@@ -1956,6 +1956,34 @@ ul {
 	font-size: 12px;
 }
 
+.paper-item {
+	margin-bottom: 2em;
+	padding: 1em;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .paper-item h3 {
+	margin-bottom: 0.5em;
+  }
+  
+  .paper-item .authors {
+	color: #666;
+	font-style: italic;
+  }
+  
+  .paper-item .venue {
+	color: #f9bf3f;
+	font-weight: bold;
+  }
+  
+  .paper-item .abstract {
+	margin-top: 1em;
+	font-size: 0.9em;
+  }
+
+
 .project-heading {
 	font-weight: 600;
 	margin-bottom: 10px;
