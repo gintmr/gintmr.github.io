@@ -14,16 +14,17 @@ export const skills = [
 
 export const experience = [
   {
-    title: "Research Intern",
-    duration: "Jun 2024 - Present",
-    subtitle: "Center for Future Media(CFM) - UESTC",
+    title: "Shiprocket Private Limited",
+    duration: "September 2023 - Present",
+    subtitle: "Software Engineer",
     details: [
-      "Research focus: advancing Open-Vocabulary Object Detection(OVD) and Segmentation.(OVS)",
-      "Pioneered innovative methods to enhance object detection capabilities, addressing challenges in recognizing diverse objects.",
-      "Collaborated on developing a robust segmentation framework, improving accuracy across various datasets.",
-      "Achieved significant progress in recognizing and segmenting objects with diverse appearances in images.",
+      "Developed a design system using Stencil and Storybook that provides consistent UI components across platforms, ensuring a cohesive design.",
+      "Developed a dynamic support ticket panel that renders subcategories based on component IDs, handling up to 100 AWBs simultaneously.",
+      "Migrated 30+ modules from AngularJS to Angular 15 using Generative AI tools, reporting directly to the VP of Engineering.",
+      "Designed and implemented advanced features such as keyboard shortcuts, improving operational efficiency by 15 percent.",
+      "Took ownership of OKRs, collaborated with the product team, and mentored two junior developers, cutting their code review iterations and ensuring on-time feature delivery.",
     ],
-    tags: [" Open-Vocabulary", "Multimodal", "Edge Computing", "CV"],
+    tags: ["JavaScript", "Angular", "Bootstrap", "AngularJs"],
     icon: "truck ",
   },
   {
