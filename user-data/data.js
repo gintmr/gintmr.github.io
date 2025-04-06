@@ -1,15 +1,15 @@
 export const bio = [
-  "Hello, I'm Vinay Somawat!",
-  "<strong>Frontend Software Engineer</strong> with 4+ years of experience building scalable, user-focused web applications.",
-  "Skilled in Angular, TypeScript, and performance optimization, I aim to leverage my expertise in delivering innovative solutions that drive measurable business outcomes.",
-  "Passionate about mentoring, teamwork, and continuous improvement in engineering processes.",
+  "Hi, I'm Xinrui Wu!",   
+  "<strong>Software Engineering Student & AI Researcher</strong> at UESTC, specializing in Open-Vocabulary Object Detection and Embedded AI Systems.",
+  "Developed innovative solutions including deepfake detection systems and autonomous drones, with 3+ research projects published in CV/Embedded AI domains.",
+  "Passionate about bridging cutting-edge AI research with real-world applications in IoT, robotics, and smart city infrastructure."
 ];
 
 export const skills = [
-  "JavaScript, TypeScript, Angular, AngularJS, React, HTML5, CSS, Bootstrap, Tailwind CSS",
-  "RxJS, NGXS, NGRX, WebSockets, Stencil, Storybook, Module Federation, Webpack",
-  "Jenkins, JIRA, Git",
-  "Performance Optimization, Responsive Design, Cross-Browser Compatibility",
+  "Python, C/C++, JavaScript, LaTeX, Linux, Embedded Systems, ROS",
+  "Computer Vision (Object Detection/Segmentation), Model Compression, Knowledge Distillation, Multimodal Learning",
+  "PyTorch, TensorFlow, OpenCV, YOLO, LangChain, IoT Development",
+  "Edge Computing, Autonomous Systems, Human-Computer Interaction, Real-time AI Applications"
 ];
 
 export const experience = [
