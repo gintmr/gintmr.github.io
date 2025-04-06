@@ -1,13 +1,10 @@
 export const bio = [
   "Hi, I'm Xinrui Wu (吴欣锐)!", 
-  "A passionate <strong>Software Engineering Student & AI Researcher</strong> at the University of Electronic Science and Technology of China (UESTC).",
-  "I am currently pursuing my B.Eng. in Software Engineering with a GPA of 3.78/4.0. My coursework includes Software Engineering, Compiler Principles, Computer Organization and Architecture, Computer Networks, and Embedded Operating Systems.",
-  "I have gained valuable experience through internships at the Center for Future Media (CFM) - UESTC, where I focused on advancing Open-Vocabulary Object Detection (OVD) and Segmentation (OVS), and at Megvii Technology Limited, where I worked as a CV Algorithm Intern.",
-  "During my internship at Megvii Technology Limited, I also served as a Research Intern at the Institute for AI Industry Research (AIR), Tsinghua University. At AIR, my research focused on the generation of controllable length Chain-of-Thought (CoT) for large language models. ",
-  "I currently have one paper under submission to ICCV, and two draft papers in preparation for submission to NeurIPS. My research interests include Computer Vision, Multimodal Learning, Edge Computing, and their applications in IoT, robotics...",
-  "Feel free to reach out to me at <a href='mailto:xinruiwu.wxr@gmail.com'>xinruiwu.wxr@gmail.com</a> for tech discussions, business opportunities, or just to say hello—I'd love to hear from you!"
+  "--👇-- 仅作参考",
+  "<strong>Software Engineering Student & AI Researcher</strong> at UESTC",
+  "Developed innovative solutions including deepfake detection systems and autonomous drones, with 3+ research projects published in CV/Embedded AI domains.",
+  "Passionate about bridging cutting-edge AI research with real-world applications in IoT, robotics, and smart city infrastructure."
 ];
-
 
 export const education = [
   {
@@ -70,7 +67,7 @@ export const papers = [
     link: "https://gintmr.github.io/",
     abstract: ["Abstract"],
     tags: ["CV", "Segment", "Ocean", "CV"],
-    icon: "search",
+    icon: "search ",
     
   },
   // 更多论文...
