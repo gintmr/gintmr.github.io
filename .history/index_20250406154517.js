@@ -1,7 +1,7 @@
 import {
   bio,
   skills,
-  edu,
+  education,
   experience,
   trekking,
   footer,
@@ -446,7 +446,6 @@ function getBlogDate(publishDate) {
 populateBio(bio, "bio");
 
 populateSkills(skills, "skills");
-populateExp_Edu(edu, "education");
 
 fetchBlogsFromMedium(medium);
 fetchReposFromGit(gitRepo);
@@ -454,5 +453,6 @@ fetchGitConnectedData(gitConnected);
 
 populateExp_Edu(experience, "experience");
 populateTrekking(trekking);
+populateExp_Edu(education, "education");
 
 populateLinks(footer, "footer");
