@@ -45,15 +45,17 @@ export const experience = [
     icon: "search",
   },
   {
-    title: "XXX - Intern",
-    duration: "Jan 2025 - Present",
-    subtitle: "Megvii Technology Limited , MEGVII",
+    title: "Research Intern",
+    duration: "Jun 2024 - Present",
+    subtitle: "Center for Future Media(CFM) - UESTC",
     details: [
-      "xxx",
-     
+      "Research focus: advancing Open-Vocabulary Object Detection(OVD) and Segmentation.(OVS)",
+      "Pioneered innovative methods to enhance object detection capabilities, addressing challenges in recognizing diverse objects.",
+      "Collaborated on developing a robust segmentation framework, improving accuracy across various datasets.",
+      "Achieved significant progress in recognizing and segmenting objects with diverse appearances in images.",
     ],
-    tags: ["xxx",],
-    icon: "search",
+    tags: [" Open-Vocabulary", "Multimodal", "Edge Computing", "CV"],
+    icon: "search ",
   },
   
 ];

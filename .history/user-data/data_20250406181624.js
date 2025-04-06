@@ -45,7 +45,7 @@ export const experience = [
     icon: "search",
   },
   {
-    title: "XXX - Intern",
+    title: "Intern",
     duration: "Jan 2025 - Present",
     subtitle: "Megvii Technology Limited , MEGVII",
     details: [
