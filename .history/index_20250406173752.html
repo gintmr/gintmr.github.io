@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />  
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />  
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Portfolio webpage of Xinrui Wu" />  
+    <meta
+      name="keywords"
+      content="portfolio,website,personal website,github,projects,computer science and engineering"
+    />
+    <meta name="author" content="Xinrui Wu" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="icon" type="image/png" href="./logo.png" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat|Open+Sans|Raleway&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/animate.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
+    />
+
+    <script src="js/modernizr-2.6.2.min.js"></script>
+    <script type="module" src="index.js"></script>
+    <script src="js/profile-card.js"></script>
+  </head>
+  <body>
+    <div id="colorlib-page">
+      <div class="container-wrap">
+        <a
+          href="#"
+          class="js-colorlib-nav-toggle colorlib-nav-toggle"
+          data-toggle="collapse"
+          data-target="#navbar"
+          aria-expanded="false"
+          aria-controls="navbar"
+          ><i></i
+        ></a>
+        <aside
+          id="colorlib-aside"
+          role="complementary"
+          class="border js-fullheight no-print"
+        >
+          <div class="text-center">
+            <div class="author-img">
+              <img alt="profile-img" src="./logo.png" />
+            </div>
+            <h1 id="colorlib-logo"><a href="./index.html"> Xinrui Wu </a></h1>
+          </div>
+          <nav
+            id="colorlib-main-menu"
+            role="navigation"
+            class="navbar"
+            style="padding-top: 2em"
+          >
+            <div id="navbar" class="collapse">
+              <ul>
+                <li><a href="#" data-nav-section="about">About</a></li>
+                <li>
+                  <a href="#" data-nav-section="education">Education</a>
+                </li>
+                <li>
+                  <a href="#" data-nav-section="experience">Experience</a>
+                </li>
+                <li><a href="#" data-nav-section="papers">Published Papers and Preprints</a></li>
+                <li><a href="#" data-nav-section="skills">Skills</a></li>
+
+                <li>
+                  <a href="#" data-nav-section="trekking">Trekking Adventures</a>
+                </li>
+                <li><a href="#" data-nav-section="contact">Contact</a></li>
+              </ul>
+            </div>
+          </nav>
+        </aside>
+        <div id="colorlib-main">
+
+          <section class="colorlib-profile" data-section="profile-card">
+            <div class="colorlib-narrow-content">
+              <div
+                class="row row-bottom-padded-sm animate-box"
+                data-animate-effect="fadeInLeft"
+              >
+                <div class="profile-cards">
+                  <!-- <div class="col">
+                    <div class="stack-card" user-id="这是作者对应的card"></div>
+                  </div> --> 
+                  <div class="col">
+                    <div class="github-card" username="gintmr"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="colorlib-about" data-section="about">
+            <div class="colorlib-narrow-content">
+              <div class="row animate-box" data-animate-effect="fadeInLeft">
+                <div class="about-desc">
+                  <h1>About</h1>
+                  <div id="bio"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="colorlib-education" data-section="education">
+            <div class="colorlib-narrow-content">
+              <div
+                class="row row-bottom-padded-sm animate-box fadeInLeft animated"
+                data-animate-effect="fadeInLeft"
+              >
+                <div class="about-desc">
+                  <h1>Education</h1>
+                </div>
+              </div>
+              <div class="timeline-centered" id="education">
+              </div>
+            </div>
+          </section>
+
+          <section class="colorlib-experience" data-section="experience">
+            <div class="colorlib-narrow-content">
+              <div
+                class="row row-bottom-padded-sm animate-box fadeInLeft animated"
+                data-animate-effect="fadeInLeft"
+              >
+                <div class="about-desc">
+                  <h1>Work <span style="color: #f9bf3f">Experience</span></h1>
+                </div>
+              </div>
+              <div class="timeline-centered" id="experience"></div>
+            </div>
+          </section>
+
+          <section class="colorlib-papers" data-section="papers">
+            <div class="colorlib-narrow-content">
+              <div
+                class="row row-bottom-padded-sm animate-box"
+                data-animate-effect="fadeInLeft"
+              >
+                <div class="about-desc">
+                  <h1>
+                    Published <span style="color: #f9bf3f">Papers</span> and
+                    Preprints
+                  </h1>
+                </div>
+              </div>
+              <div id="papers" class="row"></div>
+            </div>
+          </section>
+
+          <section class="colorlib-skills" data-section="skills">
+            <div class="colorlib-narrow-content">
+              <div
+                class="row row-bottom-padded-sm animate-box"
+                data-animate-effect="fadeInLeft"
+              >
+                <div class="about-desc">
+                  <h1>Skills</h1>
+                </div>
+              </div>
+              <div id="skills" class="row"></div>
+            </div>
+          </section>
+
+          <section class="colorlib-skills" data-section="trekking">
+            <div class="colorlib-narrow-content">
+              <div
+                class="row row-bottom-padded-sm animate-box"
+                data-animate-effect="fadeInLeft"
+              >
+                <div class="about-desc">
+                  <h1>
+                    Trekking <span style="color: #f9bf3f">Adventures</span>
+                  </h1>
+                  <p>Here are the treks I've explored so far:</p>
+                  <div id="trekking" class="row"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="colorlib-contact" data-section="contact">
+            <div class="colorlib-narrow-content">
+              <div
+                class="row row-bottom-padded-sm animate-box"
+                data-animate-effect="fadeInLeft"
+              >
+                <div class="about-desc">
+                  <h1>Contact</h1>
+                </div>
+                <p>
+                  Feel free to email me at
+                  <strong>vinaysomawat40@gmail.com</strong> for tech
+                  discussions, business opportunities, or just to say hello—I’d
+                  love to hear from you!
+                </p>
+              </div>
+            </div>
+          </section>
+          <section class="colorlib-footer no-print">
+            <div class="colorlib-narrow-content">
+              <p id="visitorCount">Visitor Count: Loading...</p>
+            </div>
+          </section>
+          <section class="colorlib-footer no-print" data-section="footer">
+            <div class="colorlib-narrow-content">
+              <footer class="footer" id="footer"></footer>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.waypoints.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyBM5-cQema1PzjpTPtCxIdmvTrWH2p1nc8",
+        authDomain: "vinaysomawat-portfolio.firebaseapp.com",
+        projectId: "vinaysomawat-portfolio",
+        storageBucket: "vinaysomawat-portfolio.firebasestorage.app",
+        messagingSenderId: "996992279996",
+        appId: "1:996992279996:web:f296555eef216d501337b9",
+        measurementId: "G-8PVX0MLGSK",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+      } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+      // Initialize Firestore
+      const db = getFirestore(app);
+
+      // Reference to the visitor count document
+      const counterRef = doc(db, "visitors", "counter");
+
+      // Function to update visitor count
+      async function updateVisitorCount() {
+        try {
+          const docSnap = await getDoc(counterRef);
+
+          if (docSnap.exists()) {
+            let newCount = docSnap.data().count + 1;
+            await updateDoc(counterRef, { count: newCount });
+            document.getElementById(
+              "visitorCount"
+            ).innerText = `Visitor Count: ${newCount}`;
+          } else {
+            await setDoc(counterRef, { count: 1 });
+            document.getElementById("visitorCount").innerText =
+              "Visitor Count: 1";
+          }
+        } catch (error) {
+          console.error("Error updating visitor count:", error);
+        }
+      }
+
+      // Call function on page load
+      updateVisitorCount();
+    </script>
+  </body>
+</html>
