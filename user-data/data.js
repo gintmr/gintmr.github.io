@@ -23,6 +23,30 @@ export const education = [
   }
 ];
 
+export const awards = [
+  {
+    title: "UESTC Model Student Scholarship",
+    duration: "Oct 2024",
+    subtitle: "Scientific and technological innovation",
+    tags: ["Scholarship"],
+    icon: "star-o",
+  },
+  {
+    title: "National Third Prize",
+    duration: "Aug 2024",
+    subtitle: "C4 National College Student Network Technology Challenge",
+    tags: ["Competition"],
+    icon: "star-o",
+  },
+  {
+    title: "Second Prize of SiChuan Province",
+    duration: "Jun 2024",
+    subtitle: "China College Student Computer Design Competition",
+    tags: ["Competition"],
+    icon: "star-o",
+  },
+]
+
 export const experience = [
   {
     title: "Research Intern",
