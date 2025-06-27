@@ -4,7 +4,7 @@ export const bio = [
   "I am currently pursuing my B.Eng. in Software Engineering with a GPA of 3.78/4.0. My coursework includes Software Engineering, Compiler Principles, Computer Organization and Architecture, Computer Networks, and Embedded Operating Systems.",
   "I have gained valuable experience through internships at the Center for Future Media (CFM) - UESTC, where I focused on advancing Open-Vocabulary Object Detection (OVD) and Segmentation (OVS), and at Megvii Technology Limited, where I worked as a CV Algorithm Intern.",
   "During my internship at Megvii Technology Limited, I also served as a Research Intern at the Institute for AI Industry Research (AIR), Tsinghua University. At AIR, my research focused on the generation of controllable length Chain-of-Thought (CoT) for large language models. ",
-  "I currently have one paper under submission to ICCV, and two draft papers in preparation for submission to NeurIPS. My research interests include Computer Vision, Multimodal Learning, Edge Computing, and their applications in IoT, robotics...",
+  "I currently have one paper under submission to AAAI2025, and two draft papers in preparation. My research interests include Computer Vision, Multimodal Learning, Edge Computing, and their applications in IoT, robotics...",
   "Feel free to reach out to me at <a href='mailto:xinruiwu.wxr@gmail.com'>xinruiwu.wxr@gmail.com</a> for tech discussions, business opportunities, or just to say hello—I'd love to hear from you!"
 ];
 
@@ -32,6 +32,13 @@ export const awards = [
     icon: "star-o",
   },
   {
+    "title": "National Third Prize",
+    "duration": "May 2025",
+    "subtitle": "National College Student Innovation and Entrepreneurship Competition",
+    "tags": ["Competition", ],
+    "icon": "trophy"
+  },
+  {
     title: "National Third Prize",
     duration: "Aug 2024",
     subtitle: "C4 National College Student Network Technology Challenge",
@@ -48,55 +55,61 @@ export const awards = [
 ]
 
 export const experience = [
-  {
-    title: "Research Intern",
-    duration: "Jun 2024 - Present",
-    subtitle: "Center for Future Media(CFM) - UESTC",
-    details: [
-      "Research focus: advancing Open-Vocabulary Object Detection(OVD) and Segmentation.(OVS)",
-      "Pioneered innovative methods to enhance object detection capabilities, addressing challenges in recognizing diverse objects.",
-      "Collaborated on developing a robust segmentation framework, improving accuracy across various datasets.",
-      "Achieved significant progress in recognizing and segmenting objects with diverse appearances in images.",
-    ],
-    tags: [" Open-Vocabulary", "Multimodal", "Edge Computing", "CV"],
-    icon: "search ",
-  },
-  {
-    title: "Research Intern",
-    duration: "Jan 2025 - Present",
-    subtitle: "Institute for AI Industry Research, Tsinghua University , AIR",
-    details: [
-      "xxx",
-     
-    ],
-    tags: ["xxx",],
-    icon: "search",
-  },
-  {
-    title: "CV Algorithm Intern",
-    duration: "Jan 2025 - Present",
-    subtitle: "Megvii Technology Limited , MEGVII",
-    details: [
-      "xxx",
-     
-    ],
-    tags: ["xxx",],
-    icon: "search",
-  },
+
+    {
+      "title": "Research Intern",
+      "duration": "Jun 2024 - Present",
+      "subtitle": "Center for Future Media (CFM) - UESTC",
+      "details": [
+        "Research focus: advancing Open-Vocabulary Object Detection (OVD) and Segmentation (OVS)",
+        "Pioneered innovative methods to enhance object detection capabilities",
+        "Collaborated on developing a robust segmentation framework",
+        "Achieved significant progress in recognizing diverse objects"
+      ],
+      "tags": ["Computer Vision", "Open-Vocabulary", "Segmentation", "Object Detection"],
+      "icon": "search"
+    },
+    {
+      "title": "Research Intern",
+      "duration": "Jan 2025 - Jun 2025",
+      "subtitle": "Institute for AI Industry Research (AIR) - Tsinghua University",
+      "details": [
+        "Research focus: generation of controllable length Chain-of-Thought (CoT) for LLMs",
+        "Developed novel approaches to control reasoning chain length in LLM outputs",
+        "Investigated CoT length-performance relationship across tasks",
+        "Improved efficiency and interpretability of LLM reasoning"
+      ],
+      "tags": ["LLM", "Chain-of-Thought", "NLP", "Interpretability"],
+      "icon": "search"
+    },
+    {
+      "title": "CV Algorithm Intern",
+      "duration": "Feb 2025 - Jun 2025",
+      "subtitle": "Megvii Technology Limited (MEGVII)",
+      "details": [
+        "Conducted research on Open-Vocabulary Detection (OVD) and Vision-Language Models (VLM)",
+        "Designed proprietary OVD model framework architecture",
+        "Led development of 100M+ sample OVD training data engine",
+        "Supported large-scale OVD model training experiments"
+      ],
+      "tags": ["Computer Vision", "Open-Vocabulary", "VLM", "Large-scale Training"],
+      "icon": "search"
+    }
   
 ];
 
 export const papers = [
-  {
-    title: "xxx",
-    authors: "authors",
-    conference: "ICCV 2025",
-    link: "https://gintmr.github.io/",
-    abstract: ["Abstract"],
-    tags: ["CV", "Segment", "Ocean", "CV"],
-    icon: "search",
-    
-  },
+    {
+      "title": "IMC-1000: Dataset and Benchmark for Identifying Salient Individual Marine Creatures",
+      "authors": "Yiwei Chen, Ziqiang Zheng, Xinrui Wu, Sai-Kit Yeung",
+      "conference": "Target submission to AAAI 2025",
+      "status": "preparing",
+      "abstract": [
+        // "First large-scale marine creature identification benchmark with 1,000+ species",
+      ],
+      "tags": ["Computer Vision", "Marine Biology", "Dataset", "Object Detection"],
+      "icon": "search"
+    }
   // 更多论文...
 ];
 
