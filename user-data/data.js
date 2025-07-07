@@ -71,7 +71,7 @@ export const experience = [
     },
     {
       "title": "Research Intern",
-      "duration": "Jan 2025 - Jun 2025",
+      "duration": "Jan 2025 - Present",
       "subtitle": "Institute for AI Industry Research (AIR) - Tsinghua University",
       "details": [
         "Research focus: generation of controllable length Chain-of-Thought (CoT) for LLMs",
@@ -84,7 +84,7 @@ export const experience = [
     },
     {
       "title": "CV Algorithm Intern",
-      "duration": "Feb 2025 - Jun 2025",
+      "duration": "Feb 2025 - Jul 2025",
       "subtitle": "Megvii Technology Limited (MEGVII)",
       "details": [
         "Conducted research on Open-Vocabulary Detection (OVD) and Vision-Language Models (VLM)",
