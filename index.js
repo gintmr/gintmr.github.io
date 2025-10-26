@@ -202,31 +202,32 @@ function populateRepo(items, id) {
   projectdesign.appendChild(rowWrapper);
 
   for (let i = 0; i < count; i++) {
+  
     // Create elements for each repo card
-    const repoCard = document.createElement("div");
-    repoCard.className = "repo-card";
-    repoCard.style = `
-          flex: 1 0 48%;  /* Two cards in one row */
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          border-radius: 12px;
-          padding: 16px;
-          font-size: 14px;
-          background: linear-gradient(135deg, #ffdd99, #f9bf3f);
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          transition: transform 0.2s ease-in-out;
-          cursor: pointer;
-      `;
+    // const repoCard = document.createElement("div");
+    // repoCard.className = "repo-card";
+    // repoCard.style = `
+    //       flex: 1 0 48%;  /* Two cards in one row */
+    //       display: flex;
+    //       flex-direction: column;
+    //       justify-content: space-between;
+    //       border-radius: 12px;
+    //       padding: 16px;
+    //       font-size: 14px;
+    //       background: linear-gradient(135deg, #ffdd99, #f9bf3f);
+    //       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    //       transition: transform 0.2s ease-in-out;
+    //       cursor: pointer;
+    //   `;
 
-    // Make the card clickable by wrapping the content inside an anchor tag
-    const repoLink = document.createElement("a");
-    repoLink.href = `https://github.com/${items[i].author}/${items[i].name}`;
-    repoLink.target = "_blank";
-    repoLink.style =
-      "text-decoration: none; color: black; display: block; height: 100%;";
+    // // Make the card clickable by wrapping the content inside an anchor tag
+    // const repoLink = document.createElement("a");
+    // repoLink.href = `https://github.com/${items[i].author}/${items[i].name}`;
+    // repoLink.target = "_blank";
+    // repoLink.style =
+    //   "text-decoration: none; color: black; display: block; height: 100%;";
 
-    repoCard.appendChild(repoLink);
+    // repoCard.appendChild(repoLink);
 
     // Repository name
     const repoName = document.createElement("h4");
