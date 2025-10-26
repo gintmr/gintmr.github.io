@@ -1,30 +1,30 @@
 export const bio = [
-  "Hi, I'm Xinrui Wu (吴欣锐)!", 
-  "I am currently pursuing my undergraduate degree in Embedded Systems at the School of Information and Software Engineering (SISE), University of Electronic Science and Technology of China (UESTC), with a GPA of 3.54/4.0.",
+    "Hi, I'm Xinrui Wu (吴欣锐)!",
 
-  "I have gained internship experience at Megvii Tech, HKUST, and Tsinghua AIR, along with substantial research exposure. My research interests primarily focus on embodied intelligence, multimodal systems, robotic perception, and model lightweighting.",
-
-  "During my internships at the UESTC's Future Media Center and Megvii Technology, I focused on open-vocabulary detection and segmentation. This work not only enhanced model accuracy on known categories but also aimed to break the conceptual boundaries of traditional models, enabling them to understand and localize objects described in any language. By leading and contributing to the development of a large-scale open-vocabulary detection framework and constructing a massive training data engine, I gained a comprehensive understanding of visual perception—spanning from algorithmic design to data curation.",
-
-  "As a visiting student at HKUST, driven by the pursuit of practical solutions for resource-constrained environments, I proposed a novel distillation method to efficiently transfer knowledge from complex models to lightweight networks. This approach provided deployable solutions for tasks such as salient marine organism recognition in challenging oceanic settings.",
-
-  "Interning at Tsinghua’s AIR (Institute for AI Industry Research), I delved into the mechanisms of human reasoning, identifying limitations in current AI inference paradigms. My goal was to make large models’ reasoning processes more controllable and efficient, while also exploring how to replicate human-like thinking in embodied robotic “brains.” This would enable a more human-like workflow from perception to decision-making.",
-
-  "These experiences form a complete technical chain spanning from “perception” to “reasoning,” laying a solid foundation for my in-depth research in embodied intelligence, multimodal systems, and robotic perception.",
-
-  "Feel free to reach out to me at <a href='mailto:xinruiwu.wxr@gmail.com'>xinruiwu.wxr@gmail.com</a> for tech discussions, job opportunities, or just to say hello—I'd love to hear from you!"
+    "I am currently pursuing my undergraduate degree(2023-2027) in Embedded Systems at the School of Information and Software Engineering (SISE), University of Electronic Science and Technology of China (UESTC), with a GPA of 3.54/4.0 .",
   
+    "My research spans embodied intelligence, multimodal systems, robotic perception, and model lightweighting, with experience gained through internships at Megvii Tech, HKUST, and Tsinghua AIR.",
+    
+    "At Megvii and UESTC's Future Media Center, I worked on open-vocabulary detection and segmentation to help models localize objects described in any language.",
+    "During my visit at HKUST, I developed a distillation method to efficiently transfer knowledge from complex models to lightweight networks for marine organism recognition.",
+    "At Tsinghua AIR, I explored making large models' reasoning more controllable and efficient while replicating human-like thinking in robotic systems.",
+  
+    "My goal is to advance AI that seamlessly integrates perception and reasoning—building systems that perceive, understand, and act more like humans.",
+  
+    "Feel free to reach out at <a href='mailto:xinruiwu.wxr@gmail.com'>xinruiwu.wxr@gmail.com</a> for collaborations or conversations!"
+
+
 ];
 
 
 export const education = [
   {
-    title: "B.Eng. in Software Engineering",
+    title: "B.Eng. in Software Engineering(Embedded System)",
     duration: "Sep 2023 - present",
     subtitle: "University of Electronic Science and Technology of China , UESTC",
     details: [
       "GPA: 3.54/4.0",
-      "Relevant Courses: Software Engineering, Compiler Principles, Computer Organization and Architecture, Computer Networks, Embedded Operating Systems",
+      "Relevant Courses: Software Engineering, Compiler Principles, Computer Organization and Architecture, Computer Networks, Embedded Operating Systems, RTOS, ARM, Quadcopter Drones"
     ],
     tags: ["Computer Science", "Engineering"], // 添加标签数组,要素必须齐全
     icon: "book",
