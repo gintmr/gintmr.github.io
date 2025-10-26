@@ -536,7 +536,7 @@ body.offcanvas .colorlib-nav-toggle {
 }
 
 .colorlib-experience,
-.colorlib-skills,
+.colorlib-hobbies,
 .colorlib-profile,
 .colorlib-projects,
 .colorlib-education,
@@ -560,7 +560,7 @@ body.offcanvas .colorlib-nav-toggle {
 
 @media screen and (max-width: 768px) {
 	.colorlib-experience,
-	.colorlib-skills,
+	.colorlib-hobbies,
 	.colorlib-profile,
 	.colorlib-projects,
 	.colorlib-education,
