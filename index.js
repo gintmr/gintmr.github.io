@@ -1,6 +1,6 @@
 import {
   bio,
-  skills,
+  hobbies,
   education,
   papers,
   experience,
@@ -83,8 +83,8 @@ function populateBio(items, id) {
   });
 }
 
-function populateSkills(items, id) {
-  const skillsTag = document.getElementById(id);
+function populateHobbies(items, id) {
+  const HobbiesTag = document.getElementById(id);
   items.forEach((item) => {
     const h3 = getElement("li", null);
     h3.innerHTML = item;
@@ -95,12 +95,12 @@ function populateSkills(items, id) {
     const divAnimateBox = getElement("div", "col-md-12 animate-box");
     divAnimateBox.append(divProgressWrap);
 
-    skillsTag.append(divAnimateBox);
+    HobbiesTag.append(divAnimateBox);
   });
 }
 
 function populateTrekking(items) {
-  const skillsTag = document.getElementById('trekking');
+  const HobbiesTag = document.getElementById('trekking');
   items.forEach((item) => {
     const h3 = getElement("li", null);
     h3.innerHTML = item;
@@ -111,7 +111,7 @@ function populateTrekking(items) {
     const divAnimateBox = getElement("div", "col-md-12 animate-box");
     divAnimateBox.append(divProgressWrap);
 
-    skillsTag.append(divAnimateBox);
+    HobbiesTag.append(divAnimateBox);
   });
 }
 
@@ -591,7 +591,7 @@ function getBlogDate(publishDate) {
 
 populateBio(bio, "bio");
 
-populateSkills(skills, "skills");
+populateHobbies(hobbies, "hobbies");
 populateExp_Edu(education, "education");
 populatePapers(papers, "papers");
 
