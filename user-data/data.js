@@ -1,15 +1,13 @@
 export const bio = [
     "Hi, I'm Xinrui Wu (吴欣锐)!",
 
-    "I am currently pursuing my undergraduate degree(2023-2027) in Embedded Systems at the School of Information and Software Engineering (SISE), University of Electronic Science and Technology of China (UESTC), with a GPA of 3.54/4.0 .",
+    "I am currently pursuing my undergraduate degree(2023-2027) in Embedded Systems at the SISE, University of Electronic Science and Technology of China (UESTC)",
   
-    "My research spans embodied intelligence, multimodal systems, robotic perception, and model lightweighting, with experience gained through internships at Megvii Tech, HKUST, and Tsinghua AIR.",
+    "My research interests include embodied intelligence, multimodal systems, robot perception, and model lightweighting.",
     
-    "At Megvii and UESTC's Future Media Center, I worked on open-vocabulary detection and segmentation to help models localize objects described in any language.",
-    "During my visit at HKUST, I developed a distillation method to efficiently transfer knowledge from complex models to lightweight networks for marine organism recognition.",
-    "At Tsinghua AIR, I explored making large models' reasoning more controllable and efficient while replicating human-like thinking in robotic systems.",
+    "I previously conducted research on open-vocabulary detection and segmentation at the UESTC Future Media Center, and later at Megvii Technology, I led the development of a large-scale open-vocabulary detection framework, building a data engine to establish a comprehensive visual perception and cognition system. During my visiting study at the Hong Kong University of Science and Technology, I proposed a distillation scheme to transfer knowledge from complex models to lightweight networks, which was applied to semantic segmentation of marine organisms. Since early 2025, I have been interning at the Tsinghua AIR Institute, exploring ways to enhance the controllability and efficiency of large model reasoning, and researching how to implement human-like thinking processes in embodied robots.",
   
-    "My goal is to advance AI that seamlessly integrates perception and reasoning—building systems that perceive, understand, and act more like humans.",
+    "These experiences have shaped my end-to-end research chain, spanning from 'perception' to 'reasoning'. My long-term goal is to contribute, even modestly, to enabling machines to understand and interact with the complex world as efficiently as humans do.",
   
     "Feel free to reach out at <a href='mailto:xinruiwu.wxr@gmail.com'>xinruiwu.wxr@gmail.com</a> for collaborations or conversations!"
 
