@@ -6,8 +6,7 @@ export const bio = [
 
     "I am currently pursuing my undergraduate degree(2023-2027) in Embedded Systems at the SISE, University of Electronic Science and Technology of China (UESTC).",
     
-    "I have participated in internships and research at <strong>Megvii Technology</strong>, <strong>The Hong Kong University of Science and Technology (HKUST)</strong>, and <strong>Tsinghua AIR Institute</strong>. My research primarily focuses on <strong>multimodal AI, LLM reasoning, robotic perception, and model lightweighting</strong>.",
-  
+    "I have participated in internships and research at <strong>Megvii Technology</strong>, <strong>VGD Group of HKUST (advisor: <a href='https://scholar.google.com/citations?user=16iMMwwAAAAJ&hl=zh-CN'>Sai-Kit Yeung</a>)</strong>, and <strong>Tsinghua AIR Institute (advisor: <a href='https://yuanchun-li.github.io/'>Yuanchun Li</a>, <a href='https://scholar.google.com/citations?user=TFGBA9cAAAAJ&hl=zh-CN'>Yunxin Liu</a>)</strong>. My research primarily focuses on <strong>multimodal AI, LLM reasoning, robotic perception, and model lightweighting</strong>.",
     
     "I previously conducted research on open-vocabulary detection and segmentation at the UESTC Future Media Center, and later at Megvii Technology, I led the development of a large-scale open-vocabulary detection framework, building a data engine to establish a comprehensive visual perception and cognition system. During my visiting study at the Hong Kong University of Science and Technology, I proposed a distillation scheme to transfer knowledge from complex models to lightweight networks, which was applied to semantic segmentation of marine organisms. Since early 2025, I have been interning at the Tsinghua AIR Institute, exploring ways to enhance the controllability and efficiency of large model reasoning, and researching how to implement human-like thinking processes in embodied robots.",
   
