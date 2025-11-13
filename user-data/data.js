@@ -1,7 +1,7 @@
 export const bio = [
     "Hi, I'm Xinrui Wu (吴欣锐)!",
 
-    "Here is My <a href='https://drive.google.com/file/d/1Ejf8kBWV4a_WR0ZKJ25RvJ6R-6geZiyJ/view?usp=sharing'>CV</a> | <a href='https://scholar.google.com/citations?user=pJzltu8AAAAJ&hl=en'>Googlar Scholar</a> | <a href='https://github.com/gintmr'>Github</a> | <a href='https://gintmr.github.io/'>Homepage</a>.",
+    "Here is My <a href='https://drive.google.com/file/d/1yHJ3HdnyRxWbuLOH_42hYNoMHS7pIf7v/view?usp=sharing'>CV</a> | <a href='https://scholar.google.com/citations?user=pJzltu8AAAAJ&hl=en'>Googlar Scholar</a> | <a href='https://github.com/gintmr'>Github</a> | <a href='https://gintmr.github.io/'>Homepage</a>.",
 
 
     "I am currently pursuing my undergraduate degree(2023-2027) in Embedded Systems at the SISE, University of Electronic Science and Technology of China (UESTC).",
