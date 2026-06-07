@@ -292,24 +292,63 @@ function populateRepo(items, id) {
 function populatePapers(items, id) {
   let mainContainer = document.getElementById(id);
 
-  for (let i = 0; i < items.length; i++) {
+  const groups = [
+    {
+      key: "first",
+      title: "First / Co-first Author",
+      items: items.filter((item) => item.roleGroup === "first"),
+    },
+    {
+      key: "contributor",
+      title: "Contributing Author",
+      items: items.filter((item) => item.roleGroup === "contributor"),
+    },
+  ];
+
+  const columns = document.createElement("div");
+  columns.className = "paper-columns";
+  mainContainer.append(columns);
+
+  groups.forEach((group) => {
+    const column = document.createElement("div");
+    column.className = "paper-column";
+
+    const heading = document.createElement("h2");
+    heading.className = "paper-column-title";
+    heading.innerHTML = group.title;
+    column.append(heading);
+
+    const timeline = document.createElement("div");
+    timeline.className = "timeline-centered paper-column-timeline";
+    column.append(timeline);
+
+    group.items.forEach((item) => {
+      timeline.append(createPaperEntry(item));
+    });
+
+    timeline.append(createTimelineEnd());
+    columns.append(column);
+  });
+}
+
+function createPaperEntry(item) {
     let spanTimelineSublabel = document.createElement("span");
     spanTimelineSublabel.className = "timeline-sublabel";
-    spanTimelineSublabel.innerHTML = items[i].authors;
+    spanTimelineSublabel.innerHTML = item.authors;
 
     let spanh2 = document.createElement("span");
-    spanh2.innerHTML = items[i].conference;
+    spanh2.innerHTML = item.conference;
 
     let h2TimelineLabel = document.createElement("h2");
 
-    if (items[i].link) {
+    if (item.link) {
       let titleLink = document.createElement("a");
-      titleLink.href = items[i].link;
+      titleLink.href = item.link;
       titleLink.target = "_blank";
-      titleLink.innerHTML = items[i].title;
+      titleLink.innerHTML = item.title;
       h2TimelineLabel.append(titleLink);
     } else {
-      h2TimelineLabel.innerHTML = items[i].title;
+      h2TimelineLabel.innerHTML = item.title;
     }
     h2TimelineLabel.append(spanh2);
 
@@ -318,24 +357,24 @@ function populatePapers(items, id) {
     divTimelineLabel.append(h2TimelineLabel);
     divTimelineLabel.append(spanTimelineSublabel);
 
-    for (let j = 0; j < items[i].abstract.length; j++) {
+    for (let j = 0; j < item.abstract.length; j++) {
       let pTimelineText = document.createElement("p");
       pTimelineText.className = "timeline-text";
-      pTimelineText.innerHTML = "&blacksquare; " + items[i].abstract[j];
+      pTimelineText.innerHTML = "&blacksquare; " + item.abstract[j];
       divTimelineLabel.append(pTimelineText);
     }
 
     let divTags = document.createElement("div");
-    for (let j = 0; j < items[i].tags.length; j++) {
+    for (let j = 0; j < item.tags.length; j++) {
       let spanTags = document.createElement("span");
       spanTags.className = "badge";
-      spanTags.innerHTML = items[i].tags[j];
+      spanTags.innerHTML = item.tags[j];
       divTags.append(spanTags);
     }
     divTimelineLabel.append(divTags);
 
     let iFa = document.createElement("i");
-    iFa.className = "fa fa-" + items[i].icon;
+    iFa.className = "fa fa-" + item.icon;
 
     let divTimelineIcon = document.createElement("div");
     divTimelineIcon.className = "timeline-icon color-2";
@@ -350,9 +389,10 @@ function populatePapers(items, id) {
     article.className = "timeline-entry animate-box";
     article.append(divTimelineEntryInner);
 
-    mainContainer.append(article);
-  }
+    return article;
+}
 
+function createTimelineEnd() {
   let divTimelineIcon = document.createElement("div");
   divTimelineIcon.className = "timeline-icon color-2";
 
@@ -364,7 +404,7 @@ function populatePapers(items, id) {
   article.className = "timeline-entry begin animate-box";
   article.append(divTimelineEntryInner);
 
-  mainContainer.append(article);
+  return article;
 }
 
 

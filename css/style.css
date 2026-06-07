@@ -793,6 +793,30 @@ body.offcanvas .colorlib-nav-toggle {
 	margin-bottom: 30px;
 }
 
+.paper-columns {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+	align-items: start;
+}
+
+.paper-column-title {
+	margin: 0 0 18px;
+	font-size: 22px;
+	font-weight: 600;
+	color: #000;
+}
+
+.paper-column-timeline {
+	margin-bottom: 0;
+}
+
+@media screen and (max-width: 768px) {
+	.paper-columns {
+		grid-template-columns: 1fr;
+	}
+}
+
 .timeline-centered:before,
 .timeline-centered:after {
 	content: " ";
