@@ -156,7 +156,7 @@ export const experience = [
 export const papers = [
     {
       "title": "MaskGuide: Efficient Distillation for Deployable Lightweight Segmentation in Marine Environments",
-      "authors": "Co-first Author",
+      "authors": "First Author",
       "roleGroup": "first",
       "conference": "Accepted by IEEE Robotics and Automation Letters, Apr 2026",
       "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=pJzltu8AAAAJ&citation_for_view=pJzltu8AAAAJ:d1gkVwhDpl0C",
