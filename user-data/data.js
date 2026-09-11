@@ -167,12 +167,6 @@ export const publications = [
     shortName: "SeaTree",
     title: "SeaTree: Tracing Marine Creatures through Taxonomic Tree",
     authors: "Yiwei Chen, Zheng Ziqiang, Xinrui Wu, Sai-Kit Yeung",
-    authorLinks: {
-      "Yiwei Chen": "https://openreview.net/profile?id=~Yiwei_Chen1",
-      "Zheng Ziqiang": "https://openreview.net/profile?id=~Zheng_Ziqiang1",
-      "Xinrui Wu": "https://openreview.net/profile?id=~Xinrui_Wu4",
-      "Sai-Kit Yeung": "https://openreview.net/profile?id=~Sai-Kit_Yeung3",
-    },
     venue: "AAAI 2027",
     year: 2026,
     status: "submitted",

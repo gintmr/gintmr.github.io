@@ -112,11 +112,7 @@ function home() {
 }
 
 function publicationPage() {
-  const authors = (paper) => paper.authors.split(', ').map(name => {
-    const label = escape(name).replace('Xinrui Wu', '<strong>Xinrui Wu</strong>').replaceAll('*', '<sup>*</sup>').replaceAll('Ma+', 'Ma<sup>+</sup>');
-    const url = paper.authorLinks?.[name];
-    return url ? `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>` : label;
-  }).join(', ');
+  const authors = (paper) => escape(paper.authors).replace('Xinrui Wu', '<strong>Xinrui Wu</strong>').replaceAll('*', '<sup>*</sup>').replaceAll('Ma+', 'Ma<sup>+</sup>');
   return `<div class="page-heading">${linkedHeading('h1', 'publication-heading', 'Publication')}${external(profile.scholarUrl, 'Google Scholar', 'heading-link')}</div>
     <p class="publication-note">* Equal contribution.</p>
     ${publicationGroups.map(group => `<section class="section publication-section" id="${group.id}" aria-labelledby="${group.id}-heading">
