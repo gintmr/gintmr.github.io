@@ -1,0 +1,59 @@
+/* Decorative motion stays behind the content or passes every pointer event through. */
+:root {
+  --sparkle-color: color-mix(in srgb, var(--link) 70%, transparent);
+  --particle-color: var(--link);
+}
+html[data-theme='dark'] {
+  --sparkle-color: color-mix(in srgb, var(--accent) 85%, transparent);
+  --particle-color: var(--accent);
+}
+html[data-effects='on'] body::before {
+  inset: -16vh -14vw auto;
+  height: 85vh;
+  background:
+    radial-gradient(35% 48% at 14% 28%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 75%),
+    radial-gradient(30% 46% at 88% 68%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 75%);
+  animation: ambient-breathe 14s ease-in-out infinite;
+}
+@keyframes ambient-breathe {
+  0%, 100% { opacity: .4; transform: translate3d(-1vw, -1vh, 0) scale(1); }
+  50% { opacity: .9; transform: translate3d(1vw, 2vh, 0) scale(1.04); }
+}
+.ambient-effects, .click-effects { position: fixed; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
+.ambient-effects { z-index: -1; display: none; }
+.click-effects { z-index: 60; }
+html[data-effects='on'] .ambient-effects { display: block; }
+.ambient-sparkle {
+  position: absolute;
+  left: var(--sparkle-x);
+  top: var(--sparkle-y);
+  width: var(--sparkle-size, 3px);
+  height: var(--sparkle-size, 3px);
+  border-radius: 50%;
+  background: var(--sparkle-color);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--accent) 30%, transparent);
+  opacity: 0;
+  animation: ambient-twinkle var(--sparkle-duration, 7s) ease-in-out var(--sparkle-delay, 0s) infinite;
+}
+@keyframes ambient-twinkle {
+  0%, 100% { opacity: .05; transform: translateY(0) scale(.75); }
+  50% { opacity: .65; transform: translateY(-5px) scale(1); }
+}
+.click-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--particle-color);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+@media (max-width: 720px) {
+  .ambient-sparkle:nth-child(n + 5) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-effects='on'] body::before { animation: none; }
+  .ambient-effects, .click-effects { display: none !important; }
+}
+@media print {
+  .ambient-effects, .click-effects { display: none !important; }
+}

@@ -31,6 +31,8 @@ Every page includes an outline with native section anchors and scroll-based high
 
 All content headings are self-links. Clicking one updates the URL fragment, smoothly aligns it below the sticky navigation, and gives it keyboard focus. Hovering or focusing a heading expands its gradient underline over 280ms, matching the personal blog; reduced-motion preferences disable the transition and smooth scrolling. Paper resource links remain beneath each paper title.
 
+All four pages share the decorative effects in `css/effects.css` and `effects.js`: a slow background glow, eight softly twinkling points (four on mobile), and short mouse-click particle bursts. The layers pass pointer events through and are hidden from assistive technology. Reduced-motion preferences disable the effects, and hidden pages pause them and clear particles. Click particles are bounded and removed when their animations finish; no continuous JavaScript render loop or animation library is used. Theme colors follow the site's shared palette.
+
 ## Content sources
 
 The accompanying CV's `main.tex`, `subfolders/Interests.tex`, and `subfolders/Scholarships-Prizes.tex` supply the September 2026 academic content. Institution logos are copied from that CV directory. Neither the CV nor personal-site source is modified by the build.

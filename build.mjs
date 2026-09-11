@@ -9,7 +9,7 @@ import { visitorMarkup } from './visitor-markup.mjs';
 const root = fileURLToPath(new URL('.', import.meta.url));
 // All generated pages reference the same asset versions, so layout edits cannot
 // leave individual subpages using a previously cached stylesheet, script, or logo.
-const [stylesheetUrl, scriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl] = await Promise.all(['/css/style.css', '/index.js', profile.logo, '/css/visitors.css', '/visitors.js'].map(async path => {
+const [stylesheetUrl, scriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl, effectsStyleUrl, effectsScriptUrl] = await Promise.all(['/css/style.css', '/index.js', profile.logo, '/css/visitors.css', '/visitors.js', '/css/effects.css', '/effects.js'].map(async path => {
   const version = createHash('sha256').update(await readFile(`${root}${path.slice(1)}`)).digest('hex').slice(0, 12);
   return `${path}?v=${version}`;
 }));
@@ -184,7 +184,9 @@ function layout(page, content) {
     } catch (_) {}
   </script>
   <link rel="stylesheet" href="${stylesheetUrl}" />
+  <link rel="stylesheet" href="${effectsStyleUrl}" />
   <script src="${scriptUrl}" defer></script>
+  <script src="${effectsScriptUrl}" defer></script>
   ${page.id === 'home' ? `<link rel="stylesheet" href="${visitorStyleUrl}" />` : ''}
   <script id="visitor-config" type="application/json">${JSON.stringify(visitorConfig).replaceAll('<', '\\u003c')}</script>
   <script src="${visitorScriptUrl}" type="module"></script>
