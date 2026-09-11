@@ -1,5 +1,6 @@
-// Keep the official artwork intact, including its boundaries and approval number.
-// Visitor totals are listed separately rather than overlaid with unrelated geometry.
+import { readFileSync } from 'node:fs';
+
+const worldMap = readFileSync(new URL('./assets/maps/world-countries.svg', import.meta.url), 'utf8').trim();
 
 export function visitorMarkup() {
   return `<section id="visitors" class="section visitor-section" aria-labelledby="visitors-heading">
@@ -15,10 +16,7 @@ export function visitorMarkup() {
     </div>
     <div class="visitor-geography">
       <figure class="visitor-map-figure">
-        <a class="visitor-map-original" href="/assets/maps/source/world-gs-2016-2948.jpg" target="_blank" rel="noopener noreferrer" aria-label="Open the original standard world map">
-          <img class="visitor-map" src="/assets/maps/source/world-gs-2016-2948.jpg" width="800" height="513" loading="lazy" alt="Standard world map, approval number GS(2016)2948. Visitor counts are listed separately by country or region.">
-        </a>
-        <figcaption class="visitor-map-source"><span>审图号 GS(2016)2948号</span><a href="https://beijing.tianditu.gov.cn/bzdt/" target="_blank" rel="noopener noreferrer">Map source ↗</a></figcaption>
+        ${worldMap}
       </figure>
       <div class="visitor-country-panel" data-visitor-country-panel hidden>
         <p class="visitor-country-heading">Countries &amp; regions <span>Page views</span></p>

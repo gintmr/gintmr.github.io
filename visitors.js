@@ -106,6 +106,13 @@ function renderSummary(card, summary, demo) {
     .sort((a, b) => b.pageviews - a.pageviews || a.code.localeCompare(b.code));
   const values = { ...summary.totals, countries: countries.length };
   for (const node of card.querySelectorAll('[data-visitor-value]')) node.textContent = numberFormat.format(values[node.dataset.visitorValue]);
+  const viewsByCountry = new Map(countries.map(country => [country.code, country.pageviews]));
+  const maximumViews = Math.max(1, ...viewsByCountry.values());
+  for (const shape of card.querySelectorAll('.visitor-map [data-country]')) {
+    const views = viewsByCountry.get(shape.dataset.country) || 0;
+    const strength = views > 0 ? 20 + 45 * Math.log1p(views) / Math.log1p(maximumViews) : 8;
+    shape.style.setProperty('--visitor-country-strength', `${strength}%`);
+  }
   card.dataset.state = summary.totals.pageviews > 0 ? 'ready' : 'empty';
   card.querySelector('[data-visitor-demo]').hidden = !demo;
   const firstList = card.querySelector('[data-visitor-country-list]');

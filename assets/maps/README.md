@@ -1,31 +1,23 @@
-# Visitor map source
+# Visitor map
 
-The Visitors card uses the unchanged official world-map artwork in
-[`source/world-gs-2016-2948.jpg`](source/world-gs-2016-2948.jpg), downloaded from
-the [Tianditu Beijing Standard Map Service](https://beijing.tianditu.gov.cn/bzdt/).
-Its visible approval number is **GS(2016)2948号**. The complete image, legend,
-Antarctica and approval block are displayed without cropping or recoloring in
-both themes. The image links to the local original; the caption links to its
-official catalog.
+The Visitors card uses `world-countries.svg`, the simplified world outline
+restored at the site owner's request on 11 September 2026. The SVG is embedded
+by `visitor-markup.mjs`; its 900 × 380 viewBox scales with the card in both themes.
+Country paths use `data-country` codes to shade recorded page views. The adjacent
+country/region list and totals retain the actual numeric statistics.
 
-See [`source/README.md`](source/README.md) for the exact source URL, checksum,
-resolution, inspection findings and download limitations.
+The map intentionally has no visible labels, caption, legend, or hover text.
+An accessible SVG name and description remain available to assistive technology.
+No geography, visit collection, or historical records are inferred from this
+visual change.
 
-## Display and coverage
+## Geographic scope
 
-This is an 800 × 513 official web-display JPG, not an EPS master. A matching
-high-resolution original could not be retrieved from a working official
-download. Mainland China, Taiwan, Hainan and the South China Sea area are visible,
-but individual small islands and fine boundary detail cannot be reliably audited
-at this resolution. No claim of exhaustive island completeness is made.
+This is the previous simplified Natural Earth outline, intended for a compact
+visitor overview. It is not the official standard map, and it does not guarantee
+fine boundary or small-island completeness. IP-based location estimates and the
+map's geometric precision are separate limitations.
 
-The prior simplified Natural Earth SVG is no longer loaded by the site. The
-official raster is not overlaid with that unrelated boundary geometry. Dynamic
-choropleth shading and its legend have been removed; real visitor totals remain
-available in the accessible country/region list beside the map. IP-based country
-estimates are separate from the map's geographic precision.
-
-If a higher-resolution official EPS/JPG becomes available, preserve its full
-artwork and approval number, verify the local asset against the source, and audit
-the China boundaries and island symbols at the source's actual scale before
-replacing this file. Never infer missing detail from the former SVG.
+The unchanged official JPG and its retrieval/inspection record remain in
+[`source/`](source/README.md) for reference. They are no longer displayed or
+linked from the Visitors card. No approval number is claimed for the restored SVG.

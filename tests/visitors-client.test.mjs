@@ -64,7 +64,7 @@ test('visible visitor card reads after collection settles, and local previews on
       }));
       const card = {
         dataset: { state: 'unconfigured' },
-        querySelectorAll: () => totals,
+        querySelectorAll: selector => selector === '[data-visitor-value]' ? totals : [],
         querySelector(selector) {
           if (!nodes.has(selector)) nodes.set(selector, { textContent: '', hidden: false, replaceChildren() {} });
           return nodes.get(selector);
