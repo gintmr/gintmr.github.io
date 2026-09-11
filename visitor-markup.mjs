@@ -18,13 +18,45 @@ export function visitorMarkup() {
       <figure class="visitor-map-figure">
         ${worldMap}
       </figure>
-      <div class="visitor-country-panel" data-visitor-country-panel hidden>
-        <p class="visitor-country-heading">Countries &amp; regions <span>Page views</span></p>
-        <ol class="visitor-country-list" data-visitor-country-list aria-label="Page views by country or region"></ol>
-        <details class="visitor-more-countries" data-visitor-more hidden><summary>All countries &amp; regions</summary><ol class="visitor-country-list" data-visitor-country-rest aria-label="More countries and regions"></ol></details>
-        <p class="visitor-unknown" data-visitor-unknown hidden></p>
-      </div>
     </div>
+    <details class="visitor-details" data-visitor-details>
+      <summary><span>More visitor details</span><span class="visitor-details-hint">Countries &amp; activity</span></summary>
+      <div class="visitor-details-content">
+        <div class="visitor-today">
+          <p class="visitor-detail-label">Today <span data-visitor-today-date>UTC</span></p>
+          <dl class="visitor-totals visitor-today-totals">
+            <div><dt>Page views</dt><dd data-visitor-today-value="pageviews">—</dd></div>
+            <div><dt>Visitors</dt><dd data-visitor-today-value="visitors">—</dd></div>
+          </dl>
+        </div>
+        <section class="visitor-detail-section" aria-labelledby="visitor-countries-heading">
+          <h3 id="visitor-countries-heading">Countries &amp; regions</h3>
+          <p class="visitor-detail-note">Visitor-days sum daily unique visitors across UTC days; a returning visitor counts again on another day.</p>
+          <div class="visitor-table-scroll" tabindex="0" aria-label="Visitor totals by country or region">
+            <table class="visitor-table visitor-country-table">
+              <thead><tr><th scope="col">Country / region</th><th scope="col">Page views</th><th scope="col">Visitor-days</th></tr></thead>
+              <tbody data-visitor-country-rows></tbody>
+            </table>
+          </div>
+          <p class="visitor-detail-note" data-visitor-countries-status>Country totals are not available yet.</p>
+        </section>
+        <section class="visitor-detail-section" aria-labelledby="visitor-activity-heading">
+          <h3 id="visitor-activity-heading">Visit history</h3>
+          <p class="visitor-detail-note">Times are in UTC. Locations are estimated from IP addresses.</p>
+          <p class="visitor-detail-note" data-visitor-history-note hidden>Some earlier visits retain only their time; their location and page were not recorded.</p>
+          <div class="visitor-table-scroll" tabindex="0" aria-label="Visit history by time, country or region, and page">
+            <table class="visitor-table visitor-activity-table">
+              <thead><tr><th scope="col">Time (UTC)</th><th scope="col">Country / region</th><th scope="col">Page</th></tr></thead>
+              <tbody data-visitor-activity-rows></tbody>
+            </table>
+          </div>
+          <div class="visitor-activity-controls">
+            <p class="visitor-detail-note" data-visitor-activity-status role="status">Open this panel to load visit history.</p>
+            <button class="visitor-load-more" type="button" data-visitor-load-more hidden>Load more</button>
+          </div>
+        </section>
+      </div>
+    </details>
     <div class="visitor-footer">
       <p class="visitor-status" data-visitor-status role="status">Visitor statistics are not connected yet.</p>
     </div>

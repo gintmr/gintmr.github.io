@@ -87,6 +87,37 @@ export function validateEvent(body) {
   return { eventId: body.eventId.toLowerCase(), path: body.path };
 }
 
+const validCursor = value => typeof value === 'string' && /^[1-9][0-9]{0,18}$/.test(value) &&
+  BigInt(value) <= 9223372036854775807n;
+
+function readView(request) {
+  const query = new URL(request.url).search;
+  if (!query) return { view: 'summary' };
+  if (request.method !== 'GET' || query.length > 80) return null;
+  const params = new URLSearchParams(query);
+  const keys = [...params.keys()];
+  if (keys.some(key => !['view', 'before'].includes(key)) ||
+      params.getAll('view').length !== 1 || params.get('view') !== 'activity' ||
+      params.getAll('before').length > 1) return null;
+  const before = params.get('before');
+  if (before !== null && !validCursor(before)) return null;
+  return { view: 'activity', before };
+}
+
+function publicActivity(data) {
+  if (data?.version !== 1 || !Array.isArray(data.records) || data.records.length > 25 ||
+      (data.nextCursor !== null && !validCursor(data.nextCursor))) throw new Error('Invalid activity result');
+  const records = data.records.map(row => {
+    if (typeof row?.visitedAt !== 'string' || row.visitedAt.length > 40 ||
+        !Number.isFinite(Date.parse(row.visitedAt)) ||
+        (row.countryCode !== null && normalizeCountry(row.countryCode) !== row.countryCode) ||
+        (row.path !== null && !PATHS.has(row.path))) throw new Error('Invalid activity record');
+    // Explicit projection keeps internal IDs and any future private fields out.
+    return { visitedAt: row.visitedAt, countryCode: row.countryCode, path: row.path };
+  });
+  return { version: 1, records, nextCursor: data.nextCursor };
+}
+
 async function readSmallJson(request) {
   if ((request.headers.get('content-type') || '').split(';')[0].trim().toLowerCase() !== 'application/json') {
     throw { status: 415 };
@@ -163,7 +194,8 @@ export function createHandler(config, dependencies = {}) {
       'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400',
     });
     if (!['GET', 'POST'].includes(request.method)) return json(405, { error: 'Method not allowed' }, { allow: 'GET, POST, OPTIONS' });
-    if (new URL(request.url).search) return json(400, { error: 'Unexpected query parameters' });
+    const read = readView(request);
+    if (!read) return json(400, { error: 'Invalid query parameters' });
     if (!config.ready) return json(503, { error: 'Statistics are not configured' });
 
     try {
@@ -185,6 +217,9 @@ export function createHandler(config, dependencies = {}) {
         return json(429, { error: 'Too many requests' }, { 'retry-after': '60' });
       }
       if (kind === 'summary') {
+        if (read.view === 'activity') {
+          return json(200, publicActivity(await rpc('visitor_analytics_activity', { p_before: read.before })));
+        }
         if (!summaryCache || summaryCache.expires <= instant.getTime() || summaryCache.day !== day) {
           summaryCache = { data: await rpc('visitor_analytics_summary', {}), expires: instant.getTime() + 60000, day };
         }
@@ -193,7 +228,10 @@ export function createHandler(config, dependencies = {}) {
       const country = config.geoProvider === 'proxy-header'
         ? normalizeCountry(request.headers.get(config.countryHeader))
         : await countryFor(ip, ipHash, instant.getTime());
-      await rpc('visitor_analytics_track', { p_event_id: event.eventId, p_visitor_hash: visitorHash, p_day: day, p_country_code: country });
+      await rpc('visitor_analytics_track_v2', {
+        p_event_id: event.eventId, p_visitor_hash: visitorHash, p_day: day,
+        p_country_code: country, p_path: event.path,
+      });
       return json(202, { ok: true });
     } catch (error) {
       const status = [400, 413, 415].includes(error?.status) ? error.status : 503;

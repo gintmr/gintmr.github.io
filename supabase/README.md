@@ -7,6 +7,16 @@ its storage and function quotas are shared with this feature.
 
 ## Deployment status — 11 September 2026
 
+The visit-history upgrade (`202609110002_visitor_activity.sql`) and updated
+collector were deployed at approximately 19:29 UTC. Read-only checks before and
+after migration retained 71 pageviews and 11 visitor-days, with all six existing
+blog tables unchanged. All 71 retained event timestamps were backfilled; their
+unrecorded country/page fields remain null. The new table has RLS enabled, and
+the activity RPC is denied to `anon` and `authenticated` and allowed to
+`service_role`. Anonymous Edge Function GET returned HTTP 200 with public CORS
+and `no-store`; three cursor pages returned all 71 records, and an invalid cursor
+returned HTTP 400. No synthetic visits were added for these checks.
+
 The reviewed SQL migration and the `visitor-analytics` function have been deployed
 to `gjofwuihpzjfqeaysuuy`. A live read-only check confirmed six existing blog tables,
 six separate analytics tables, no analytics RPC access for `anon` or
@@ -66,6 +76,9 @@ database checks pass. Never enable the frontend based only on unit tests.
 - `POST /functions/v1/visitor-analytics` records an allowed page load.
 - `GET /functions/v1/visitor-analytics` exposes aggregate statistics only, with
   public CORS so the localhost preview can display the existing live totals.
+- `GET /functions/v1/visitor-analytics?view=activity` exposes minimized visit
+  history in pages of 25: server receipt time, IP-derived country/region and an
+  allowed site path. The optional `before` cursor loads older records.
 - Exact production-origin allowlist for tracking and four fixed page paths.
 - No cookies, raw IPs, user agents, referrers, query strings or full URLs in the
   analytics database. A per-day HMAC of IP + user agent approximates one visitor
@@ -76,7 +89,7 @@ database checks pass. Never enable the frontend based only on unit tests.
 - Rate limiting is atomic in PostgreSQL: 20 tracking requests and 120 summary
   requests per IP per minute. It runs before an external geolocation lookup.
 - Country-level geolocation only. Unknown locations remain unknown. No fabricated
-  city coordinates, exact visitor dots or visitor history are exposed.
+  city coordinates, exact visitor dots, raw IPs or visitor identifiers are exposed.
 - Optional verified proxy-country header (`proxy-header`, disabled by default)
   reads only a configured header and needs no additional geolocation service.
 - Optional country.is (no account/key) or IPinfo Lite lookup (disabled by default);
@@ -94,13 +107,32 @@ different humans who have ever visited. A returning visitor on two dates adds tw
 visitor-days. Shared networks, user-agent changes, VPNs, blockers and bot filtering
 also affect estimates. Do not label this number “all-time unique visitors”.
 
-Daily and country aggregates are retained indefinitely. The first pageview assigns
+Daily and country aggregates are retained indefinitely. Country `visitorDays`
+uses the same daily visitor definition as the overall metric; it is available
+for historical aggregates as well as new visits. The first pageview assigns
 a visitor's country for that UTC day; country pageviews use each event's lookup.
 An unknown first location is not retroactively guessed. Hashed daily identifiers
-are removed after the previous UTC day, retry UUIDs after seven days, and rate
-buckets after two hours. One request per hour performs cleanup, so it resumes on
+are removed after the previous UTC day, the retry-deduplication table is cleared
+after seven days, and rate buckets after two hours. One request per hour performs cleanup, so it resumes on
 the next request after an idle period. No cron or always-on process is required.
 These identifiers are pseudonymous during their short retention window.
+
+The additive activity migration retains minimized visit records indefinitely in
+private `visitor_analytics.visit_records`. Its internal sequence ID and page-load
+UUID are never returned in record objects. The sequence ID is used only as an
+opaque decimal-string pagination cursor; the UUID does not identify a browser
+across pages or extend the seven-day retry window. No IP, user agent or daily
+visitor hash is copied into this history. Timestamp and broad location are public
+through the activity endpoint; the table and its RPC remain inaccessible directly
+to browser database roles.
+
+At migration time, surviving `recent_events` can supply their original timestamps
+only. They are backfilled with null country and path; those values must display
+as unknown/not recorded rather than being inferred from country totals. Events
+already removed from the retry table cannot be reconstructed. The new history
+therefore need not contain as many rows as the all-time pageview total. New
+records include the validated page path and any country resolved by the existing
+provider. The history does not change visitor deduplication or existing totals.
 
 The database still needs capacity, a working Supabase project and backups. The
 Free plan may pause after extended inactivity. Changing the HMAC secret midway
@@ -122,14 +154,24 @@ Dashboard owner login is required for deployment; visitors do not need accounts.
    named `public.visitor_analytics_*` RPC wrappers. It deliberately fails on name
    collisions instead of overwriting objects. It does not alter the existing
    application's schemas, grants, auth settings or tables.
-3. Keep `visitor_analytics` **out of the Data API's exposed schemas**. Tables have
+3. For a new installation, also run
+   `migrations/202609110002_visitor_activity.sql` once, after the initial migration.
+   For the existing deployed project, run **only this additive second migration**.
+   It creates the private visit-history table and two service-role-only RPCs,
+   and replaces only the known academic-site legacy tracking wrapper so an older
+   Edge Function keeps working during rollout. Backfill never changes totals.
+   Apply the SQL **before** deploying the updated Edge Function, then deploy the
+   frontend. Old collectors can record history during this interval, with null
+   page paths because their old RPC has no path argument. Never reset the shared
+   project, rerun the initial migration or alter blog tables to add this feature.
+4. Keep `visitor_analytics` **out of the Data API's exposed schemas**. Tables have
    RLS enabled and no browser policies or grants. Only the service role can call
-   the three public RPC wrappers; `anon`, `authenticated` and `PUBLIC` cannot.
-4. Merge the `[functions.visitor-analytics]` entry from `config.toml` into an
+   the five public RPC wrappers; `anon`, `authenticated` and `PUBLIC` cannot.
+5. Merge the `[functions.visitor-analytics]` entry from `config.toml` into an
    existing Supabase configuration if needed. `verify_jwt = false` allows visitors
    without accounts to reach this intentionally public collector. No other
    function's authentication setting should be changed.
-5. Copy `.env.example` to `.env.local`; fill the HMAC secret and review origins,
+6. Copy `.env.example` to `.env.local`; fill the HMAC secret and review origins,
    the trusted IP header, owner exclusions and geography setting. Use the
    Supabase dashboard's Edge Function secrets or the CLI, keeping values private:
 
@@ -146,21 +188,23 @@ Dashboard owner login is required for deployment; visitors do not need accounts.
    `index.ts`. That generated bundle combines the source modules without secrets.
    Name the function `visitor-analytics` and disable Verify JWT **for this function
    only**. Enter secrets through the project's Edge Function secrets screen.
-6. Verify trusted proxy behavior before setting `VISITOR_PROXY_HEADERS_VERIFIED=true`.
+7. Verify trusted proxy behavior before setting `VISITOR_PROXY_HEADERS_VERIFIED=true`.
    In a temporary restricted diagnostic, compare requests from two known networks;
    the selected header must contain their client address, not the gateway address.
    Send forged values in `cf-connecting-ip`, `x-real-ip`, `x-forwarded-for` and
    country headers; ensure clients cannot replace the chosen address. Remove the
    diagnostic afterwards. Do not log real visitor headers or addresses.
-7. Configure the public Edge Function endpoint in the homepage's visitor config,
+8. Configure the public Edge Function endpoint in the homepage's visitor config,
    then enable it after a real browser check from the allowed production origin.
    `localhost` can read public totals but is intentionally excluded from tracking.
    Before enabling, check that an anonymous
    direct Data API call to each RPC is denied, retrying one event adds one pageview,
    and the same browser visiting a second page adds no second daily visitor.
 
-The initial SQL should be applied as the single reviewed migration on a shared
-project, not by resetting it or pushing an unrelated migration history.
+Apply each reviewed migration once on the shared project, not by resetting it or
+pushing an unrelated migration history. To verify an existing production upgrade,
+compare aggregate totals before and after migration and read activity pages;
+do not create artificial production pageviews to test the UI.
 
 ## Client IP and geography
 
@@ -217,12 +261,14 @@ visitor counts. The service should not be used for billing or access control.
 
 The browser sends its `Origin` automatically. POST accepts only configured HTTPS
 origins; localhost POST requests and their preflights are rejected. GET is a
-public aggregate read with `Access-Control-Allow-Origin: *`, including localhost
+public read with `Access-Control-Allow-Origin: *`, including localhost
 preview, and does not need an Origin header. GET still requires a verified client
 address and passes the same database rate limiter, including when the summary is
 cached. Owner IP exclusions skip tracking but do not prevent reading totals.
 GET preflight grants only GET/OPTIONS, never cross-origin POST. Do not send a
-Supabase API key or browser credentials. Requests with query parameters are
+Supabase API key or browser credentials. GET without query parameters returns the
+summary. The only other query is `view=activity`, optionally with `before`.
+Duplicate, extra or invalid query values and all POST query parameters are
 rejected. Allowed POST paths: `/`, `/publication/`, `/project/`, `/cv/`.
 
 ```json
@@ -256,15 +302,44 @@ Example GET response (illustrative numbers, not actual visits):
 `null` is unknown and should not be placed on a map. GET is a public aggregate
 response, with no row-level visitor identifiers.
 
+Activity response (illustrative records, not actual visits):
+
+```json
+{
+  "version": 1,
+  "records": [
+    {"visitedAt": "2026-09-11T12:00:00+00:00", "countryCode": "CN", "path": "/publication/"},
+    {"visitedAt": "2026-09-11T11:00:00+00:00", "countryCode": null, "path": null}
+  ],
+  "nextCursor": null
+}
+```
+
+The actual page size is fixed at 25 and records are ordered by descending private
+insertion ID. When more records exist, `nextCursor` is the last returned row's ID
+as a **string**. Request `?view=activity&before=...` to fetch strictly older IDs.
+This keyset pagination prevents newer pageviews shifting previously fetched
+pages. Cursors must be canonical positive decimal strings from `1` through
+`9223372036854775807`, not JavaScript numbers; no signs or leading zeros. The
+query string is limited to 80 characters. Empty results have `records: []` and
+`nextCursor: null`. The Edge Function explicitly projects the three public record
+fields, rejects malformed or oversized database responses and never returns
+internal UUIDs, row IDs, hashes or addresses as record fields. Activity responses
+use `Cache-Control: no-store` and share the summary's 120 requests/IP/minute
+budget. The existing summary response and its one-minute cache are unchanged.
+
 ## Local checks
 
 ```sh
-node --test tests/backend-visitor-analytics.test.mjs
+node --test tests/backend-visitor-analytics.test.mjs tests/visitors-database.test.mjs
 ```
 
 These tests exercise validation, exact CORS, proxy failure, privacy/exclusion,
 hash rotation, backend payload minimization, rate-limit ordering, geolocation
-failure/cache and summary caching using mocked network/RPC boundaries. They do
+failure/cache, summary caching and activity query/response minimization using
+mocked network/RPC boundaries. PGlite tests exercise the additive migration,
+unchanged aggregate counts, legacy compatibility, idempotency, stable pagination,
+bigint cursor precision, unknown historical fields, retention and role grants. They do
 not establish that the hosted Supabase proxy or secrets are configured correctly.
 
 ## Official references

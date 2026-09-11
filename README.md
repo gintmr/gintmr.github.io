@@ -29,7 +29,7 @@ Commit the generated `index.html`, `publication/index.html`, `project/index.html
 
 Every page includes an outline with native section anchors and scroll-based highlighting. It follows Embedded-Studio's Fumadocs design: an indented heading rail, accent-colored active segment, and moving dot. When the side margin fits `--outline-width` and `--outline-gap`, the outline sits to the right without narrowing the content. Otherwise it becomes a collapsible bar below the main navigation. Its entries come from `pageOutline()` in `build.mjs`; institution, publication, and project links reuse the content data. The CV outline links to the document section; the embedded PDF keeps its own page controls.
 
-All content headings are self-links. Clicking one updates the URL fragment, smoothly aligns it below the sticky navigation, and gives it keyboard focus. Hovering or focusing a heading expands its gradient underline over 280ms, matching the personal blog; reduced-motion preferences disable the transition and smooth scrolling. Paper resource links remain beneath each paper title.
+All content headings are self-links. Clicking one updates the URL fragment, smoothly aligns it below the sticky navigation, and gives it keyboard focus. A small purple accent fades into the heading's normal text color; hovering or focusing gently extends that gradient over 320ms. Reduced-motion preferences disable the transition and smooth scrolling; forced-colors and print modes use solid text. Paper resource links remain beneath each paper title.
 
 All four pages share the decorative effects in `css/effects.css` and `effects.js`: a slow background glow, eight softly twinkling points (four on mobile), and short mouse-click particle bursts. The layers pass pointer events through and are hidden from assistive technology. Reduced-motion preferences disable the effects, and hidden pages pause them and clear particles. Click particles are bounded and removed when their animations finish; no continuous JavaScript render loop or animation library is used. Theme colors follow the site's shared palette.
 
@@ -65,9 +65,11 @@ records. No blog source, tables, credentials or grants are modified.
   removed on 11 September 2026; SQL, the public API and the local page confirmed
   zero real counts. Localhost reads totals but never records visits.
 - `visitor-markup.mjs`, `visitors.js`, `css/visitors.css`: component, collector,
-  display and theme styling. `assets/maps/source/` includes the unchanged official
-  standard-map JPG and its provenance. Counts appear in a separate country/region
-  list; no generic boundary polygons are overlaid on the official artwork.
+  display and theme styling. The main card shows three totals and the simplified
+  SVG country map with no visible map labels. A collapsed details panel contains
+  country pageviews and visitor-days, today's totals, and paginated visit history.
+  `assets/maps/source/` archives the earlier official standard-map artwork; it is
+  not the displayed map.
 - `supabase/`: reviewed migration, Edge Function and secret template. See
   [the deployment instructions](supabase/README.md) for reusing the existing
   project. No third Supabase project is needed. Its quotas are shared.
@@ -81,6 +83,11 @@ Page views count accepted page loads. Visitor-days sum **daily** deduplicated
 visitors, not distinct people over all time. Country locations are approximate;
 unavailable locations remain unknown. Historical aggregate counts persist, while
 short-lived deduplication and rate-limit records are cleaned up automatically.
+Visit history records server time, approximate country/region and one of the four
+allowed page paths; it contains no raw IP address or visitor identifier. The
+details panel loads 25 records at a time on demand. Earlier retained event times
+are preserved with missing country and page fields, since those details were not
+stored before the history upgrade.
 
 Run `npm ci` then `npm test` for client and backend checks, including the SQL
 migration executed in PGlite (PostgreSQL/WASM). These do not replace a live

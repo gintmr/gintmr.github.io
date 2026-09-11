@@ -142,14 +142,15 @@ test('body validation and actual byte limit happen before database or provider c
   assert.equal(calls.length, 0);
 });
 
-test('valid event sends only date/hash/id/country to database, never IP/UA/referrer/path', async () => {
+test('valid event sends only date/hash/id/country/allowed path to database, never IP/UA/referrer', async () => {
   const { handler, calls } = setup();
   assert.equal((await handler(request())).status, 202);
   assert.equal(calls.length, 2);
   assert.equal(calls[0].name, 'visitor_analytics_rate_limit');
-  assert.equal(calls[1].name, 'visitor_analytics_track');
-  assert.deepEqual(Object.keys(calls[1].args).sort(), ['p_country_code', 'p_day', 'p_event_id', 'p_visitor_hash']);
+  assert.equal(calls[1].name, 'visitor_analytics_track_v2');
+  assert.deepEqual(Object.keys(calls[1].args).sort(), ['p_country_code', 'p_day', 'p_event_id', 'p_path', 'p_visitor_hash']);
   assert.equal(calls[1].args.p_country_code, null);
+  assert.equal(calls[1].args.p_path, '/');
   assert.equal(JSON.stringify(calls).includes('8.8.8.8'), false);
 });
 
@@ -285,4 +286,85 @@ test('database failures never disclose credentials or internal errors to the bro
   const response = await handler(request());
   assert.equal(response.status, 503);
   assert.equal((await response.text()).includes('secret-value'), false);
+});
+
+test('activity GET shares public CORS/rate limit, keeps cursor precision, and exposes only minimized records', async () => {
+  const calls = [];
+  const backendRecord = {
+    visitedAt: '2026-09-11T12:00:00+00:00', countryCode: 'CN', path: '/publication/',
+    id: '9007199254740994', event_id: event.eventId, visitor_hash: 'internal', ip: '8.8.8.8',
+  };
+  const { handler } = setup({}, { rpc: async (name, args) => {
+    calls.push({ name, args });
+    if (name === 'visitor_analytics_rate_limit') return true;
+    return { version: 1, records: [backendRecord], nextCursor: '9007199254740994', internal: true };
+  } });
+  const response = await handler(request('GET', {
+    headers: { origin: 'http://127.0.0.1:4173' },
+    url: 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity&before=9223372036854775807',
+  }));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('access-control-allow-origin'), '*');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(await response.json(), { version: 1, records: [{
+    visitedAt: backendRecord.visitedAt, countryCode: 'CN', path: '/publication/',
+  }], nextCursor: '9007199254740994' });
+  assert.deepEqual(calls.map(c => [c.name, c.args.p_kind || c.args.p_before]), [
+    ['visitor_analytics_rate_limit', 'summary'], ['visitor_analytics_activity', '9223372036854775807'],
+  ]);
+});
+
+test('activity accepts an absent cursor and historical unknown values without calling summary or geolocation', async () => {
+  const calls = [];
+  const { handler } = setup({ VISITOR_GEO_PROVIDER: 'country-is' }, {
+    rpc: async (name, args) => {
+      calls.push({ name, args });
+      return name === 'visitor_analytics_rate_limit' ? true : {
+        version: 1, records: [{ visitedAt: '2026-09-10T23:59:00Z', countryCode: null, path: null }], nextCursor: null,
+      };
+    },
+    fetch: async () => { throw new Error('History must not request geolocation'); },
+  });
+  for (let i = 0; i < 2; i++) {
+    const response = await handler(request('GET', { url: 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity' }));
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).records[0].countryCode, null);
+  }
+  assert.deepEqual(calls.filter(c => c.name === 'visitor_analytics_activity').map(c => c.args), [{ p_before: null }, { p_before: null }]);
+  assert.equal(calls.some(c => c.name === 'visitor_analytics_summary'), false);
+});
+
+test('activity query validation rejects duplicate, extra, oversized and malformed values before any RPC', async () => {
+  const { handler, calls } = setup();
+  const queries = ['?view=other', '?before=1', '?view=activity&extra=1', '?view=activity&view=activity',
+    '?view=activity&before=1&before=2', '?view=activity&before=', '?view=activity&before=0',
+    '?view=activity&before=01', '?view=activity&before=-1', '?view=activity&before=1.5',
+    '?view=activity&before=1e3', '?view=activity&before=9223372036854775808',
+    '?view=activity&before=' + '1'.repeat(200), '?view=activity&before=%2B1'];
+  for (const query of queries) {
+    assert.equal((await handler(request('GET', { url: 'https://test-project.supabase.co/functions/v1/visitor-analytics' + query }))).status, 400, query);
+  }
+  assert.equal((await handler(request('POST', { url: 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity' }))).status, 400);
+  assert.equal(calls.length, 0);
+});
+
+test('activity respects rate limiting and never returns malformed or oversized backend history', async () => {
+  const url = 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity';
+  const denied = [];
+  const { handler: limited } = setup({}, { rpc: async name => { denied.push(name); return false; } });
+  assert.equal((await limited(request('GET', { url }))).status, 429);
+  assert.deepEqual(denied, ['visitor_analytics_rate_limit']);
+  const valid = { visitedAt: '2026-09-11T12:00:00Z', countryCode: 'CN', path: '/' };
+  for (const invalid of [
+    { version: 1, records: Array(26).fill(valid), nextCursor: null },
+    { version: 1, records: [{ ...valid, countryCode: 'XX' }], nextCursor: null },
+    { version: 1, records: [{ ...valid, path: '/?private=1' }], nextCursor: null },
+    { version: 1, records: [{ ...valid, visitedAt: 'bad' }], nextCursor: null },
+    { version: 1, records: [valid], nextCursor: 42 },
+  ]) {
+    const { handler } = setup({}, { rpc: async name => name === 'visitor_analytics_rate_limit' ? true : invalid });
+    const response = await handler(request('GET', { url }));
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: 'Statistics temporarily unavailable' });
+  }
 });
