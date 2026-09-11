@@ -116,6 +116,7 @@ export const publications = [
     year: 2026,
     status: "submitted",
     role: "contributor",
+    authorGroup: "core",
     roleLabel: "Second author",
     topic: "vision",
     links: [{ label: "alphaXiv", url: "https://www.alphaxiv.org/abs/2608.ocg-optical-character-grounded-reasoning" }],

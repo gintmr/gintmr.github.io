@@ -37,7 +37,7 @@ All four pages share the decorative effects in `css/effects.css` and `effects.js
 
 The accompanying CV's `main.tex`, `subfolders/Interests.tex`, and `subfolders/Scholarships-Prizes.tex` supply the September 2026 academic content. Institution logos are copied from that CV directory. Neither the CV nor personal-site source is modified by the build.
 
-Publication content follows the author's latest updates where they differ from the accompanying CV. The Publication page groups first-author and co-first-author papers under **Core Author**; all records with the contributing-author role, including the second-author OCG paper, appear under **Contributing Author**. Each paper retains its own acceptance or submission status.
+Publication content follows the author's latest updates where they differ from the accompanying CV. **Core Author** contains the five first-author/co-first-author papers plus OCG, explicitly assigned through `authorGroup: "core"`. OCG retains its **Second author** label and original author order. **Contributing Author** contains ParaThinker and SeaTree. Each paper retains its own acceptance or submission status.
 
 BudgetThinker and ParaThinker are accepted by EMNLP 2026, and MaskGuide is accepted by IEEE Robotics and Automation Letters. ImageTime is **Submitted to WACV 2027**. HiReT and the action-aware clinical world-model manuscript are submitted to ICLR 2027; HiReT replaces the previous HiCausal entry. The author supplied complete author lists for BudgetThinker and ParaThinker, the updated ParaThinker title, and the OCG entry submitted to NeurIPS 2026 Workshop BeNTo with its alphaXiv link. BudgetThinker marks Hao Wen and Xinrui Wu as equal contributors.
 

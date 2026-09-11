@@ -30,9 +30,10 @@ const icon = (name) => {
 const pages = [{ id: 'home', label: 'Home', path: '/' }, { id: 'publication', label: 'Publication', path: '/publication/' }, { id: 'project', label: 'Project', path: '/project/' }, { id: 'cv', label: 'CV', path: profile.cvUrl }];
 // This page is deliberately absent from the public navigation and page outlines.
 const historyPage = { id: 'visit-history', label: 'Visit history', path: '/visit-history/' };
+const isCoreAuthor = paper => paper.authorGroup === 'core' || paper.role === 'first';
 const publicationGroups = [
-  { id: 'core-author', label: 'Core Author', papers: publications.filter(paper => paper.role === 'first') },
-  { id: 'contributing-author', label: 'Contributing Author', papers: publications.filter(paper => paper.role === 'contributor') },
+  { id: 'core-author', label: 'Core Author', papers: publications.filter(isCoreAuthor) },
+  { id: 'contributing-author', label: 'Contributing Author', papers: publications.filter(paper => !isCoreAuthor(paper)) },
 ];
 const linkedHeading = (tag, id, title, className = '') => `<${tag} class="${className}" id="${id}" tabindex="-1"><a class="heading-anchor" href="#${id}">${title}</a></${tag}>`;
 const heading = (id, title) => linkedHeading('h2', `${id}-heading`, title, 'section-title');
