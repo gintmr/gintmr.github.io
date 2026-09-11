@@ -7,6 +7,14 @@ its storage and function quotas are shared with this feature.
 
 ## Deployment status — 12 September 2026
 
+At the owner's request, the 71 timestamp-only legacy history rows (IDs 1–71,
+with both country and path null) were deleted in a guarded transaction. The
+actual deletion count was checked, and the five newer complete records plus
+all aggregate statistics were verified unchanged. History now starts with the
+complete records; the collector remains enabled. This was a one-time data
+cleanup, not a schema migration: do not rerun the activity backfill to restore
+these intentionally removed rows. All-time totals still include those visits.
+
 The numbered-page RPC, transaction-ordered collector and updated Edge Function
 are deployed. Read-only live checks returned 75 records across four pages
 (20/20/20/15), a reusable snapshot, public CORS and `no-store`; invalid page zero
@@ -20,7 +28,8 @@ The visit-history upgrade (`202609110002_visitor_activity.sql`) and updated
 collector were deployed at approximately 19:29 UTC. Read-only checks before and
 after migration retained 71 pageviews and 11 visitor-days, with all six existing
 blog tables unchanged. All 71 retained event timestamps were backfilled; their
-unrecorded country/page fields remain null. The new table has RLS enabled, and
+unrecorded country/page fields were null (those rows have since been deleted
+at the owner's request, as noted above). The new table has RLS enabled, and
 the activity RPC is denied to `anon` and `authenticated` and allowed to
 `service_role`. Anonymous Edge Function GET returned HTTP 200 with public CORS
 and `no-store`; three cursor pages returned all 71 records, and an invalid cursor

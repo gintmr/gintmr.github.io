@@ -88,9 +88,9 @@ allowed page paths; it contains no raw IP address or visitor identifier. The
 details panel loads 20 records per page on demand, with Previous/Next controls
 and a direct page-number jump. Page navigation reuses a maximum-record-ID snapshot
 so newly arriving visits do not shift records between pages; Refresh starts at
-the newest page. Earlier retained event times
-are preserved with missing country and page fields, since those details were not
-stored before the history upgrade.
+the newest page. The 71 timestamp-only records from before the history upgrade
+were removed at the owner's request on 12 September 2026. New complete records
+and all-time aggregate counts were retained; the collector continues recording.
 
 Run `npm ci` then `npm test` for client and backend checks, including the SQL
 migration executed in PGlite (PostgreSQL/WASM). These do not replace a live
