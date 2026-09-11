@@ -7,6 +7,14 @@ its storage and function quotas are shared with this feature.
 
 ## Deployment status — 12 September 2026
 
+The UI now separates the public homepage summary from an unlisted history page.
+Home displays the map, all-time totals, today's counts and country totals without
+an accordion or activity request. The independent history client issues only
+paginated activity GETs; opening it does not count as a visit. The existing Edge
+Function and database are unchanged. History remains accessible without a password
+by the owner's explicit choice; removing its public navigation link is not an
+authorization check.
+
 At the owner's request, the 71 timestamp-only legacy history rows (IDs 1–71,
 with both country and path null) were deleted in a guarded transaction. The
 actual deletion count was checked, and the five newer complete records plus

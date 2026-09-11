@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { normalizeVisitorConfig, canRecordVisit, validateVisitorSummary, validateVisitorActivity, initializeVisitors } from '../visitors.js';
+import { normalizeVisitorConfig, canRecordVisit, validateVisitorSummary, initializeVisitors } from '../visitors.js';
+import { normalizeVisitHistoryConfig, validateVisitorActivity, initializeVisitHistory } from '../visit-history.js';
 
 const config = normalizeVisitorConfig({ enabled: true,
   endpoint: 'https://example.supabase.co/functions/v1/visitor-analytics',
@@ -30,7 +31,7 @@ function makeNode() {
 
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
-function setupVisitorDOM(t, fetch, search = '') {
+function setupVisitorDOM(t, fetch, search = '', surface = 'history') {
   const nodes = new Map();
   const totals = ['pageviews', 'visitorDays', 'countries'].map(visitorValue => ({ dataset: { visitorValue }, textContent: '—' }));
   const today = ['pageviews', 'visitors'].map(visitorTodayValue => ({ dataset: { visitorTodayValue }, textContent: '—' }));
@@ -42,9 +43,10 @@ function setupVisitorDOM(t, fetch, search = '') {
     },
   };
   const window = makeNode();
-  const globals = { location: new URL(`http://127.0.0.1:4173/${search}`), navigator: {}, window, fetch,
+  const globals = { location: new URL(`http://127.0.0.1:4173/${surface === 'history' ? 'visit-history/' : ''}${search}`), navigator: {}, window, fetch,
     document: { visibilityState: 'visible', createElement: () => makeNode(),
-      getElementById: () => ({ textContent: JSON.stringify({ ...config, enabled: true }) }), querySelector: () => card },
+      getElementById: () => ({ textContent: JSON.stringify({ ...config, enabled: true }) }),
+      querySelector: selector => selector === (surface === 'history' ? '[data-visitor-history]' : '[data-visitor-card]') ? card : null },
   };
   const saved = Object.fromEntries(Object.keys(globals).map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
   t.after(() => {
@@ -74,7 +76,7 @@ test('client records only known deployed pages and respects privacy choices', ()
     assert.equal(canRecordVisit(config, new URL(`https://gintmr.github.io${path}`)), true);
   }
   for (const url of ['http://127.0.0.1:4173/', 'http://localhost:4173/', 'https://preview.example/',
-    'https://gintmr.github.io/output/', 'https://gintmr.github.io/MaskGuide/', 'http://gintmr.github.io/']) {
+    'https://gintmr.github.io/output/', 'https://gintmr.github.io/MaskGuide/', 'https://gintmr.github.io/visit-history/', 'http://gintmr.github.io/']) {
     assert.equal(canRecordVisit(config, new URL(url)), false);
   }
   for (const privacy of [{ globalPrivacyControl: true }, { doNotTrack: '1' }, { doNotTrack: 'yes' }]) {
@@ -103,6 +105,49 @@ test('summary distinguishes empty real counts from unknown or invalid service re
     const value = makeSummary(); mutate(value);
     assert.equal(validateVisitorSummary(value), null);
   }
+});
+
+test('Home reads only the summary and renders its compact today/country information without history hooks', async t => {
+  const calls = [];
+  const { node, today } = setupVisitorDOM(t, async (url, options) => {
+    calls.push({ url: new URL(url), method: options.method || 'GET' });
+    return { ok: true, json: async () => makeSummary() };
+  }, '', 'home');
+  initializeVisitors();
+  initializeVisitHistory(); // No history root: even an accidental call is inert.
+  await settle();
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].method, 'GET');
+  assert.equal(calls[0].url.search, '');
+  assert.equal(today[1].textContent, '1');
+  assert.equal(node('[data-visitor-country-rows]').children.length, 2);
+  const source = await readFile(new URL('../visitors.js', import.meta.url), 'utf8');
+  assert.equal(source.includes('data-visitor-activity'), false);
+  assert.equal(source.includes('data-visitor-details'), false);
+  assert.equal(source.includes("'activity'"), false);
+});
+
+test('standalone history has read-only configuration and never collects or requests a summary on the live route', async t => {
+  assert.deepEqual(normalizeVisitHistoryConfig({ enabled: true, endpoint: config.endpoint }), { endpoint: config.endpoint });
+  for (const endpoint of ['http://example.com', 'https://user:password@example.com', `${config.endpoint}?view=other`, `${config.endpoint}#fragment`]) {
+    assert.equal(normalizeVisitHistoryConfig({ enabled: true, endpoint }), null);
+  }
+  assert.equal(normalizeVisitHistoryConfig({ enabled: false, endpoint: config.endpoint }), null);
+  const calls = [];
+  setupVisitorDOM(t, async (url, options) => {
+    calls.push({ url: new URL(url), method: options.method, credentials: options.credentials });
+    return { ok: true, json: async () => makeActivity() };
+  });
+  globalThis.location = new URL('https://gintmr.github.io/visit-history/');
+  initializeVisitHistory();
+  initializeVisitors(); // Path allowlist and absent Home root independently prevent a POST/summary.
+  await settle();
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].method, 'GET');
+  assert.equal(calls[0].credentials, 'omit');
+  assert.equal(calls[0].url.searchParams.get('view'), 'activity');
+  assert.equal(calls[0].url.searchParams.get('page'), '1');
+  assert.equal(calls[0].url.searchParams.has('snapshot'), false);
 });
 
 test('activity validates fixed 20-row pages, totals, and exact bigint snapshots', () => {
@@ -141,34 +186,29 @@ test('activity validates fixed 20-row pages, totals, and exact bigint snapshots'
   }
 });
 
-test('activity stays lazy and navigates fixed pages with retries, direct jumps, and a fresh snapshot', async t => {
+test('standalone activity loads immediately and navigates fixed pages with retries, direct jumps, and a fresh snapshot', async t => {
   const calls = [];
   let firstPageResolve;
   let reads = 0;
-  const { node, today } = setupVisitorDOM(t, async (url, options) => {
-    assert.notEqual(options.method, 'POST');
+  const { node } = setupVisitorDOM(t, async (url, options) => {
+    assert.equal(options.method, 'GET');
+    assert.equal(options.credentials, 'omit');
     const request = new URL(url);
     calls.push(request);
-    if (request.searchParams.get('view') !== 'activity') return { ok: true, json: async () => makeSummary() };
+    assert.equal(request.searchParams.get('view'), 'activity', 'history never fetches the summary');
     reads += 1;
     if (reads === 1) return new Promise(resolve => { firstPageResolve = resolve; });
     if (reads === 2) return { ok: false, status: 503 };
     const snapshot = request.searchParams.get('snapshot');
     return { ok: true, json: async () => makeActivity(Number(request.searchParams.get('page')), snapshot ? 43 : 45, snapshot || '9007199254740995') };
   });
-  initializeVisitors();
+  initializeVisitHistory();
   await settle();
-  assert.equal(calls.length, 1, 'closed details fetch only the summary');
-  assert.equal(today[1].textContent, '1');
-  assert.equal(node('[data-visitor-country-rows]').children.length, 2);
-  const details = node('[data-visitor-details]');
+  assert.equal(calls.length, 1, 'history starts its first GET without opening a disclosure');
   const next = node('[data-visitor-next]');
   const previous = node('[data-visitor-previous]');
   const input = node('[data-visitor-page-input]');
-  details.open = true;
-  details.emit('toggle');
   await settle();
-  details.emit('toggle');
   node('[data-visitor-refresh]').emit('click');
   await settle();
   assert.equal(reads, 1, 'an in-flight page cannot be requested twice');
@@ -186,7 +226,7 @@ test('activity stays lazy and navigates fixed pages with retries, direct jumps, 
   assert.equal(node('[data-visitor-page-label]').textContent, 'Page 1 of 3', 'failed reads retain the previous page');
   node('[data-visitor-retry]').emit('click');
   await settle();
-  assert.deepEqual(calls.slice(2, 4).map(url => [url.searchParams.get('page'), url.searchParams.get('snapshot')]),
+  assert.deepEqual(calls.slice(1, 3).map(url => [url.searchParams.get('page'), url.searchParams.get('snapshot')]),
     [['2', '9007199254740993'], ['2', '9007199254740993']]);
   assert.equal(node('[data-visitor-activity-rows]').children.length, 20, 'pagination replaces rather than appends rows');
   assert.equal(node('[data-visitor-activity-status]').textContent, 'Showing 21–40 of 43 visit records.');
@@ -219,17 +259,13 @@ test('activity stays lazy and navigates fixed pages with retries, direct jumps, 
   next.emit('click');
   await settle();
   assert.equal(calls.at(-1).searchParams.get('snapshot'), '9007199254740995');
-  const beforeReopen = reads;
-  details.emit('toggle');
-  await settle();
-  assert.equal(reads, beforeReopen, 'reopening loaded history keeps the current page');
 });
 
 test('activity aborts on pagehide and resumes the same page and snapshot after BFCache restoration', async t => {
   const requests = [];
   const { node, window } = setupVisitorDOM(t, async (url, options) => {
     const request = new URL(url);
-    if (request.searchParams.get('view') !== 'activity') return { ok: true, json: async () => makeSummary() };
+    assert.equal(request.searchParams.get('view'), 'activity', 'history never fetches the summary');
     if (requests.length === 0) {
       requests.push({ request, signal: options.signal });
       return { ok: true, json: async () => makeActivity() };
@@ -239,10 +275,7 @@ test('activity aborts on pagehide and resumes the same page and snapshot after B
       options.signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
     });
   });
-  initializeVisitors();
-  const details = node('[data-visitor-details]');
-  details.open = true;
-  details.emit('toggle');
+  initializeVisitHistory();
   await settle();
   node('[data-visitor-next]').emit('click');
   await settle();
@@ -264,10 +297,7 @@ test('activity aborts on pagehide and resumes the same page and snapshot after B
 test('activity renders empty snapshots and server-clamped pages without inventing records', async t => {
   let response = makeActivity(1, 0);
   const { node } = setupVisitorDOM(t, async url => ({ ok: true, json: async () => new URL(url).searchParams.get('view') === 'activity' ? response : makeSummary() }));
-  initializeVisitors();
-  const details = node('[data-visitor-details]');
-  details.open = true;
-  details.emit('toggle');
+  initializeVisitHistory();
   await settle();
   assert.equal(node('[data-visitor-activity-rows]').children.length, 0);
   assert.equal(node('[data-visitor-pagination]').hidden, true);
@@ -287,12 +317,8 @@ test('activity renders empty snapshots and server-clamped pages without inventin
 
 test('local design preview replaces sample history pages without contacting or recording to the service', async t => {
   const { node } = setupVisitorDOM(t, () => { throw new Error('Demo must not fetch'); }, '?visitor-demo=1');
-  initializeVisitors();
+  initializeVisitHistory();
   assert.equal(node('[data-visitor-demo]').hidden, false);
-  assert.equal(node('[data-visitor-activity-rows]').children.length, 0);
-  const details = node('[data-visitor-details]');
-  details.open = true;
-  details.emit('toggle');
   await settle();
   assert.equal(node('[data-visitor-activity-rows]').children.length, 20);
   node('[data-visitor-page-input]').value = '3';
@@ -384,6 +410,7 @@ test('generated pages load one collector each; only Home includes the map and ou
   for (const page of ['index.html', 'publication/index.html', 'project/index.html', 'cv/index.html']) {
     const html = await readFile(new URL(`../${page}`, import.meta.url), 'utf8');
     assert.equal((html.match(/src="\/visitors\.js\?v=/g) || []).length, 1);
+    assert.equal(html.includes('/visit-history.js'), false);
     assert.equal((html.match(/id="visitor-config"/g) || []).length, 1);
     const value = JSON.parse(html.match(/id="visitor-config" type="application\/json">(.*?)<\/script>/s)[1]);
     assert.deepEqual(Object.keys(value).sort(), ['allowedOrigins', 'enabled', 'endpoint']);

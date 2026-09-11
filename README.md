@@ -19,13 +19,13 @@ Open `http://127.0.0.1:4173/`. The generated HTML files can be served directly b
 - `css/style.css`: the shared UI, mobile layouts, themes, and print styles. Set `--site-max-width` and `--site-inline-padding` in `:root` to change the width and padding of every page, including the navigation and CV preview container.
 - `index.js`: theme preference, mobile navigation, page outline, and responsive iframe scaling.
 
-After changing content, templates, CSS, JavaScript, or the logo, regenerate the four HTML pages. The build adds content-based version identifiers to the shared stylesheet, script, and logo URLs so all pages load the updated assets:
+After changing content, templates, CSS, JavaScript, or the logo, regenerate the four public navigation pages and the unlisted history page. The build adds content-based version identifiers to the stylesheet, script, and logo URLs so all pages load the updated assets:
 
 ```sh
 node build.mjs
 ```
 
-Commit the generated `index.html`, `publication/index.html`, `project/index.html`, and `cv/index.html` along with source changes. The initial theme is light; the header toggle saves the user's choice across pages. The centered content and navigation containers have a maximum width of 75rem (1200px), with responsive side padding on smaller screens. Academic content and desktop navigation also work without JavaScript.
+Commit the generated `index.html`, `publication/index.html`, `project/index.html`, `cv/index.html`, and `visit-history/index.html` along with source changes. The initial theme is light; the header toggle saves the user's choice across pages. The centered content and navigation containers have a maximum width of 75rem (1200px), with responsive side padding on smaller screens. Academic content and desktop navigation also work without JavaScript.
 
 Every page includes an outline with native section anchors and scroll-based highlighting. It follows Embedded-Studio's Fumadocs design: an indented heading rail, accent-colored active segment, and moving dot. When the side margin fits `--outline-width` and `--outline-gap`, the outline sits to the right without narrowing the content. Otherwise it becomes a collapsible bar below the main navigation. Its entries come from `pageOutline()` in `build.mjs`; institution, publication, and project links reuse the content data. The CV outline links to the document section; the embedded PDF keeps its own page controls.
 
@@ -66,8 +66,9 @@ records. No blog source, tables, credentials or grants are modified.
   zero real counts. Localhost reads totals but never records visits.
 - `visitor-markup.mjs`, `visitors.js`, `css/visitors.css`: component, collector,
   display and theme styling. The main card shows three totals and the simplified
-  SVG country map with no visible map labels. A collapsed details panel contains
-  country pageviews and visitor-days, today's totals, and paginated visit history.
+  SVG country map with no visible map labels. A compact, always-visible analysis
+  card immediately below the map contains today's totals and country pageviews
+  and visitor-days. Home has no expandable panel or individual visit records.
   `assets/maps/source/` archives the earlier official standard-map artwork; it is
   not the displayed map.
 - `supabase/`: reviewed migration, Edge Function and secret template. See
@@ -75,6 +76,7 @@ records. No blog source, tables, credentials or grants are modified.
   project. No third Supabase project is needed. Its quotas are shared.
 
 Preview the layout at `http://127.0.0.1:4173/?visitor-demo=1#visitors-heading`.
+The standalone history preview is `/visit-history/?visitor-demo=1` on localhost.
 The sample-data badge is intentional: this mode is available only on localhost,
 never records visits, and never substitutes for a production API error. The
 normal unconnected page displays dashes, not fabricated counts.
@@ -85,12 +87,20 @@ unavailable locations remain unknown. Historical aggregate counts persist, while
 short-lived deduplication and rate-limit records are cleaned up automatically.
 Visit history records server time, approximate country/region and one of the four
 allowed page paths; it contains no raw IP address or visitor identifier. The
-details panel loads 20 records per page on demand, with Previous/Next controls
+unlisted `/visit-history/` page loads 20 records per page, with Previous/Next controls
 and a direct page-number jump. Page navigation reuses a maximum-record-ID snapshot
 so newly arriving visits do not shift records between pages; Refresh starts at
 the newest page. The 71 timestamp-only records from before the history upgrade
 were removed at the owner's request on 12 September 2026. New complete records
 and all-time aggregate counts were retained; the collector continues recording.
+
+`visit-history.js` is loaded only on the standalone history page. That page does
+not record visits or fetch the summary, has `noindex, nofollow, noarchive` metadata,
+and has no entrypoint in public navigation or any other page. There is no sitemap
+entry. This is intentionally an unlisted public page, not authenticated access;
+the owner accepted direct-URL/source discovery. Existing Supabase storage and
+the public read-only activity API continue to serve the records; no new database,
+password system, repository visibility change, or server deployment is involved.
 
 Run `npm ci` then `npm test` for client and backend checks, including the SQL
 migration executed in PGlite (PostgreSQL/WASM). These do not replace a live
