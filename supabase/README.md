@@ -15,13 +15,26 @@ Function and database are unchanged. History remains accessible without a passwo
 by the owner's explicit choice; removing its public navigation link is not an
 authorization check.
 
-At the owner's request, the 71 timestamp-only legacy history rows (IDs 1–71,
+**Latest reset — 12 September 2026, 01:28:29 Asia/Dubai
+(11 September, 21:28:29 UTC):** the owner requested a fresh start for all academic
+visitor data. A guarded transaction took the existing writer advisory lock and
+cleared only the six data tables in `visitor_analytics`: `daily_totals`,
+`country_daily_totals`, `daily_visitors`, `recent_events`, `visit_records`, and
+`rate_limits`. The maintenance singleton was retained; the history identity
+sequence remained at 84 so old pagination snapshots cannot include new records.
+SQL verified all six tables empty, zero summary counts, empty countries and null
+`since`. The collector remains enabled. No blog tables, functions, permissions,
+secrets, or frontend settings changed. This is a one-time data operation, not a
+migration or a script to rerun.
+
+Earlier, at the owner's request, the 71 timestamp-only legacy history rows (IDs 1–71,
 with both country and path null) were deleted in a guarded transaction. The
 actual deletion count was checked, and the five newer complete records plus
-all aggregate statistics were verified unchanged. History now starts with the
-complete records; the collector remains enabled. This was a one-time data
+all aggregate statistics were verified unchanged. History then started with the
+complete records. This was a one-time data
 cleanup, not a schema migration: do not rerun the activity backfill to restore
-these intentionally removed rows. All-time totals still include those visits.
+these intentionally removed rows. The latest full reset above also removed the
+retained aggregates and subsequent records.
 
 The numbered-page RPC, transaction-ordered collector and updated Edge Function
 are deployed. Read-only live checks returned 75 records across four pages

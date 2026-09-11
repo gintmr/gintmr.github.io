@@ -90,9 +90,11 @@ allowed page paths; it contains no raw IP address or visitor identifier. The
 unlisted `/visit-history/` page loads 20 records per page, with Previous/Next controls
 and a direct page-number jump. Page navigation reuses a maximum-record-ID snapshot
 so newly arriving visits do not shift records between pages; Refresh starts at
-the newest page. The 71 timestamp-only records from before the history upgrade
-were removed at the owner's request on 12 September 2026. New complete records
-and all-time aggregate counts were retained; the collector continues recording.
+the newest page. At the owner's request, all academic visitor statistics and
+history were reset at 01:28:29 on 12 September 2026 (Asia/Dubai), equivalent to
+21:28:29 UTC on 11 September. SQL verified zero pageviews, visitor-days, countries
+and history rows. The collector remains enabled and records new visits normally.
+This supersedes the earlier cleanup of 71 timestamp-only legacy records.
 
 `visit-history.js` is loaded only on the standalone history page. That page does
 not record visits or fetch the summary, has `noindex, nofollow, noarchive` metadata,
