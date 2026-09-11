@@ -257,7 +257,6 @@ export const experience = [
 export const education = [
   {
     institution: "University of Electronic Science and Technology of China (UESTC)",
-    designation: "Project 985",
     logo: "/assets/institutions/uestc.png",
     degree: "B.S. in Software Engineering (Embedded System)",
     period: "Sep 2023 – Present",
