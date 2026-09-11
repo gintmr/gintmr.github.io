@@ -14,7 +14,9 @@ const makeSummary = () => ({ version: 1, generatedAt: '2026-09-11T00:00:00Z', si
 
 function makeNode() {
   const listeners = new Map();
-  return { children: [], textContent: '', hidden: false, disabled: false, open: false,
+  return { children: [], textContent: '', value: '', hidden: false, disabled: false, open: false, validityMessage: '',
+    setCustomValidity(message) { this.validityMessage = message; },
+    reportValidity() { return this.validityMessage === ''; },
     append(...nodes) { this.children.push(...nodes); },
     replaceChildren(...nodes) { this.children = nodes; },
     addEventListener(type, handler) {
@@ -22,7 +24,7 @@ function makeNode() {
       listeners.get(type).push(handler);
     },
     removeEventListener(type, handler) { listeners.set(type, (listeners.get(type) || []).filter(value => value !== handler)); },
-    emit(type, event = {}) { for (const handler of listeners.get(type) || []) handler(event); },
+    emit(type, event = { preventDefault() {} }) { for (const handler of listeners.get(type) || []) handler(event); },
   };
 }
 
@@ -56,10 +58,16 @@ function setupVisitorDOM(t, fetch, search = '') {
   return { card, window, today, totals, node: selector => card.querySelector(selector) };
 }
 
-const makeActivity = (count = 25, nextCursor = '9007199254740993') => ({ version: 1,
-  records: Array.from({ length: count }, (_, index) => ({ visitedAt: `2026-09-11T09:00:${String(index).padStart(2, '0')}+00:00`, countryCode: 'CN', path: '/' })),
-  nextCursor,
-});
+const makeActivity = (requestedPage = 1, totalRecords = 43, snapshot = '9007199254740993') => {
+  const totalPages = Math.ceil(totalRecords / 20);
+  const page = Math.min(requestedPage, Math.max(1, totalPages));
+  const offset = (page - 1) * 20;
+  return { version: 2, page, pageSize: 20, totalRecords, totalPages, snapshot: totalRecords ? snapshot : null,
+    records: Array.from({ length: Math.min(20, totalRecords - offset) }, (_, index) => ({
+      visitedAt: new Date(Date.UTC(2026, 8, 11, 9) - (offset + index) * 60000).toISOString(), countryCode: 'CN', path: '/',
+    })),
+  };
+};
 
 test('client records only known deployed pages and respects privacy choices', () => {
   for (const path of ['/', '/publication/', '/project/', '/cv/']) {
@@ -97,30 +105,43 @@ test('summary distinguishes empty real counts from unknown or invalid service re
   }
 });
 
-test('activity validates bounded records and preserves exact opaque bigint cursors', () => {
-  assert.equal(validateVisitorActivity(makeActivity()).nextCursor, '9007199254740993');
-  assert.ok(validateVisitorActivity(makeActivity(0, null)));
-  assert.ok(validateVisitorActivity({ version: 1, records: [{ visitedAt: '2026-09-10T12:34:56Z', countryCode: null, path: null }], nextCursor: null }));
+test('activity validates fixed 20-row pages, totals, and exact bigint snapshots', () => {
+  assert.equal(validateVisitorActivity(makeActivity()).snapshot, '9007199254740993');
+  assert.ok(validateVisitorActivity(makeActivity(1, 0)));
+  const historical = makeActivity(1, 1);
+  historical.records[0].countryCode = null;
+  historical.records[0].path = null;
+  assert.ok(validateVisitorActivity(historical));
+  assert.ok(validateVisitorActivity(makeActivity(3)));
   for (const mutate of [
+    value => { value.version = 1; },
+    value => { value.pageSize = 25; },
+    value => { value.page = 0; },
+    value => { value.page = 4; },
+    value => { value.page = 1.5; },
+    value => { value.totalRecords = -1; },
+    value => { value.totalRecords = Number.MAX_SAFE_INTEGER + 1; },
+    value => { value.totalPages = 4; },
     value => { value.records.push(value.records[0]); },
     value => { value.records[0].visitedAt = 'yesterday'; },
     value => { value.records[0].countryCode = '<script>'; },
     value => { value.records[0].path = 'https://example.com/'; },
     value => { value.records[0].path = '/private/'; },
     value => { value.records[0].path = undefined; },
-    value => { value.nextCursor = 9007199254740992; },
-    value => { value.nextCursor = '01'; },
-    value => { value.nextCursor = '0'; },
-    value => { value.nextCursor = '-1'; },
-    value => { value.nextCursor = '9223372036854775808'; },
+    value => { value.snapshot = 9007199254740992; },
+    value => { value.snapshot = '01'; },
+    value => { value.snapshot = '0'; },
+    value => { value.snapshot = '-1'; },
+    value => { value.snapshot = '9223372036854775808'; },
     value => { value.records = []; },
+    value => { value.snapshot = null; },
   ]) {
     const value = makeActivity(); mutate(value);
     assert.equal(validateVisitorActivity(value), null);
   }
 });
 
-test('activity stays lazy, prevents duplicate reads, and retries the same cursor without losing rows', async t => {
+test('activity stays lazy and navigates fixed pages with retries, direct jumps, and a fresh snapshot', async t => {
   const calls = [];
   let firstPageResolve;
   let reads = 0;
@@ -132,50 +153,86 @@ test('activity stays lazy, prevents duplicate reads, and retries the same cursor
     reads += 1;
     if (reads === 1) return new Promise(resolve => { firstPageResolve = resolve; });
     if (reads === 2) return { ok: false, status: 503 };
-    return { ok: true, json: async () => makeActivity(2, null) };
+    const snapshot = request.searchParams.get('snapshot');
+    return { ok: true, json: async () => makeActivity(Number(request.searchParams.get('page')), snapshot ? 43 : 45, snapshot || '9007199254740995') };
   });
   initializeVisitors();
   await settle();
   assert.equal(calls.length, 1, 'closed details fetch only the summary');
   assert.equal(today[1].textContent, '1');
-  assert.equal(node('[data-visitor-country-rows]').children.length, 2, 'unknown location remains visible in the full country table');
+  assert.equal(node('[data-visitor-country-rows]').children.length, 2);
   const details = node('[data-visitor-details]');
-  const button = node('[data-visitor-load-more]');
+  const next = node('[data-visitor-next]');
+  const previous = node('[data-visitor-previous]');
+  const input = node('[data-visitor-page-input]');
   details.open = true;
   details.emit('toggle');
   await settle();
   details.emit('toggle');
-  button.emit('click');
+  node('[data-visitor-refresh]').emit('click');
   await settle();
   assert.equal(reads, 1, 'an in-flight page cannot be requested twice');
-  assert.equal(button.disabled, true);
+  assert.equal(next.disabled, true);
   firstPageResolve({ ok: true, json: async () => makeActivity() });
   await settle();
-  assert.equal(node('[data-visitor-activity-rows]').children.length, 25);
-  button.emit('click');
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 20);
+  assert.equal(node('[data-visitor-page-label]').textContent, 'Page 1 of 3');
+  assert.equal(previous.disabled, true);
+  next.emit('click');
   await settle();
-  assert.equal(button.textContent, 'Retry');
-  assert.equal(button.disabled, false);
-  assert.equal(node('[data-visitor-activity-rows]').children.length, 25);
-  button.emit('click');
+  assert.equal(node('[data-visitor-retry]').hidden, false);
+  assert.equal(node('[data-visitor-retry]').disabled, false);
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 20);
+  assert.equal(node('[data-visitor-page-label]').textContent, 'Page 1 of 3', 'failed reads retain the previous page');
+  node('[data-visitor-retry]').emit('click');
   await settle();
-  assert.deepEqual(calls.slice(2).map(url => url.searchParams.get('before')), ['9007199254740993', '9007199254740993']);
-  assert.equal(node('[data-visitor-activity-rows]').children.length, 27);
-  assert.equal(button.hidden, true);
-  assert.equal(node('[data-visitor-activity-status]').textContent, 'All 27 available visit records shown.');
+  assert.deepEqual(calls.slice(2, 4).map(url => [url.searchParams.get('page'), url.searchParams.get('snapshot')]),
+    [['2', '9007199254740993'], ['2', '9007199254740993']]);
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 20, 'pagination replaces rather than appends rows');
+  assert.equal(node('[data-visitor-activity-status]').textContent, 'Showing 21–40 of 43 visit records.');
+  assert.equal(previous.disabled, false);
+  next.emit('click');
+  await settle();
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 3);
+  assert.equal(next.disabled, true);
+  previous.emit('click');
+  await settle();
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 20);
+  input.value = '0';
+  const beforeInvalid = reads;
+  node('[data-visitor-page-form]').emit('submit');
+  assert.equal(reads, beforeInvalid);
+  assert.equal(input.validityMessage, 'Enter a page between 1 and 3.');
+  input.value = '99';
+  node('[data-visitor-page-form]').emit('submit');
+  assert.equal(reads, beforeInvalid);
+  input.value = '1';
+  node('[data-visitor-page-form]').emit('submit');
+  await settle();
+  assert.equal(node('[data-visitor-page-label]').textContent, 'Page 1 of 3');
+  assert.equal(input.validityMessage, '');
+  node('[data-visitor-refresh]').emit('click');
+  await settle();
+  assert.equal(calls.at(-1).searchParams.get('snapshot'), null, 'refresh requests a new snapshot');
+  assert.equal(calls.at(-1).searchParams.get('page'), '1');
+  assert.equal(node('[data-visitor-activity-status]').textContent, 'Showing 1–20 of 45 visit records.');
+  next.emit('click');
+  await settle();
+  assert.equal(calls.at(-1).searchParams.get('snapshot'), '9007199254740995');
+  const beforeReopen = reads;
   details.emit('toggle');
   await settle();
-  assert.equal(reads, 3, 'reopening complete history does not duplicate it');
+  assert.equal(reads, beforeReopen, 'reopening loaded history keeps the current page');
 });
 
-test('activity aborts on pagehide and resumes the interrupted page after BFCache restoration', async t => {
+test('activity aborts on pagehide and resumes the same page and snapshot after BFCache restoration', async t => {
   const requests = [];
   const { node, window } = setupVisitorDOM(t, async (url, options) => {
     const request = new URL(url);
     if (request.searchParams.get('view') !== 'activity') return { ok: true, json: async () => makeSummary() };
     if (requests.length === 0) {
       requests.push({ request, signal: options.signal });
-      return { ok: true, json: async () => makeActivity(25, '30') };
+      return { ok: true, json: async () => makeActivity() };
     }
     return new Promise((resolve, reject) => {
       requests.push({ request, signal: options.signal, resolve });
@@ -187,25 +244,48 @@ test('activity aborts on pagehide and resumes the interrupted page after BFCache
   details.open = true;
   details.emit('toggle');
   await settle();
-  const button = node('[data-visitor-load-more]');
-  button.emit('click');
+  node('[data-visitor-next]').emit('click');
   await settle();
   window.emit('pagehide');
   assert.equal(requests[1].signal.aborted, true);
   window.emit('pageshow', { persisted: true });
   await settle();
   assert.equal(requests.length, 3);
-  assert.equal(requests[2].request.searchParams.get('before'), '30');
+  assert.equal(requests[2].request.searchParams.get('page'), '2');
+  assert.equal(requests[2].request.searchParams.get('snapshot'), '9007199254740993');
   assert.equal(requests[2].signal.aborted, false);
-  requests[2].resolve({ ok: true, json: async () => makeActivity(2, null) });
+  requests[2].resolve({ ok: true, json: async () => makeActivity(2) });
   await settle();
-  assert.equal(node('[data-visitor-activity-rows]').children.length, 27);
-  assert.equal(button.disabled, false);
-  assert.equal(button.hidden, true);
-  assert.equal(node('[data-visitor-activity-status]').textContent, 'All 27 available visit records shown.');
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 20);
+  assert.equal(node('[data-visitor-next]').disabled, false);
+  assert.equal(node('[data-visitor-activity-status]').textContent, 'Showing 21–40 of 43 visit records.');
 });
 
-test('local design preview paginates sample history without contacting or recording to the service', async t => {
+test('activity renders empty snapshots and server-clamped pages without inventing records', async t => {
+  let response = makeActivity(1, 0);
+  const { node } = setupVisitorDOM(t, async url => ({ ok: true, json: async () => new URL(url).searchParams.get('view') === 'activity' ? response : makeSummary() }));
+  initializeVisitors();
+  const details = node('[data-visitor-details]');
+  details.open = true;
+  details.emit('toggle');
+  await settle();
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 0);
+  assert.equal(node('[data-visitor-pagination]').hidden, true);
+  assert.equal(node('[data-visitor-activity-status]').textContent, 'No visit records available yet.');
+  assert.equal(node('[data-visitor-refresh]').disabled, false);
+  response = makeActivity();
+  node('[data-visitor-refresh]').emit('click');
+  await settle();
+  response = makeActivity(3, 30);
+  node('[data-visitor-page-input]').value = '3';
+  node('[data-visitor-page-form]').emit('submit');
+  await settle();
+  assert.equal(node('[data-visitor-page-label]').textContent, 'Page 2 of 2');
+  assert.equal(node('[data-visitor-page-input]').value, '2');
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 10);
+});
+
+test('local design preview replaces sample history pages without contacting or recording to the service', async t => {
   const { node } = setupVisitorDOM(t, () => { throw new Error('Demo must not fetch'); }, '?visitor-demo=1');
   initializeVisitors();
   assert.equal(node('[data-visitor-demo]').hidden, false);
@@ -214,14 +294,19 @@ test('local design preview paginates sample history without contacting or record
   details.open = true;
   details.emit('toggle');
   await settle();
-  assert.equal(node('[data-visitor-activity-rows]').children.length, 25);
-  node('[data-visitor-load-more]').emit('click');
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 20);
+  node('[data-visitor-page-input]').value = '3';
+  node('[data-visitor-page-form]').emit('submit');
   await settle();
-  assert.equal(node('[data-visitor-activity-rows]').children.length, 40);
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 3);
   assert.equal(node('[data-visitor-history-note]').hidden, false);
   const lastRow = node('[data-visitor-activity-rows]').children.at(-1);
   assert.equal(lastRow.children[1].textContent, 'Not recorded');
   assert.equal(lastRow.children[2].textContent, 'Not recorded');
+  node('[data-visitor-refresh]').emit('click');
+  await settle();
+  assert.equal(node('[data-visitor-activity-rows]').children.length, 20);
+  assert.equal(node('[data-visitor-page-label]').textContent, 'Page 1 of 3');
 });
 
 test('visible visitor card reads after collection settles, and local previews only read', async t => {

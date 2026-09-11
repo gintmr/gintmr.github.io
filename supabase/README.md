@@ -5,7 +5,16 @@ homepage stays on GitHub Pages. No Vercel, Neon, new Supabase project, visitor l
 or browser database key is required. An existing Supabase project can be reused;
 its storage and function quotas are shared with this feature.
 
-## Deployment status — 11 September 2026
+## Deployment status — 12 September 2026
+
+The numbered-page RPC, transaction-ordered collector and updated Edge Function
+are deployed. Read-only live checks returned 75 records across four pages
+(20/20/20/15), a reusable snapshot, public CORS and `no-store`; invalid page zero
+returned HTTP 400 and the legacy cursor route still worked. Migration checks
+preserved all 75 pageviews, visit rows and six blog tables. The new page RPC and
+replacement collector remain executable only by `service_role` at the Data API
+level. History is still public through the Edge Function; pagination does not
+add authentication or make the records private.
 
 The visit-history upgrade (`202609110002_visitor_activity.sql`) and updated
 collector were deployed at approximately 19:29 UTC. Read-only checks before and
@@ -76,9 +85,11 @@ database checks pass. Never enable the frontend based only on unit tests.
 - `POST /functions/v1/visitor-analytics` records an allowed page load.
 - `GET /functions/v1/visitor-analytics` exposes aggregate statistics only, with
   public CORS so the localhost preview can display the existing live totals.
-- `GET /functions/v1/visitor-analytics?view=activity` exposes minimized visit
-  history in pages of 25: server receipt time, IP-derived country/region and an
-  allowed site path. The optional `before` cursor loads older records.
+- `GET /functions/v1/visitor-analytics?view=activity&page=1` exposes minimized
+  visit history in numbered pages of 20: server receipt time, IP-derived
+  country/region and an allowed site path. A reusable snapshot fixes the visible
+  record set while changing pages. The previous 25-row cursor route remains
+  available for older clients during rollout.
 - Exact production-origin allowlist for tracking and four fixed page paths.
 - No cookies, raw IPs, user agents, referrers, query strings or full URLs in the
   analytics database. A per-day HMAC of IP + user agent approximates one visitor
@@ -160,13 +171,23 @@ Dashboard owner login is required for deployment; visitors do not need accounts.
    It creates the private visit-history table and two service-role-only RPCs,
    and replaces only the known academic-site legacy tracking wrapper so an older
    Edge Function keeps working during rollout. Backfill never changes totals.
+   The next migration, `migrations/202609120001_visitor_activity_pages.sql`, adds
+   only the service-role-only numbered-page RPC. On the project where both
+   September 11 migrations already ran, apply **only the two September 12 migrations**.
+   The numbered-page migration changes no stored rows, aggregates or older RPCs.
+   `migrations/202609120002_visitor_history_write_order.sql` then replaces only
+   `track_v2`, preserving its grants, to serialize record-ID allocation through
+   commit. This prevents a late-committing lower ID from entering an already
+   captured pagination snapshot. It does not change historical records or totals.
+   Apply each missing SQL
+   migration before deploying the corresponding updated Edge Function.
    Apply the SQL **before** deploying the updated Edge Function, then deploy the
    frontend. Old collectors can record history during this interval, with null
    page paths because their old RPC has no path argument. Never reset the shared
    project, rerun the initial migration or alter blog tables to add this feature.
 4. Keep `visitor_analytics` **out of the Data API's exposed schemas**. Tables have
    RLS enabled and no browser policies or grants. Only the service role can call
-   the five public RPC wrappers; `anon`, `authenticated` and `PUBLIC` cannot.
+   the six public RPC wrappers; `anon`, `authenticated` and `PUBLIC` cannot.
 5. Merge the `[functions.visitor-analytics]` entry from `config.toml` into an
    existing Supabase configuration if needed. `verify_jwt = false` allows visitors
    without accounts to reach this intentionally public collector. No other
@@ -257,7 +278,7 @@ they are not authentication against scripts that forge headers. IP-based rate
 limits and basic bot filtering reduce noise but do not guarantee fraud-proof
 visitor counts. The service should not be used for billing or access control.
 
-## Public API contract (version 1)
+## Public API contracts
 
 The browser sends its `Origin` automatically. POST accepts only configured HTTPS
 origins; localhost POST requests and their preflights are rejected. GET is a
@@ -267,9 +288,11 @@ address and passes the same database rate limiter, including when the summary is
 cached. Owner IP exclusions skip tracking but do not prevent reading totals.
 GET preflight grants only GET/OPTIONS, never cross-origin POST. Do not send a
 Supabase API key or browser credentials. GET without query parameters returns the
-summary. The only other query is `view=activity`, optionally with `before`.
-Duplicate, extra or invalid query values and all POST query parameters are
-rejected. Allowed POST paths: `/`, `/publication/`, `/project/`, `/cv/`.
+summary. `view=activity&page=N`, optionally with `snapshot`, selects numbered
+history pages. `view=activity`, optionally with `before`, preserves the previous
+cursor contract. Mixing `before` with numbered pagination, supplying a snapshot
+without a page, duplicate/extra/invalid query values and all POST query parameters
+are rejected. Allowed POST paths: `/`, `/publication/`, `/project/`, `/cv/`.
 
 ```json
 {"eventId":"2f338636-4c51-48a7-85f6-91c2d420b101","path":"/publication/"}
@@ -302,7 +325,58 @@ Example GET response (illustrative numbers, not actual visits):
 `null` is unknown and should not be placed on a map. GET is a public aggregate
 response, with no row-level visitor identifiers.
 
-Activity response (illustrative records, not actual visits):
+Numbered activity response (illustrative records, not actual visits):
+
+```json
+{
+  "version": 2,
+  "records": [
+    {"visitedAt": "2026-09-12T12:00:00+00:00", "countryCode": "CN", "path": "/publication/"},
+    {"visitedAt": "2026-09-12T11:00:00+00:00", "countryCode": null, "path": null}
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalRecords": 2,
+  "totalPages": 1,
+  "snapshot": "42"
+}
+```
+
+An initial `?view=activity&page=1` captures the current maximum record ID as a
+decimal-string `snapshot`. Send that same value on all previous, next and direct
+page requests: `?view=activity&page=3&snapshot=42`. Counts and records include only
+IDs at or below this snapshot, ordered by descending ID. Newer visits therefore
+cannot shift already viewed page positions. Omit the snapshot to refresh the
+record set. A supplied value greater than the current maximum is bounded to the
+current maximum in the response. This is an insertion-bound snapshot, not a
+permanent historical database copy; administrative deletion of old records can
+still change counts and positions.
+
+Each page replaces the visible rows with up to 20 records. `totalRecords` counts
+actual rows in the snapshot, so sequence gaps do not inflate it. `totalPages` is
+`ceil(totalRecords / 20)`. `page` is a canonical positive integer request from
+1 through 1,000,000; values beyond the available pages are clamped to the final
+page and the response supplies that actual page number. With no records, the
+response is `records: []`, `page: 1`, `pageSize: 20`, `totalRecords: 0`,
+`totalPages: 0`, `snapshot: null`. Nonempty snapshot values must be canonical
+positive int64 strings; never convert them to JavaScript numbers.
+
+The new RPC is `visitor_analytics_activity_page(p_page integer, p_snapshot text)`.
+Only `service_role` can execute it. It reads existing records without changing
+tracking, aggregates, retention or the old cursor RPC. The Edge Function validates
+integer metadata, page clamping, snapshot bounds and exact page length before
+projecting the same three public record fields. Both history routes share the
+existing 120 requests/IP/minute summary budget and `Cache-Control: no-store`.
+The summary response and its one-minute cache remain unchanged.
+
+Collectors use a transaction-scoped advisory lock before their first write, so
+record IDs follow transaction completion order. The migration drains existing
+writes before replacing the collector. Administrative deletes or manual inserts
+remain outside this pagination guarantee. The database test checks that the lock
+is held before insertion, remains through the transaction and releases at commit;
+PGlite does not simulate multiple simultaneous PostgreSQL sessions.
+
+Legacy cursor activity response (illustrative records, not actual visits):
 
 ```json
 {
@@ -315,7 +389,7 @@ Activity response (illustrative records, not actual visits):
 }
 ```
 
-The actual page size is fixed at 25 and records are ordered by descending private
+The legacy page size remains fixed at 25 and records are ordered by descending private
 insertion ID. When more records exist, `nextCursor` is the last returned row's ID
 as a **string**. Request `?view=activity&before=...` to fetch strictly older IDs.
 This keyset pagination prevents newer pageviews shifting previously fetched
@@ -338,8 +412,9 @@ These tests exercise validation, exact CORS, proxy failure, privacy/exclusion,
 hash rotation, backend payload minimization, rate-limit ordering, geolocation
 failure/cache, summary caching and activity query/response minimization using
 mocked network/RPC boundaries. PGlite tests exercise the additive migration,
-unchanged aggregate counts, legacy compatibility, idempotency, stable pagination,
-bigint cursor precision, unknown historical fields, retention and role grants. They do
+unchanged aggregate counts, legacy compatibility, idempotency, numbered-page
+clamping, insertion-stable snapshots, bigint precision, unknown historical fields,
+retention and role grants. They do
 not establish that the hosted Supabase proxy or secrets are configured correctly.
 
 ## Official references

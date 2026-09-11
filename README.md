@@ -85,7 +85,10 @@ unavailable locations remain unknown. Historical aggregate counts persist, while
 short-lived deduplication and rate-limit records are cleaned up automatically.
 Visit history records server time, approximate country/region and one of the four
 allowed page paths; it contains no raw IP address or visitor identifier. The
-details panel loads 25 records at a time on demand. Earlier retained event times
+details panel loads 20 records per page on demand, with Previous/Next controls
+and a direct page-number jump. Page navigation reuses a maximum-record-ID snapshot
+so newly arriving visits do not shift records between pages; Refresh starts at
+the newest page. Earlier retained event times
 are preserved with missing country and page fields, since those details were not
 stored before the history upgrade.
 

@@ -6,8 +6,10 @@ import { PGlite } from '@electric-sql/pglite';
 
 const migration = await readFile(new URL('../supabase/migrations/202609110001_visitor_analytics.sql', import.meta.url), 'utf8');
 const activityMigration = await readFile(new URL('../supabase/migrations/202609110002_visitor_activity.sql', import.meta.url), 'utf8');
+const pagesMigration = await readFile(new URL('../supabase/migrations/202609120001_visitor_activity_pages.sql', import.meta.url), 'utf8');
+const writeOrderMigration = await readFile(new URL('../supabase/migrations/202609120002_visitor_history_write_order.sql', import.meta.url), 'utf8');
 
-async function database({ activity = true } = {}) {
+async function database({ activity = true, pages = true, writeOrder = true } = {}) {
   const db = new PGlite();
   await db.exec(`
     create role anon;
@@ -19,6 +21,8 @@ async function database({ activity = true } = {}) {
   `);
   await db.exec(migration);
   if (activity) await db.exec(activityMigration);
+  if (activity && pages) await db.exec(pagesMigration);
+  if (activity && writeOrder) await db.exec(writeOrderMigration);
   return db;
 }
 
@@ -37,6 +41,48 @@ async function activity(db, before = null) {
   return (await db.query('select public.visitor_analytics_activity($1) as activity', [before])).rows[0].activity;
 }
 
+async function activityPage(db, page = 1, snapshot = null) {
+  return (await db.query('select public.visitor_analytics_activity_page($1, $2) as activity', [page, snapshot])).rows[0].activity;
+}
+
+test('history writer holds its ordering lock before allocating records and releases it on commit', async () => {
+  const db = await database({ writeOrder: false });
+  try {
+    await track(db);
+    const originalTotals = (await summary(db)).totals;
+    const originalPage = await activityPage(db);
+    const originalAcl = (await db.query("select proacl::text as acl from pg_proc where oid = 'public.visitor_analytics_track_v2(uuid,text,date,text,text)'::regprocedure")).rows[0].acl;
+    // The assertion runs before the collector's first INSERT (and ID allocation).
+    // It fails on the old collector and observes the real PostgreSQL lock state.
+    await db.exec(`create function public.require_history_order_lock() returns trigger language plpgsql as $$
+      begin
+        if not exists (select from pg_locks where locktype = 'advisory' and granted
+          and pid = pg_backend_pid()
+          and classid::bigint = (hashtext('gjofwuihpzjfqeaysuuy:visitor_analytics')::bigint & 4294967295)
+          and objid::bigint = (hashtext('history-write-order')::bigint & 4294967295)
+          and objsubid = 2) then raise exception 'History ordering lock missing'; end if;
+        return null;
+      end; $$;
+      create trigger check_history_order before insert on visitor_analytics.recent_events
+        for each statement execute function public.require_history_order_lock();`);
+    await assert.rejects(track(db), /History ordering lock missing/);
+    await db.exec(writeOrderMigration);
+    assert.deepEqual((await summary(db)).totals, originalTotals);
+    assert.deepEqual(await activityPage(db), originalPage);
+    assert.equal((await db.query("select proacl::text as acl from pg_proc where oid = 'public.visitor_analytics_track_v2(uuid,text,date,text,text)'::regprocedure")).rows[0].acl, originalAcl);
+    const event = randomUUID();
+    await db.exec('begin');
+    assert.equal(await track(db, { event }), true);
+    assert.equal(await track(db, { event }), false);
+    assert.equal(await track(db, { legacy: true }), true);
+    assert.equal((await db.query("select count(*)::integer as count from pg_locks where locktype = 'advisory' and pid = pg_backend_pid()")).rows[0].count, 1);
+    await db.exec('commit');
+    assert.equal((await db.query("select count(*)::integer as count from pg_locks where locktype = 'advisory' and pid = pg_backend_pid()")).rows[0].count, 0);
+    assert.deepEqual((await summary(db)).totals, { pageviews: 3, visitorDays: 1 });
+    assert.deepEqual(await activityPage(db, 1, originalPage.snapshot), originalPage);
+  } finally { await db.close(); }
+});
+
 test('migration isolates analytics from existing application tables and browser roles', async () => {
   const db = await database();
   try {
@@ -49,20 +95,110 @@ test('migration isolates analytics from existing application tables and browser 
         has_function_privilege($1, 'public.visitor_analytics_rate_limit(text,text)', 'EXECUTE') as rate,
         has_function_privilege($1, 'public.visitor_analytics_track_v2(uuid,text,date,text,text)', 'EXECUTE') as track_v2,
         has_function_privilege($1, 'public.visitor_analytics_activity(text)', 'EXECUTE') as activity,
+        has_function_privilege($1, 'public.visitor_analytics_activity_page(integer,text)', 'EXECUTE') as activity_page,
         has_table_privilege($1, 'visitor_analytics.visit_records', 'SELECT') as records`, [role])).rows[0];
-      assert.deepEqual(permissions, { schema_access: false, track: false, summary: false, rate: false, track_v2: false, activity: false, records: false });
+      assert.deepEqual(permissions, { schema_access: false, track: false, summary: false, rate: false, track_v2: false, activity: false, activity_page: false, records: false });
     }
     await db.exec('set role anon');
     assert.equal((await db.query('select content from public.existing_application')).rows[0].content, 'preserve me');
     await assert.rejects(db.query('select * from visitor_analytics.daily_totals'), /permission denied/);
     await assert.rejects(db.query('select public.visitor_analytics_summary()'), /permission denied/);
     await assert.rejects(db.query('select public.visitor_analytics_activity()'), /permission denied/);
+    await assert.rejects(db.query('select public.visitor_analytics_activity_page(1)'), /permission denied/);
     await assert.rejects(db.query('select * from visitor_analytics.visit_records'), /permission denied/);
     await db.exec('reset role; set role service_role');
     assert.equal(await track(db), true);
     assert.equal((await summary(db)).totals.pageviews, 1);
     assert.equal((await activity(db)).records.length, 1);
+    assert.equal((await activityPage(db)).records.length, 1);
     await assert.rejects(db.query('select * from visitor_analytics.visit_records'), /permission denied/);
+  } finally { await db.close(); }
+});
+
+test('numbered-page migration changes no data and leaves the legacy activity RPC working', async () => {
+  const db = await database({ pages: false });
+  try {
+    await track(db);
+    const beforeTotals = (await summary(db)).totals;
+    const beforeHistory = await activity(db);
+    await db.exec(pagesMigration);
+    assert.deepEqual((await summary(db)).totals, beforeTotals);
+    assert.deepEqual(await activity(db), beforeHistory);
+    assert.deepEqual((await activityPage(db)).records, beforeHistory.records);
+    await assert.rejects(db.exec(pagesMigration), /already exists/);
+    await db.exec('rollback');
+    assert.equal((await summary(db)).totals.pageviews, 1);
+    assert.equal((await db.query('select content from public.existing_application')).rows[0].content, 'preserve me');
+  } finally { await db.close(); }
+});
+
+test('numbered pages replace 20 rows and preserve all page positions within a captured snapshot', async () => {
+  const db = await database();
+  try {
+    assert.deepEqual(await activityPage(db, 99), {
+      version: 2, records: [], page: 1, pageSize: 20, totalRecords: 0, totalPages: 0, snapshot: null,
+    });
+    const paths = ['/', '/publication/', '/project/', '/cv/'];
+    await db.exec('begin');
+    for (let i = 0; i < 47; i++) await track(db, { path: paths[i % 4], country: i % 2 ? 'CN' : 'US' });
+    await db.exec('commit');
+    const first = await activityPage(db);
+    assert.equal(first.records.length, 20);
+    assert.equal(first.page, 1);
+    assert.equal(first.pageSize, 20);
+    assert.equal(first.totalRecords, 47);
+    assert.equal(first.totalPages, 3);
+    assert.equal(first.snapshot, '47');
+    // Every visit has the same timestamp; row-ID ordering must resolve ties.
+    const expected = Array.from({ length: 47 }, (_, offset) => {
+      const i = 46 - offset;
+      return [i % 2 ? 'CN' : 'US', paths[i % 4]];
+    });
+    await track(db, { country: 'AE', path: '/cv/' });
+    const last = await activityPage(db, 3, first.snapshot);
+    const second = await activityPage(db, 2, first.snapshot);
+    const previous = await activityPage(db, 1, first.snapshot);
+    assert.deepEqual(previous, first);
+    assert.equal(second.records.length, 20);
+    assert.equal(last.records.length, 7);
+    assert.equal(second.totalRecords, 47);
+    assert.deepEqual([...first.records, ...second.records, ...last.records].map(r => [r.countryCode, r.path]), expected);
+    assert.deepEqual(await activityPage(db, 1000000, first.snapshot), last);
+    const refreshed = await activityPage(db);
+    assert.equal(refreshed.snapshot, '48');
+    assert.equal(refreshed.totalRecords, 48);
+    assert.equal(refreshed.records[0].countryCode, 'AE');
+    assert.deepEqual(Object.keys(refreshed).sort(), ['page', 'pageSize', 'records', 'snapshot', 'totalPages', 'totalRecords', 'version']);
+    assert.deepEqual(Object.keys(refreshed.records[0]).sort(), ['countryCode', 'path', 'visitedAt']);
+    assert.equal((await activity(db)).records.length, 25);
+  } finally { await db.close(); }
+});
+
+test('numbered pagination validates input, handles sparse bigint IDs and bounds future snapshots', async () => {
+  const db = await database();
+  try {
+    for (const page of [null, 0, -1, 1000001]) {
+      await assert.rejects(activityPage(db, page), /Invalid activity page/);
+    }
+    for (const snapshot of ['', '0', '-1', '01', '1.5', '1e3', '9223372036854775808', '9'.repeat(200)]) {
+      await assert.rejects(activityPage(db, 1, snapshot), /Invalid activity snapshot/);
+    }
+    await db.exec('alter sequence visitor_analytics.visit_records_id_seq restart with 9007199254740993');
+    await track(db);
+    await db.exec('alter sequence visitor_analytics.visit_records_id_seq restart with 9007199254741000');
+    await track(db, { country: 'CN' });
+    const first = await activityPage(db, 1, '9223372036854775807');
+    assert.equal(first.snapshot, '9007199254741000');
+    assert.equal(first.totalRecords, 2);
+    const older = await activityPage(db, 1, '9007199254740993');
+    assert.equal(older.snapshot, '9007199254740993');
+    assert.equal(older.totalRecords, 1);
+    assert.equal(older.records[0].countryCode, 'US');
+    assert.deepEqual(await activityPage(db, 1, '1'), {
+      version: 2, records: [], page: 1, pageSize: 20, totalRecords: 0, totalPages: 0, snapshot: null,
+    });
+    await track(db, { country: 'AE' });
+    assert.deepEqual(await activityPage(db, 1, first.snapshot), first);
   } finally { await db.close(); }
 });
 

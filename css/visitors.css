@@ -18,7 +18,7 @@
 .visitor-details > summary::after { content: '+'; color: var(--secondary); font-size: 1rem; margin-left: auto; }
 .visitor-details[open] > summary::after { content: '−'; }
 .visitor-details > summary:hover { color: var(--link); }
-.visitor-details > summary:focus-visible, .visitor-load-more:focus-visible, .visitor-table-scroll:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; border-radius: .2rem; }
+.visitor-details > summary:focus-visible, .visitor-page-button:focus-visible, .visitor-page-jump input:focus-visible, .visitor-table-scroll:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; border-radius: .2rem; }
 .visitor-details-hint { margin-left: .5rem; color: var(--secondary); font-size: .72rem; }
 .visitor-details-content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.65rem; padding-top: 1.5rem; }
 .visitor-today { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2.4rem; }
@@ -39,11 +39,19 @@
 .visitor-country-table td, .visitor-country-table th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
 .visitor-activity-table time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .visitor-activity-table td:last-child { white-space: nowrap; }
+.visitor-activity-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
+.visitor-activity-heading h3 { margin: 0; }
 .visitor-activity-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; margin-top: .75rem; }
 .visitor-activity-controls > p { margin: 0; }
-.visitor-load-more { border: 1px solid var(--border); border-radius: .45rem; background: transparent; color: var(--link); font: inherit; font-size: .75rem; padding: .35rem .85rem; cursor: pointer; }
-.visitor-load-more:hover:not(:disabled) { background: color-mix(in srgb, var(--link) 7%, transparent); }
-.visitor-load-more:disabled { color: var(--secondary); cursor: progress; }
+.visitor-page-button { border: 1px solid var(--border); border-radius: .45rem; background: transparent; color: var(--link); font: inherit; font-size: .75rem; padding: .35rem .85rem; cursor: pointer; }
+.visitor-page-button:hover:not(:disabled) { background: color-mix(in srgb, var(--link) 7%, transparent); }
+.visitor-page-button:disabled { color: var(--secondary); opacity: .5; cursor: default; }
+.visitor-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .7rem 1rem; margin-top: .8rem; }
+.visitor-page-navigation, .visitor-page-jump { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; margin: 0; }
+.visitor-page-label { color: var(--secondary); font-size: .73rem; font-variant-numeric: tabular-nums; }
+.visitor-page-jump label { color: var(--secondary); font-size: .73rem; }
+.visitor-page-jump input { width: 4.2rem; min-width: 0; padding: .35rem .4rem; border: 1px solid var(--border); border-radius: .35rem; background: color-mix(in srgb, var(--background) 70%, transparent); color: var(--foreground); font: inherit; font-size: .75rem; font-variant-numeric: tabular-nums; }
+.visitor-page-jump input:disabled { opacity: .5; }
 .visitor-footer { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem 1.5rem; margin-top: 1rem; padding-top: .75rem; border-top: 1px solid color-mix(in srgb, var(--border) 65%, transparent); font-size: .72rem; color: var(--secondary); }
 .visitor-status { font-size: .72rem; color: var(--secondary); }
 .visitor-section [hidden] { display: none !important; }
@@ -62,5 +70,9 @@
   .visitor-today { justify-content: space-between; gap: .7rem; }
   .visitor-today-totals { gap: 1rem; }
   .visitor-table th, .visitor-table td { padding-inline: .35rem; }
+  .visitor-pagination { align-items: stretch; }
+  .visitor-page-navigation { width: 100%; justify-content: space-between; }
+  .visitor-page-button { min-height: 2.5rem; }
+  .visitor-page-jump { width: 100%; justify-content: flex-end; }
   .visitor-table thead th, .visitor-activity-table time { white-space: normal; }
 }

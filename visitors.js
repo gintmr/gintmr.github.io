@@ -28,12 +28,19 @@ export function canRecordVisit(config, location, privacy = {}) {
 
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const isTimestamp = value => typeof value === 'string' && value.length <= 40 && Number.isFinite(Date.parse(value));
-const isActivityCursor = value => typeof value === 'string' && /^[1-9]\d{0,18}$/.test(value)
+const isActivitySnapshot = value => typeof value === 'string' && /^[1-9]\d{0,18}$/.test(value)
   && BigInt(value) <= 9223372036854775807n;
+const ACTIVITY_PAGE_SIZE = 20;
+const MAX_ACTIVITY_PAGE = 1000000;
 
 export function validateVisitorActivity(value) {
-  if (!value || value.version !== 1 || !Array.isArray(value.records) || value.records.length > 25
-    || (value.nextCursor !== null && (!isActivityCursor(value.nextCursor) || value.records.length !== 25))) return null;
+  if (!value || value.version !== 2 || value.pageSize !== ACTIVITY_PAGE_SIZE
+    || !isCount(value.totalRecords) || !isCount(value.totalPages)
+    || value.totalPages !== Math.ceil(value.totalRecords / ACTIVITY_PAGE_SIZE)
+    || !Number.isSafeInteger(value.page) || value.page < 1 || value.page > MAX_ACTIVITY_PAGE || value.page > Math.max(1, value.totalPages)
+    || !Array.isArray(value.records)
+    || value.records.length !== Math.min(ACTIVITY_PAGE_SIZE, value.totalRecords - (value.page - 1) * ACTIVITY_PAGE_SIZE)
+    || (value.totalRecords === 0 ? value.snapshot !== null : !isActivitySnapshot(value.snapshot))) return null;
   for (const record of value.records) {
     if (!record || !isTimestamp(record.visitedAt)
       || (record.countryCode !== null && !/^[A-Z]{2}$/.test(record.countryCode))
@@ -178,95 +185,139 @@ function createActivityRow(record) {
   return row;
 }
 
-function designPreviewActivity(before) {
-  const offset = before === null ? 0 : 40 - Number(before);
-  const records = Array.from({ length: Math.min(25, 40 - offset) }, (_, index) => {
+function designPreviewActivity(requestedPage) {
+  const totalRecords = 43;
+  const totalPages = Math.ceil(totalRecords / ACTIVITY_PAGE_SIZE);
+  const page = Math.min(requestedPage, totalPages);
+  const offset = (page - 1) * ACTIVITY_PAGE_SIZE;
+  const records = Array.from({ length: Math.min(ACTIVITY_PAGE_SIZE, totalRecords - offset) }, (_, index) => {
     const position = offset + index;
     const date = new Date(Date.UTC(2026, 8, position < 15 ? 11 : 10, 11, 55 - position * 3));
     return { visitedAt: date.toISOString(), countryCode: position > 36 ? null : ['CN', 'US', 'AE', 'GB', 'SG'][position % 5],
       path: position > 36 ? null : [...TRACKED_PATHS][position % 4] };
   });
-  return { version: 1, records, nextCursor: offset + records.length < 40 ? String(40 - offset - records.length) : null };
+  return { version: 2, records, page, pageSize: ACTIVITY_PAGE_SIZE, totalRecords, totalPages, snapshot: '43' };
 }
 
 function initializeVisitorActivity(card, config, demo, recording) {
   const details = card.querySelector('[data-visitor-details]');
   const rows = card.querySelector('[data-visitor-activity-rows]');
   const status = card.querySelector('[data-visitor-activity-status]');
-  const button = card.querySelector('[data-visitor-load-more]');
+  const pagination = card.querySelector('[data-visitor-pagination]');
+  const pageLabel = card.querySelector('[data-visitor-page-label]');
+  const previous = card.querySelector('[data-visitor-previous]');
+  const next = card.querySelector('[data-visitor-next]');
+  const input = card.querySelector('[data-visitor-page-input]');
+  const go = card.querySelector('[data-visitor-page-go]');
+  const refresh = card.querySelector('[data-visitor-refresh]');
+  const retry = card.querySelector('[data-visitor-retry]');
   let controller = new AbortController();
   let loading = false;
-  let started = false;
-  let nextCursor = null;
-  let shown = 0;
-  let failed = false;
-  let interrupted = false;
-  const load = async () => {
-    if (loading || controller.signal.aborted || (started && nextCursor === null && !failed) || (!config && !demo)) return;
+  let activity = null;
+  let activeRequest = null;
+  let failedRequest = null;
+  let interruptedRequest = null;
+  const lastReachablePage = () => Math.min(activity?.totalPages || 1, MAX_ACTIVITY_PAGE);
+  const updateControls = () => {
+    const unavailable = loading || (!config && !demo);
+    pagination.hidden = !activity?.totalPages;
+    previous.disabled = unavailable || !activity || activity.page <= 1;
+    next.disabled = unavailable || !activity || activity.page >= lastReachablePage();
+    input.disabled = unavailable || !activity?.totalPages;
+    go.disabled = input.disabled;
+    input.max = String(lastReachablePage());
+    refresh.disabled = unavailable;
+    refresh.textContent = loading && activeRequest?.snapshot === null ? 'Refreshing…' : 'Refresh';
+    retry.hidden = !failedRequest;
+    retry.disabled = unavailable;
+  };
+  const load = async request => {
+    if (loading || controller.signal.aborted || (!config && !demo)) return;
     const requestController = controller;
-    const before = started ? nextCursor : null;
+    activeRequest = request;
+    failedRequest = null;
     loading = true;
-    failed = false;
-    button.hidden = false;
-    button.disabled = true;
-    button.textContent = 'Loading…';
+    updateControls();
     status.textContent = 'Loading visit history…';
     try {
       await recording.catch(() => {});
       if (requestController.signal.aborted) return;
-      let activity;
-      if (demo) activity = designPreviewActivity(before);
+      let result;
+      if (demo) result = designPreviewActivity(request.page);
       else {
         const url = new URL(config.endpoint);
         url.searchParams.set('view', 'activity');
-        if (before !== null) url.searchParams.set('before', before);
-        activity = await requestWithTimeout(url.href, { headers: { Accept: 'application/json' } }, 6500, requestController.signal, async response => {
+        url.searchParams.set('page', String(request.page));
+        if (request.snapshot !== null) url.searchParams.set('snapshot', request.snapshot);
+        result = await requestWithTimeout(url.href, { headers: { Accept: 'application/json' } }, 6500, requestController.signal, async response => {
           if (!response.ok) throw new Error('Visit history unavailable');
           return validateVisitorActivity(await response.json());
         });
       }
-      if (!activity || (before !== null && activity.nextCursor !== null && BigInt(activity.nextCursor) >= BigInt(before))) {
+      if (!result || result.page !== Math.min(request.page, Math.max(1, result.totalPages))
+        || (request.snapshot !== null && result.snapshot !== null && result.snapshot !== request.snapshot)) {
         throw new Error('Invalid visit history');
       }
       if (requestController.signal.aborted) return;
-      rows.append(...activity.records.map(createActivityRow));
-      if (activity.records.some(record => record.path === null)) card.querySelector('[data-visitor-history-note]').hidden = false;
-      shown += activity.records.length;
-      nextCursor = activity.nextCursor;
-      started = true;
-      const count = numberFormat.format(shown);
-      status.textContent = shown === 0 ? 'No visit records available yet.'
-        : nextCursor === null ? `All ${count} available visit records shown.` : `${count} visit records shown.`;
-      button.hidden = nextCursor === null;
-      button.textContent = 'Load more';
+      rows.replaceChildren(...result.records.map(createActivityRow));
+      card.querySelector('[data-visitor-history-note]').hidden = !result.records.some(record => record.path === null);
+      activity = result;
+      input.value = String(result.page);
+      input.setCustomValidity('');
+      pageLabel.textContent = `Page ${numberFormat.format(result.page)} of ${numberFormat.format(result.totalPages)}`;
+      const first = (result.page - 1) * ACTIVITY_PAGE_SIZE + 1;
+      const last = first + result.records.length - 1;
+      status.textContent = result.totalRecords === 0 ? 'No visit records available yet.'
+        : `Showing ${numberFormat.format(first)}–${numberFormat.format(last)} of ${numberFormat.format(result.totalRecords)} visit records.`;
     } catch {
       if (!requestController.signal.aborted) {
-        failed = true;
+        failedRequest = request;
         status.textContent = 'Visit history is temporarily unavailable. Please try again.';
-        button.hidden = false;
-        button.textContent = 'Retry';
       }
     } finally {
       if (requestController === controller) {
         loading = false;
-        button.disabled = false;
+        updateControls();
       }
     }
   };
+  const navigate = page => {
+    if (!activity || page < 1 || page > lastReachablePage() || page === activity.page) return;
+    void load({ page, snapshot: activity.snapshot });
+  };
+  const open = () => {
+    if (!details.open) return;
+    const request = interruptedRequest || failedRequest || (!activity ? { page: 1, snapshot: null } : null);
+    if (request) { interruptedRequest = null; void load(request); }
+  };
   if (!config && !demo) status.textContent = 'Visit history is not connected yet.';
-  details.addEventListener('toggle', () => { if (details.open && (!started || failed)) void load(); });
-  button.addEventListener('click', () => { void load(); });
-  window.addEventListener('pagehide', () => { interrupted = loading; controller.abort(); });
+  details.addEventListener('toggle', open);
+  previous.addEventListener('click', () => { if (activity) navigate(activity.page - 1); });
+  next.addEventListener('click', () => { if (activity) navigate(activity.page + 1); });
+  refresh.addEventListener('click', () => { void load({ page: 1, snapshot: null }); });
+  retry.addEventListener('click', () => { if (failedRequest) void load(failedRequest); });
+  input.addEventListener('input', () => { input.setCustomValidity(''); });
+  card.querySelector('[data-visitor-page-form]').addEventListener('submit', event => {
+    event.preventDefault();
+    const page = Number(input.value);
+    if (!Number.isSafeInteger(page) || page < 1 || page > lastReachablePage()) {
+      input.setCustomValidity(`Enter a page between 1 and ${numberFormat.format(lastReachablePage())}.`);
+      input.reportValidity();
+      return;
+    }
+    input.setCustomValidity('');
+    navigate(page);
+  });
+  window.addEventListener('pagehide', () => { interruptedRequest = loading ? activeRequest : null; controller.abort(); });
   window.addEventListener('pageshow', event => {
     if (!event.persisted) return;
     controller = new AbortController();
     loading = false;
-    button.disabled = false;
-    button.textContent = failed ? 'Retry' : 'Load more';
-    if (details.open && (!started || interrupted)) void load();
-    interrupted = false;
+    updateControls();
+    open();
   });
-  if (details.open) void load();
+  updateControls();
+  open();
 }
 
 function initializeVisitorCard(card, config, demo, recording = Promise.resolve()) {

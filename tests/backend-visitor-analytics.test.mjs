@@ -368,3 +368,75 @@ test('activity respects rate limiting and never returns malformed or oversized b
     assert.deepEqual(await response.json(), { error: 'Statistics temporarily unavailable' });
   }
 });
+
+test('numbered activity requests use the new RPC and project a bounded snapshot DTO', async () => {
+  const calls = [];
+  const record = { visitedAt: '2026-09-12T12:00:00Z', countryCode: 'CN', path: '/', event_id: event.eventId, ip: '8.8.8.8' };
+  const backend = { version: 2, records: [record], page: 3, pageSize: 20,
+    totalRecords: 41, totalPages: 3, snapshot: '9007199254740993', internal: true };
+  const { handler } = setup({}, { rpc: async (name, args) => {
+    calls.push({ name, args });
+    return name === 'visitor_analytics_rate_limit' ? true : backend;
+  } });
+  const response = await handler(request('GET', { headers: { origin: 'http://127.0.0.1:4173' },
+    url: 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity&page=999&snapshot=9007199254740993' }));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('access-control-allow-origin'), '*');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(await response.json(), { version: 2, records: [{ visitedAt: record.visitedAt, countryCode: 'CN', path: '/' }],
+    page: 3, pageSize: 20, totalRecords: 41, totalPages: 3, snapshot: '9007199254740993' });
+  assert.deepEqual(calls.map(c => [c.name, c.name.endsWith('_page') ? c.args : c.args.p_kind]), [
+    ['visitor_analytics_rate_limit', 'summary'],
+    ['visitor_analytics_activity_page', { p_page: 999, p_snapshot: '9007199254740993' }],
+  ]);
+});
+
+test('numbered activity accepts initial and empty requests without a snapshot', async () => {
+  const calls = [];
+  const empty = { version: 2, records: [], page: 1, pageSize: 20, totalRecords: 0, totalPages: 0, snapshot: null };
+  const { handler } = setup({}, { rpc: async (name, args) => {
+    calls.push({ name, args });
+    return name === 'visitor_analytics_rate_limit' ? true : empty;
+  } });
+  const response = await handler(request('GET', {
+    url: 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity&page=1',
+  }));
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), empty);
+  assert.deepEqual(calls.at(-1), { name: 'visitor_analytics_activity_page', args: { p_page: 1, p_snapshot: null } });
+});
+
+test('numbered activity rejects malformed pages, snapshots and mixed legacy queries before any RPC', async () => {
+  const { handler, calls } = setup();
+  const queries = ['page=', 'page=0', 'page=01', 'page=-1', 'page=1.0', 'page=1e3', 'page=1000001',
+    'page=1&page=2', 'page=1&before=1', 'page=1&before=', 'snapshot=1', 'before=1&snapshot=1',
+    'page=1&snapshot=', 'page=1&snapshot=0', 'page=1&snapshot=01', 'page=1&snapshot=-1',
+    'page=1&snapshot=9223372036854775808', 'page=1&snapshot=1&snapshot=2', 'page=' + '1'.repeat(100)];
+  for (const query of queries) {
+    const response = await handler(request('GET', {
+      url: 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity&' + query,
+    }));
+    assert.equal(response.status, 400, query);
+  }
+  assert.equal(calls.length, 0);
+});
+
+test('numbered activity validates counts, page shape, metadata precision and privacy before exposing results', async () => {
+  const record = { visitedAt: '2026-09-12T12:00:00Z', countryCode: null, path: null };
+  const valid = { version: 2, records: [record], page: 1, pageSize: 20, totalRecords: 1, totalPages: 1, snapshot: '1' };
+  for (const invalid of [
+    { ...valid, version: 1 }, { ...valid, pageSize: 25 }, { ...valid, page: 0 }, { ...valid, page: 2 },
+    { ...valid, totalRecords: -1 }, { ...valid, totalRecords: 1.5 }, { ...valid, totalRecords: Number.MAX_SAFE_INTEGER + 1 },
+    { ...valid, totalPages: 2 }, { ...valid, snapshot: 1 }, { ...valid, snapshot: null },
+    { ...valid, snapshot: '01' }, { ...valid, records: [] }, { ...valid, records: Array(21).fill(record) },
+    { ...valid, records: [{ ...record, path: '/?secret=1' }] },
+    { ...valid, totalRecords: 0, totalPages: 0, records: [] },
+  ]) {
+    const { handler } = setup({}, { rpc: async name => name === 'visitor_analytics_rate_limit' ? true : invalid });
+    const response = await handler(request('GET', {
+      url: 'https://test-project.supabase.co/functions/v1/visitor-analytics?view=activity&page=1',
+    }));
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: 'Statistics temporarily unavailable' });
+  }
+});

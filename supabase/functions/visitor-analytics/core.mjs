@@ -96,18 +96,25 @@ function readView(request) {
   if (request.method !== 'GET' || query.length > 80) return null;
   const params = new URLSearchParams(query);
   const keys = [...params.keys()];
-  if (keys.some(key => !['view', 'before'].includes(key)) ||
+  if (keys.some(key => !['view', 'before', 'page', 'snapshot'].includes(key)) ||
       params.getAll('view').length !== 1 || params.get('view') !== 'activity' ||
-      params.getAll('before').length > 1) return null;
+      ['before', 'page', 'snapshot'].some(key => params.getAll(key).length > 1)) return null;
+  if (params.has('page')) {
+    const page = params.get('page');
+    const snapshot = params.get('snapshot');
+    if (params.has('before') || !/^[1-9][0-9]{0,6}$/.test(page) || Number(page) > 1000000 ||
+        (snapshot !== null && !validCursor(snapshot))) return null;
+    return { view: 'activity-page', page: Number(page), snapshot };
+  }
+  if (params.has('snapshot')) return null;
   const before = params.get('before');
   if (before !== null && !validCursor(before)) return null;
   return { view: 'activity', before };
 }
 
-function publicActivity(data) {
-  if (data?.version !== 1 || !Array.isArray(data.records) || data.records.length > 25 ||
-      (data.nextCursor !== null && !validCursor(data.nextCursor))) throw new Error('Invalid activity result');
-  const records = data.records.map(row => {
+function publicActivityRecords(records, limit) {
+  if (!Array.isArray(records) || records.length > limit) throw new Error('Invalid activity records');
+  return records.map(row => {
     if (typeof row?.visitedAt !== 'string' || row.visitedAt.length > 40 ||
         !Number.isFinite(Date.parse(row.visitedAt)) ||
         (row.countryCode !== null && normalizeCountry(row.countryCode) !== row.countryCode) ||
@@ -115,7 +122,33 @@ function publicActivity(data) {
     // Explicit projection keeps internal IDs and any future private fields out.
     return { visitedAt: row.visitedAt, countryCode: row.countryCode, path: row.path };
   });
-  return { version: 1, records, nextCursor: data.nextCursor };
+}
+
+function publicActivity(data) {
+  if (data?.version !== 1 || (data.nextCursor !== null && !validCursor(data.nextCursor))) {
+    throw new Error('Invalid activity result');
+  }
+  return { version: 1, records: publicActivityRecords(data.records, 25), nextCursor: data.nextCursor };
+}
+
+function publicActivityPage(data, requested) {
+  if (data?.version !== 2 || data.pageSize !== 20 ||
+      !Number.isSafeInteger(data.totalRecords) || data.totalRecords < 0 ||
+      !Number.isSafeInteger(data.totalPages) || data.totalPages !== Math.ceil(data.totalRecords / 20) ||
+      !Number.isInteger(data.page) || data.page < 1 || data.page > 1000000 ||
+      data.page !== Math.min(requested.page, Math.max(1, data.totalPages)) ||
+      (data.totalRecords === 0 ? data.snapshot !== null : !validCursor(data.snapshot)) ||
+      (data.snapshot !== null && requested.snapshot !== null && BigInt(data.snapshot) > BigInt(requested.snapshot))) {
+    throw new Error('Invalid activity page');
+  }
+  const records = publicActivityRecords(data.records, 20);
+  if (records.length !== Math.min(20, data.totalRecords - (data.page - 1) * 20)) {
+    throw new Error('Invalid activity page length');
+  }
+  return {
+    version: 2, records, page: data.page, pageSize: 20,
+    totalRecords: data.totalRecords, totalPages: data.totalPages, snapshot: data.snapshot,
+  };
 }
 
 async function readSmallJson(request) {
@@ -217,6 +250,11 @@ export function createHandler(config, dependencies = {}) {
         return json(429, { error: 'Too many requests' }, { 'retry-after': '60' });
       }
       if (kind === 'summary') {
+        if (read.view === 'activity-page') {
+          return json(200, publicActivityPage(await rpc('visitor_analytics_activity_page', {
+            p_page: read.page, p_snapshot: read.snapshot,
+          }), read));
+        }
         if (read.view === 'activity') {
           return json(200, publicActivity(await rpc('visitor_analytics_activity', { p_before: read.before })));
         }
