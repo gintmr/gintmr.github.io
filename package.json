@@ -1,0 +1,13 @@
+{
+  "name": "xinrui-wu-academic-homepage",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "analytics:bundle": "node scripts/bundle-visitor-function.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8"
+  }
+}

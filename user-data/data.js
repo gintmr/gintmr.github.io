@@ -1,312 +1,298 @@
-export const bio = [
-    "Hi, I'm Xinrui Wu (吴欣锐)!",
+// Academic content. Run `node build.mjs` after editing to regenerate all pages.
+export const profile = {
+  name: "Xinrui Wu",
+  chineseName: "吴欣锐",
+  role: "Undergraduate Researcher",
+  affiliation: "UESTC · Visiting Student at MBZUAI · Research Intern at Tsinghua AIR",
+  educationSummary: "B.S. in Software Engineering (Embedded System), UESTC",
+  email: "xinruiwu.wxr@gmail.com",
+  opportunities: "I am currently seeking PhD positions for Fall 2027 and am open to job opportunities.",
+  scholarUrl: "https://scholar.google.com/citations?user=pJzltu8AAAAJ&hl=en",
+  alphaXivUrl: "https://www.alphaxiv.org/@xinrui-wu",
+  githubUrl: "https://github.com/gintmr",
+  cvUrl: "/cv/",
+  cvPdfUrl: "/assets/cv/Xinrui-Wu-CV.pdf",
+  portrait: "/assets/portraits/xinrui-wu-enhanced.png",
+  logo: "/assets/branding/xinrui-wu-illustrated-avatar.png",
+  intro: [
+    "I am an undergraduate student in Software Engineering at the University of Electronic Science and Technology of China (UESTC). I am also a visiting student at MBZUAI, advised by Prof. Yutong Xie, and a research intern at the Institute for AI Industry Research (AIR), Tsinghua University, advised by Prof. Yuanchun Li.",
+    "My research centers on clinical AI and world models, efficient language-model reasoning, and visual intelligence. I study how models reason over patient trajectories, control their reasoning budgets, and represent visual and temporal information.",
+  ],
+};
 
-    "Here is My <a href='https://drive.google.com/file/d/1yHJ3HdnyRxWbuLOH_42hYNoMHS7pIf7v/view?usp=sharing'>CV</a> | <a href='https://scholar.google.com/citations?user=pJzltu8AAAAJ&hl=en'>Google Scholar</a> | <a href='https://github.com/gintmr'>GitHub</a> | <a href='https://gintmr.github.io/'>Homepage</a>.",
-
-
-    "I am currently pursuing my B.S. in Software Engineering (Embedded System) at the University of Electronic Science and Technology of China (UESTC), with a GPA of 3.63/4.0.",
-    
-    "My research experience spans <strong>UESTC Center for Future Media</strong>, <strong>Megvii Technology</strong>, <strong>HKUST VGD Group</strong>, <strong>Tsinghua AIR</strong>, and <strong>MBZUAI</strong>. I have worked with Prof. Yang Yang, Dr. Wei Ge, Prof. Sai-Kit Yeung, Prof. Yuanchun Li, Prof. Yunxin Liu, and Prof. Yutong Xie.",
-    
-    "My current interests include <strong>clinical AI</strong>, <strong>clinical world models</strong>, <strong>LLM reasoning</strong>, and <strong>vision systems</strong>. More specifically, I work on clinical reasoning optimization, longitudinal clinical prognosis, causal trajectory modeling, controllable chain-of-thought generation, test-time compute scaling, open-vocabulary detection and segmentation, lightweight deployment, and knowledge distillation.",
-  
-    "In vision, I have studied open-vocabulary detection and segmentation, built large-scale automated data pipelines, and developed deployable lightweight segmentation methods such as MaskGuide. In reasoning, I have worked on BudgetThinker for budget-aware LLM reasoning and on clinical reasoning frameworks that integrate complex multi-stage clinical information.",
-  
-    "Feel free to reach out at <a href='mailto:xinruiwu.wxr@gmail.com'>xinruiwu.wxr@gmail.com</a> for collaborations or conversations!"
-
-
+export const researchAreas = [
+  {
+    id: "clinical",
+    title: "Clinical AI",
+    description: "Clinical reasoning, longitudinal prognosis, relational trajectory modeling.",
+    keywords: ["Clinical reasoning", "Relational trajectories", "Action-aware world models"],
+  },
+  {
+    id: "reasoning",
+    title: "Efficient Reasoning & Perception",
+    description: "Budget-aware LLM reasoning, lightweight segmentation, distillation.",
+    keywords: ["Reasoning budgets", "Controllable generation", "Test-time compute"],
+  },
+  {
+    id: "vision",
+    title: "World Models",
+    description: "Visual world modeling, spatiotemporal consistency, causal reasoning.",
+    keywords: ["Perception & distillation", "Spatial intelligence", "Generative modeling"],
+  },
+  {
+    id: "spatial",
+    title: "Spatial Intelligence",
+    description: "3D perception, vision-language spatial reasoning, AR/VR.",
+  },
+  {
+    id: "generative",
+    title: "Generative Models",
+    description: "Controllable image generation, reference-guided editing, generative model evaluation.",
+  },
 ];
 
+export const publications = [
+  {
+    id: "budgetthinker",
+    shortName: "BudgetThinker",
+    title: "BudgetThinker: Empowering Budget-aware LLM Reasoning with Control Tokens",
+    authors: "Hao Wen*, Xinrui Wu*, Yi Sun, Feifei Zhang, Liye Chen, Jie Wang, Yifan Su, Yunxin Liu, Ya-Qin Zhang, Yuanchun Li",
+    venue: "EMNLP 2026",
+    year: 2026,
+    status: "accepted",
+    role: "first",
+    roleLabel: "Co-first author",
+    topic: "reasoning",
+    summary: "Uses proportional control tokens and a two-stage training pipeline to align reasoning length with a specified token budget.",
+    links: [{ label: "arXiv", url: "https://arxiv.org/abs/2508.17196" }],
+  },
+  {
+    id: "maskguide",
+    shortName: "MaskGuide",
+    title: "MaskGuide: Efficient Distillation for Deployable Lightweight Segmentation in Marine Environments",
+    authors: "Xinrui Wu*, Ziqiang Zheng*, Yiwei Chen, Zeyu Ma+, Yang Yang, Sai-Kit Yeung",
+    venue: "IEEE Robotics and Automation Letters",
+    year: 2026,
+    status: "accepted",
+    role: "first",
+    roleLabel: "Co-first author",
+    topic: "vision",
+    summary: "Distills marine segmentation models through mask-guided feature separation and purification for lightweight deployment.",
+    links: [
+      {
+        label: "Scholar",
+        url: "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=pJzltu8AAAAJ&citation_for_view=pJzltu8AAAAJ:d1gkVwhDpl0C",
+      },
+      { label: "PDF", url: "https://saikit.org/static/projects/RAL26/MaskGuide_RAL2026.pdf" },
+      { label: "Project page", url: "https://gintmr.github.io/MaskGuide/" },
+    ],
+  },
+  {
+    id: "imagetime",
+    shortName: "ImageTime",
+    title: "Can Image Models Imagine Time? ImageTime: A Novel Benchmark for Probing Visual World Modeling Through Spatiotemporal Consistency",
+    authors: "Xinrui Wu, Lichen Huang",
+    venue: "WACV 2027",
+    year: 2026,
+    status: "accepted",
+    role: "first",
+    roleLabel: "First author",
+    topic: "vision",
+    summary: "Evaluates visual world modeling in image models through the consistency of their spatial and temporal representations.",
+    links: [
+      { label: "arXiv", url: "https://arxiv.org/abs/2606.10620" },
+      { label: "PDF", url: "https://www.alphaxiv.org/pdf/2606.10620" },
+      { label: "Project page", url: "https://gintmr.github.io/ImagineTime/" },
+      { label: "GitHub", url: "https://github.com/gintmr/ImagineTime" },
+      { label: "Dataset", url: "https://huggingface.co/datasets/Xin-Rui/ImageTime_Benchmark" },
+    ],
+  },
+  {
+    id: "ocg",
+    shortName: "OCG",
+    title: "OCG: Optical Character Grounded Visual Reasoning with Flow Matching",
+    authors: "Lichen Huang, Xinrui Wu",
+    venue: "NeurIPS 2026 Workshop BeNTo",
+    year: 2026,
+    status: "submitted",
+    role: "contributor",
+    roleLabel: "Second author",
+    topic: "vision",
+    links: [{ label: "alphaXiv", url: "https://www.alphaxiv.org/abs/2608.ocg-optical-character-grounded-reasoning" }],
+  },
+  {
+    id: "hiret",
+    shortName: "HiReT",
+    title: "HiReT: Hierarchical Relational Trajectory Modeling for Longitudinal Clinical Prognosis",
+    authors: "Xinrui Wu, Wanqi Yang, Min Xu, Yutong Xie",
+    venue: "ICLR 2027",
+    year: 2026,
+    status: "submitted",
+    role: "first",
+    roleLabel: "First author",
+    topic: "clinical",
+    summary: "Models hierarchical relationships within longitudinal clinical trajectories to support patient prognosis.",
+    links: [],
+  },
+  {
+    id: "clinical-world-models",
+    shortName: "Clinical World Models",
+    title: "Predicting the Future Is Not Enough: Toward Action-Aware Clinical World Models",
+    authors: "Xinrui Wu, Wanqi Yang, Min Xu, Yutong Xie",
+    venue: "ICLR 2027",
+    year: 2026,
+    status: "submitted",
+    role: "first",
+    roleLabel: "First author",
+    topic: "clinical",
+    summary: "Studies clinical world models that account for actions as well as future patient outcomes.",
+    links: [],
+  },
+  {
+    id: "parathinker",
+    shortName: "ParaThinker",
+    title: "ParaThinker: Native Parallel Reasoning for Scaling LLM Test-Time Compute",
+    authors: "Hao Wen, Yifan Su, Feifei Zhang, Xinrui Wu, Yi Sun, Yunxin Liu, Yunhao Liu, Ya-Qin Zhang, Yuanchun Li",
+    venue: "EMNLP 2026",
+    year: 2026,
+    status: "accepted",
+    role: "contributor",
+    roleLabel: "Contributing author",
+    topic: "reasoning",
+    summary: "Explores native parallel thinking as a way to scale language-model computation during inference.",
+    links: [],
+  },
+  {
+    id: "seatree",
+    shortName: "Seatree",
+    title: "Seatree: Tracing Marine Creatures through Taxonomic Tree",
+    authors: "Xinrui Wu (contributing author)",
+    venue: "ECCV 2026",
+    year: 2026,
+    status: "submitted",
+    role: "contributor",
+    roleLabel: "Contributing author",
+    topic: "vision",
+    summary: "Investigates marine-creature recognition using taxonomic tree structure.",
+    links: [],
+  },
+];
+
+export const experience = [
+  {
+    id: "mbzuai",
+    organization: "Mohamed bin Zayed University of Artificial Intelligence",
+    shortName: "MBZUAI",
+    logo: "/assets/institutions/mbzuai.jpg",
+    role: "Visiting Student",
+    period: "Jan 2026 – Present",
+    location: "Abu Dhabi, UAE",
+    advisors: [
+      { name: "Prof. Yutong Xie", url: "https://scholar.google.com/citations?user=ddDL9HMAAAAJ&hl" },
+    ],
+    description: "Developing structured clinical reasoning methods that integrate multi-stage patient information; studying longitudinal prognosis and training paradigms for clinical world models.",
+    tags: ["Clinical AI", "World Models", "Longitudinal Prognosis"],
+  },
+  {
+    id: "tsinghua-air",
+    organization: "Tsinghua University, Institute for AI Industry Research",
+    shortName: "Tsinghua AIR",
+    logo: "/assets/institutions/tsinghua-air.png",
+    role: "Research Intern",
+    period: "Jan 2025 – Present",
+    location: "Beijing, China",
+    advisors: [
+      { name: "Prof. Yuanchun Li", url: "https://yuanchun-li.github.io/" },
+      { name: "Prof. Yunxin Liu", url: "https://scholar.google.com/citations?user=TFGBA9cAAAAJ&hl=zh-CN" },
+    ],
+    description: "Developed BudgetThinker for controllable chain-of-thought generation. Proportional control tokens and a two-stage training pipeline with reinforcement learning achieve over 95% budget adherence, with generalization to embodied spatial reasoning.",
+    tags: ["LLM Reasoning", "Budget Control", "Reinforcement Learning"],
+  },
+  {
+    id: "hkust",
+    organization: "Hong Kong University of Science and Technology, VGD Group",
+    shortName: "HKUST",
+    logo: "/assets/institutions/hkust.png",
+    role: "Research Intern",
+    period: "Jul 2025 – Aug 2025",
+    location: "Hong Kong",
+    advisors: [
+      { name: "Prof. Sai-Kit Yeung", url: "https://scholar.google.com/citations?user=16iMMwwAAAAJ&hl=zh-CN" },
+    ],
+    description: "Developed MaskGuide for lightweight marine segmentation through feature separation and purification. Tiny-MSAM achieves 99.4% of SAM's accuracy with 0.5% of its parameters at 164.7 FPS.",
+    tags: ["Marine Vision", "Lightweight Segmentation", "Distillation"],
+  },
+  {
+    id: "megvii",
+    organization: "Megvii Technology Limited",
+    shortName: "Megvii",
+    logo: "/assets/institutions/megvii.png",
+    role: "CV Algorithm Intern",
+    period: "Feb 2025 – Jul 2025",
+    location: "Beijing, China",
+    advisors: [{ name: "Dr. Wei Ge" }],
+    description: "Unified multimodal prompts as visual masks and built a data pipeline supporting billions of samples. Led the development and business deployment of an open-vocabulary detection model.",
+    tags: ["Open-Vocabulary Detection", "Multimodal Prompts", "Deployment"],
+  },
+  {
+    id: "uestc-cfm",
+    organization: "UESTC, Center for Future Media",
+    shortName: "UESTC CFM",
+    logo: "/assets/institutions/uestc.png",
+    role: "Research Intern",
+    period: "Jun 2024 – Present",
+    location: "Sichuan, China",
+    advisors: [{ name: "Prof. Yang Yang", url: "https://cfm.uestc.edu.cn/~yangyang/" }],
+    description: "Studying open-vocabulary object detection and segmentation, including false-positive reduction and recognition of objects with diverse visual appearances.",
+    tags: ["Computer Vision", "Open-Vocabulary Perception", "Segmentation"],
+  },
+];
 
 export const education = [
   {
-    title: "B.S. in Software Engineering (Embedded System)",
-    duration: "Sep 2023 - present",
-    subtitle: "University of Electronic Science and Technology of China (UESTC), Sichuan, China",
-    details: [
-      "GPA: 3.63/4.0",
-      "Relevant Courses: Software Engineering, Compiler Principles, Computer Organization and Architecture, Computer Networks, Embedded Operating Systems, RTOS, ARM, Quadcopter Drones"
-    ],
-    tags: ["Computer Science", "Engineering"], // 添加标签数组,要素必须齐全
-    icon: "book",
-  }
+    institution: "University of Electronic Science and Technology of China (UESTC)",
+    designation: "Project 985",
+    logo: "/assets/institutions/uestc.png",
+    degree: "B.S. in Software Engineering (Embedded System)",
+    period: "Sep 2023 – Present",
+    detail: "Sichuan, China · GPA: 3.63/4.0",
+  },
 ];
 
 export const awards = [
   {
     title: "UESTC Model Student Scholarship",
-    duration: "Oct 2025",
-    subtitle: "Top 5%, Sci-Tech Innovation",
-    tags: ["Scholarship"],
-    icon: "star-o",
+    detail: "Top 5% · Sci-Tech Innovation · October",
+    year: 2025,
+  },
+  {
+    title: "National Third Prize",
+    detail: "China College Student Computer Design Competition · June",
+    year: 2025,
+  },
+  {
+    title: "National Third Prize",
+    detail: "National College Student Innovation and Entrepreneurship Competition · May",
+    year: 2025,
   },
   {
     title: "UESTC Model Student Scholarship",
-    duration: "Oct 2024",
-    subtitle: "Top 5%, Sci-Tech Innovation",
-    tags: ["Scholarship"],
-    icon: "star-o",
+    detail: "Top 5% · Sci-Tech Innovation · October",
+    year: 2024,
   },
   {
     title: "National Second Prize",
-    duration: "Aug 2024",
-    subtitle: "C4 National College Student Network Technology Challenge",
-    tags: ["Competition"],
-    "icon": "trophy"
-  },
-  {
-    "title": "National Third Prize",
-    "duration": "May 2025",
-    "subtitle": "National College Student Innovation and Entrepreneurship Competition",
-    "tags": ["Competition", ],
-    "icon": "trophy"
+    detail: "C4 National College Student Network Technology Challenge · August",
+    year: 2024,
   },
   {
     title: "National Third Prize",
-    duration: "Jun 2025",
-    subtitle: "China College Student Computer Design Competition",
-    tags: ["Competition"],
-    "icon": "trophy"
+    detail: "C4 National College Student Network Technology Challenge · August",
+    year: 2024,
   },
   {
-    title: "National Third Prize",
-    duration: "Aug 2024",
-    subtitle: "C4 National College Student Network Technology Challenge",
-    tags: ["Competition"],
-    "icon": "trophy"
+    title: "Sichuan Provincial Second Prize",
+    detail: "China College Student Computer Design Competition · June",
+    year: 2024,
   },
-  {
-    title: "Second Prize of SiChuan Province",
-    duration: "Jun 2024",
-    subtitle: "China College Student Computer Design Competition",
-    tags: ["Competition"],
-    "icon": "trophy"
-  },
-]
-
-export const experience = [
-
-    {
-      "title": "Research Intern",
-      "duration": "Jun 2024 - Present",
-      "subtitle": "UESTC, Center for Future Media (CFM), Advisor: <a href='https://cfm.uestc.edu.cn/~yangyang/'>Prof. Yang Yang</a>",
-      "details": [
-        "Research focus: advancing Open-Vocabulary Object Detection (OVD) and Segmentation (OVS)",
-        "Pioneered methods to enhance object detection capabilities and reduce false positives in OVD",
-        "Collaborated on developing a robust segmentation framework, improving accuracy across various datasets",
-        "Achieved significant progress in recognizing and segmenting objects with diverse appearances in images"
-      ],
-      "tags": ["Computer Vision", "Open-Vocabulary", "Segmentation", "Object Detection"],
-      "icon": "search"
-    },
-    {
-      "title": "CV Algorithm Intern", 
-      "duration": "Feb 2025 - Jul 2025",
-      "subtitle": "Megvii Technology Limited (MEGVII), Mentor: Dr. Wei Ge",
-      "details": [
-        "Proposed a unified prompt representation method, transforming multi-modal inputs into visual masks to simplify alignment and improve training efficiency",
-        "Built a large-scale automated data pipeline capable of processing billions of samples to support model training",
-        "Led development of an open-vocabulary detection model achieving performance comparable to closed-source SOTA models",
-        "Successfully deployed the developed OVD model in business applications, validating its practical utility"
-      ],
-      "tags": ["Computer Vision", "Open-Vocabulary", "VLM", "Large-scale Training"],
-      "icon": "search"
-    },
-    {
-      "title": "Research Intern",
-      "duration": "Jul 2025 - Aug 2025", 
-      "subtitle": "HKUST, VGD Group, Advisor: <a href='https://scholar.google.com/citations?user=16iMMwwAAAAJ&hl=zh-CN'>Prof. Sai-Kit Yeung</a>",
-      "details": [
-        "Research focus: lightweight image segmentation and salient individual identification for marine environments",
-        "Proposed the MaskGuide mask-guided distillation framework, enhancing critical information and suppressing noise through feature separation and purification",
-        "The resulting Tiny-MSAM model achieves 99.4% of the Segment Anything Model's accuracy with only 0.5% of its parameters and an inference speed of 164.7 FPS",
-        "Submitted as a first-author paper to IEEE Robotics and Automation Letters"
-      ],
-      "tags": ["Lightweight Models", "Knowledge Distillation", "Marine Vision", "Resource-Constrained"],
-      "icon": "search"
-    },
-    {
-      "title": "Research Intern",
-      "duration": "Jan 2025 - Present",
-      "subtitle": "Tsinghua AIR, Advisors: <a href='https://yuanchun-li.github.io/'>Prof. Yuanchun Li</a>, <a href='https://scholar.google.com/citations?user=TFGBA9cAAAAJ&hl=zh-CN'>Prof. Yunxin Liu</a>",
-      "details": [
-        "Research focus: generation of controllable length Chain-of-Thought (CoT) for large language models",
-        "Proposed the BudgetThinker framework, centered on an innovative proportional control token mechanism",
-        "Via a two-stage training pipeline integrating specialized data and reinforcement learning, the model achieved SOTA on benchmarks like MATH with over 95% budget adherence success",
-        "Demonstrated generalization in embodied spatial reasoning and submitted as a co-first-author paper to ACL"
-      ],
-      "tags": ["LLM", "Chain-of-Thought", "MLLM", "Embodied Intelligence", "Reasoning"],
-      "icon": "search"
-    },
-    {
-      "title": "Visiting Student",
-      "duration": "Jan 2026 - Present",
-      "subtitle": "MBZUAI, Advisor: <a href='https://scholar.google.com/citations?user=ddDL9HMAAAAJ&hl'>Prof. Yutong Xie</a>",
-      "details": [
-        "Research focus: optimization of clinical reasoning",
-        "Proposed a framework that integrates complex multi-stage clinical information to enhance structured medical reasoning",
-        "Explored frontier training paradigms for clinical world models"
-      ],
-      "tags": ["Clinical AI", "Medical Reasoning", "World Models", "Causal Modeling"],
-      "icon": "search"
-    },
-  
-];
-
-export const papers = [
-    {
-      "title": "MaskGuide: Efficient Distillation for Deployable Lightweight Segmentation in Marine Environments",
-      "authors": "First Author",
-      "roleGroup": "first",
-      "conference": "Accepted by IEEE Robotics and Automation Letters, Apr 2026",
-      "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=pJzltu8AAAAJ&citation_for_view=pJzltu8AAAAJ:d1gkVwhDpl0C",
-      "status": "accepted",
-      "abstract": [
-        // "First large-scale marine creature identification benchmark with 1,000+ species",
-      ],
-      "tags": ["Knowledge Distillation", "Lightweight Segmentation", "Marine Environments"],
-      "icon": "search"
-    },
-    {
-      "title": "HiCausal: Hierarchical Causal Trajectory Modeling for Longitudinal Clinical Prognosis",
-      "authors": "First Author",
-      "roleGroup": "first",
-      "conference": "Submitted to NeurIPS 2026, May 2026",
-      "status": "submitted",
-      "abstract": [
-        // "First large-scale marine creature identification benchmark with 1,000+ species",
-      ],
-      "tags": ["Clinical AI", "Causal Modeling", "Longitudinal Prognosis"],
-      "icon": "search"
-    },
-    {
-      "title": "BudgetThinker: Empowering Budget-aware LLM Reasoning with Control Tokens",
-      "authors": "Co-first Author",
-      "roleGroup": "first",
-      "conference": "Submitted to ACL, May 2026",
-      "link": "https://arxiv.org/pdf/2508.17196?",
-      "status": "submitted",
-      "abstract": [
-        // "First large-scale marine creature identification benchmark with 1,000+ species",
-      ],
-      "tags": ["LLM", "Reasoning", "Budget-Aware", "Control Tokens"],
-      "icon": "search"
-    },
-    {
-      "title": "ParaThinker: Native Parallel Thinking as a New Paradigm to Scale LLM Test-time Compute",
-      "authors": "Contributor",
-      "roleGroup": "contributor",
-      "conference": "Submitted to ACL, May 2026", 
-      "status": "submitted",
-      "abstract": [
-        // "First large-scale marine creature identification benchmark with 1,000+ species",
-      ],
-      "tags": ["LLM", "Parallel Thinking", "Test-time Compute", "Reasoning"],
-      "icon": "search"
-    },
-    {
-      "title": "Seatree: Tracing Marine Creatures through Taxonomic Tree",
-      "authors": "Contributor",
-      "roleGroup": "contributor",
-      "conference": "Submitted to ECCV 2026, Mar 2026",
-      "status": "submitted",
-      "abstract": [
-        // "First large-scale marine creature identification benchmark with 1,000+ species",
-      ],
-      "tags": ["Computer Vision", "Marine Biology", "Taxonomic Tree"],
-      "icon": "search"
-    },
-  // More papers...
-];
-
-export const hobbies = [
-  "<strong>Clinical AI:</strong> Clinical reasoning optimization, longitudinal clinical prognosis, causal trajectory modeling",
-  "<strong>World Models:</strong> Clinical world models, multimodal reasoning, frontier training paradigms",
-  "<strong>LLM Reasoning:</strong> Efficient reasoning, controllable generation, test-time compute scaling",
-  "<strong>Vision Systems:</strong> Open-vocabulary detection and segmentation, lightweight deployment, knowledge distillation"
-
-  
-  // "Python, sh, cpp, Java, Linux, LaTex, Git, CUDA...",
-  // "Embodied Intelligence, Multimodal and Robotic perception, MLLM, LLM, Computer Vision, Knowledge Distillation...",
-  // "PyTorch, TensorFlow, OpenCV, YOLO, MMDetection, Detectron2, IoT Development...",
-];
-
-// export const trekking = [
-//   "<strong>Kheerganga Trek</strong>, Himachal Pradesh (9,711 feet)",
-//   "<strong>Triund Trek</strong>, Himachal Pradesh (9,350 feet)",
-//   "<strong>Kedarkantha Trek</strong>, Uttarakhand (12,500 feet)",
-//   "<strong>Jalori Pass Trek</strong>, Himachal Pradesh (10,800 feet)",
-//   "<strong>Vaishno Devi Trek</strong>, Jammu & Kashmir (5,200 feet)",
-// ];
-
-
-
-export const footer = [
-    // {
-    //   label: "Dev Profiles",
-    //   data: [
-    //     {
-    //       text: "Stackoverflow",
-    //       link: "https://stackoverflow.com/users/8461233/vinay-somawat",
-    //     },
-    //     {
-    //       text: "GitHub",
-    //       link: "https://github.com/vinaysomawat",
-    //     },
-    //     {
-    //       text: "LeetCode",
-    //       link: "https://leetcode.com/somawatvinay/",
-    //     },
-    //   ],
-    // },
-    // {
-    //   label: "Resources",
-    //   data: [
-    //     {
-    //       text: "Enable Dark/Light Mode",
-    //       func: "enableDarkMode()",
-    //     },
-    //     {
-    //       text: "Print this page",
-    //       func: "window.print()",
-    //     },
-    //     {
-    //       text: "Clone this page",
-    //       link: "https://github.com/vinaysomawat/vinaysomawat.github.io",
-    //     },
-    //   ],
-    // },
-  {
-    label: "Links",
-    data: [
-        // {
-        //   text: "Linkedin",
-        //   link: "https://www.linkedin.com/in/vinaysomawat/",
-        // },
-        // {
-        //   text: "Twitter",
-        //   link: "https://twitter.com/thesigmakid",
-        // },
-      // {
-      //   text: "BiliBili😇",
-      //   link: "https://space.bilibili.com/475570627?spm_id_from=333.337.0.0",
-      // },
-      {
-        text: "Academic🧑‍🏫",
-        link: "https://gintmr.github.io/",
-      },     
-      {
-        text: "Google Scholar📝",
-        link: "https://scholar.google.com/citations?user=pJzltu8AAAAJ&hl=en",
-      },      
-      {
-        text: "Github 🫠",
-        link: "https://github.com/gintmr",
-      },
-    ],
-  },
-  // {
-  //   label: "copyright-text",
-  //   data: ["Made with &hearts; by Vinay Somawat"],
-  // },
 ];

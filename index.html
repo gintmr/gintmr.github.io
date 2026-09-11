@@ -1,326 +1,147 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />  
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />  
-    <title></title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Portfolio webpage of Xinrui Wu" />  
-    <meta
-      name="keywords"
-      content="portfolio,website,personal website,github,projects,computer science and engineering"
-    />
-    <meta name="author" content="Xinrui Wu" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link rel="icon" type="image/png" href="./个人照2.j p g" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Montserrat|Open+Sans|Raleway&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="css/animate.css" />
-    <link rel="stylesheet" href="css/style.css" />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
-    />
-
-    <script src="js/modernizr-2.6.2.min.js"></script>
-    <script type="module" src="index.js"></script>
-    <script src="js/profile-card.js"></script>
-  </head>
-  <body>
-    <div id="colorlib-page">
-      <div class="container-wrap">
-        <a
-          href="#"
-          class="js-colorlib-nav-toggle colorlib-nav-toggle"
-          data-toggle="collapse"
-          data-target="#navbar"
-          aria-expanded="false"
-          aria-controls="navbar"
-          ><i></i
-        ></a>
-        <aside
-          id="colorlib-aside"
-          role="complementary"
-          class="border js-fullheight no-print"
-        >
-          <div class="text-center">
-            <div class="author-img">
-              <img alt="profile-img" src="./个人照2.jpg" />
-            </div>
-            <h1 id="colorlib-logo"><a href="./index.html"> Xinrui Wu </a></h1>
-          </div>
-          <nav
-            id="colorlib-main-menu"
-            role="navigation"
-            class="navbar"
-            style="padding-top: 2em"
-          >
-            <div id="navbar" class="collapse">
-              <ul>
-                <li><a href="#" data-nav-section="about">About</a></li>
-
-                <li>
-                  <a href="#" data-nav-section="experience">Experience</a>
-                </li>
-                <li><a href="#" data-nav-section="papers">Published Papers and Preprints</a></li>
-                <li><a href="#" data-nav-section="awards">Awards</a></li>
-                <li><a href="#" data-nav-section="education">Education</a></li>
-
-                <li><a href="#" data-nav-section="hobbies">Research Interests</a></li>
-<!-- 
-                <li>
-                  <a href="#" data-nav-section="trekking">Trekking Adventures</a>
-                </li> -->
-                
-                <li><a href="#" data-nav-section="contact">Contact</a></li>
-              </ul>
-            </div>
-          </nav>
-        </aside>
-        <div id="colorlib-main">
-
-          <section class="colorlib-profile" data-section="profile-card">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="profile-cards">
-                  <!-- <div class="col">
-                    <div class="stack-card" user-id="这是作者对应的card"></div>
-                  </div> --> 
-                  <div class="col">
-                    <div class="github-card" username="gintmr"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          <section class="colorlib-about" data-section="about">
-            <div class="colorlib-narrow-content">
-              <div class="row animate-box" data-animate-effect="fadeInLeft">
-                <div class="about-desc">
-                  <h1>About</h1>
-                  <div id="bio"></div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 新增的特色图片部分 -->
-          <section class="colorlib-featured-image" data-section="featured-image">
-            <div class="colorlib-narrow-content">
-              <div class="row animate-box" data-animate-effect="fadeInLeft">
-                <div class="featured-image-container">
-                  <img 
-                    src="experience.png" 
-                    alt="Featured Image" 
-                    class="img-responsive featured-image"
-                  >
-                  <div class="image-caption">
-                    <!-- <p>This is a caption for your featured image. You can describe what the image represents or any other relevant information.</p> -->
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-<!-- 实习经历 -->
-          <section class="colorlib-experience" data-section="experience">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box fadeInLeft animated"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="about-desc">
-                  <h1>Work <span style="color: #f9bf3f">Experience</span></h1>
-                </div>
-              </div>
-              <div class="timeline-centered" id="experience"></div>
-            </div>
-          </section>
-<!-- 论文 -->
-          <section class="colorlib-papers" data-section="papers">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="about-desc">
-                  <h1>
-                    Published <span style="color: #f9bf3f">Papers</span> and
-                    Preprints
-                  </h1>
-                </div>
-              </div>
-              <div class="papers-container" id="papers"></div>
-            </div>
-          </section>
-<!-- 奖项 -->
-          <section class="colorlib-education" data-section="awards">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box fadeInLeft animated"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="about-desc">
-                  <h1>Awards</h1>
-                </div>
-              </div>
-              <div class="timeline-centered" id="awards">
-              </div>
-            </div>
-          </section>
-<!-- 教育背景 -->
-          <section class="colorlib-education" data-section="education">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box fadeInLeft animated"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="about-desc">
-                  <h1>Education</h1>
-                </div>
-              </div>
-              <div class="timeline-centered" id="education">
-              </div>
-            </div>
-          </section>
-<!-- Research Interests -->
-          <section class="colorlib-hobbies" data-section="hobbies">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="about-desc">
-                  <h1>Research Interests</h1>
-                </div>
-              </div>
-              <div id="hobbies" class="row"></div>
-            </div>
-          </section>
-          <!-- <section class="colorlib-hobbies" data-section="trekking">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="about-desc">
-                  <h1>
-                    Trekking <span style="color: #f9bf3f">Adventures</span>
-                  </h1>
-                  <p>Here are the treks I've explored so far:</p>
-                  <div id="trekking" class="row"></div>
-                </div>
-              </div>
-            </div>
-          </section> -->
-<!-- Contact -->
-          <section class="colorlib-contact" data-section="contact">
-            <div class="colorlib-narrow-content">
-              <div
-                class="row row-bottom-padded-sm animate-box"
-                data-animate-effect="fadeInLeft"
-              >
-                <div class="about-desc">
-                  <h1>Contact</h1>
-                </div>
-                <p>
-                  Feel free to email me at
-                  <strong>xinruiwu.wxr@gmail.com</strong> for tech
-                  discussions, business opportunities, or just to say hello—I'd
-                  love to hear from you!
-                </p>
-              </div>
-            </div>
-          </section>
-          <section class="colorlib-footer no-print">
-            <div class="colorlib-narrow-content">
-              <p id="visitorCount">Visitor Count: Loading...</p>
-            </div>
-          </section>
-          <section class="colorlib-footer no-print" data-section="footer">
-            <div class="colorlib-narrow-content">
-              <footer class="footer" id="footer"></footer>
-            </div>
-          </section>
-        </div>
+<!doctype html>
+<!-- Generated by build.mjs. Edit user-data/ or the build templates, then run node build.mjs. -->
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#fffaff" />
+  <title>Xinrui Wu · Academic Homepage</title>
+  <meta name="description" content="Xinrui Wu (吴欣锐), undergraduate at UESTC, visiting student at MBZUAI, and research intern at Tsinghua AIR. Research interests, education, academic experience, and awards." />
+  <meta name="author" content="Xinrui Wu" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Home · Xinrui Wu" />
+  <meta property="og:description" content="Xinrui Wu (吴欣锐), undergraduate at UESTC, visiting student at MBZUAI, and research intern at Tsinghua AIR. Research interests, education, academic experience, and awards." />
+  <meta property="og:url" content="https://gintmr.github.io/" />
+  <meta property="og:image" content="https://gintmr.github.io/assets/portraits/xinrui-wu-enhanced.png" />
+  <link rel="canonical" href="https://gintmr.github.io/" />
+  <link rel="icon" href="/assets/branding/xinrui-wu-illustrated-avatar.png?v=0530f1659f60" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/branding/xinrui-wu-illustrated-avatar.png?v=0530f1659f60" />
+  <link rel="preload" href="/assets/fonts/noto-serif-sc/files/noto-serif-sc-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <script>
+    document.documentElement.classList.add('js');
+    try {
+      const saved = localStorage.getItem('xinrui-academic-theme');
+      const theme = saved === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+      document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#fffaff' : '#191919';
+    } catch (_) {}
+  </script>
+  <link rel="stylesheet" href="/css/style.css?v=a32d9e8f8d6d" />
+  <script src="/index.js?v=eda2caf7ac7f" defer></script>
+  <link rel="stylesheet" href="/css/visitors.css?v=61a0df31bd3d" />
+  <script id="visitor-config" type="application/json">{"enabled":true,"endpoint":"https://gjofwuihpzjfqeaysuuy.supabase.co/functions/v1/visitor-analytics","allowedOrigins":["https://gintmr.github.io"]}</script>
+  <script src="/visitors.js?v=c041854b9a40" type="module"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Xinrui Wu","alternateName":"吴欣锐","url":"https://gintmr.github.io/","sameAs":["https://scholar.google.com/citations?user=pJzltu8AAAAJ&hl=en","https://www.alphaxiv.org/@xinrui-wu","https://github.com/gintmr"],"knowsAbout":["Clinical AI","Efficient Reasoning & Perception","World Models","Spatial Intelligence","Generative Models"]}</script>
+</head>
+<body data-page="home" data-site-watermark="Xinrui Wu">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header"><div class="nav-container"><div class="header-shell">
+    <a class="brand" href="/" aria-label="Xinrui Wu — Home"><img src="/assets/branding/xinrui-wu-illustrated-avatar.png?v=0530f1659f60" width="40" height="40" alt="" /><span>Xinrui Wu</span></a>
+    <nav class="site-nav" id="site-nav" aria-label="Main navigation"><a href="/" aria-current="page">Home</a><a href="/publication/">Publication</a><a href="/project/">Project</a><a href="/cv/">CV</a></nav>
+    <div class="header-controls"><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Switch to dark theme"><svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.4A8.5 8.5 0 0 1 9.6 4a8.5 8.5 0 1 0 10.4 10.4Z"/></svg></button><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-nav"><svg class="icon icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><svg class="icon icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button></div>
+  </div></div></header>
+  <aside class="page-outline" aria-label="Page outline">
+    <div class="outline-shell">
+      <button class="outline-toggle" id="outline-toggle" type="button" aria-expanded="false" aria-controls="outline-panel">
+        <svg class="icon icon-outline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg><span>On this page</span><span class="outline-current" aria-hidden="true">About</span><svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <nav class="outline-panel" id="outline-panel" aria-labelledby="outline-heading">
+        <p class="outline-heading" id="outline-heading"><svg class="icon icon-outline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>On this page</p>
+        <div class="outline-scroll"><div class="outline-items">
+          <svg class="outline-track" width="24" aria-hidden="true"><path class="outline-rail"/><path class="outline-segment"/><circle class="outline-dot" r="2"/></svg>
+          <ol class="outline-list"><li data-depth="0"><a href="#about">About</a></li><li data-depth="0"><a href="#education">Education</a></li><li data-depth="0"><a href="#research">Research Interests</a></li><li data-depth="0"><a href="#experience">Research &amp; Internships</a></li><li data-depth="1"><a href="#mbzuai">MBZUAI</a></li><li data-depth="1"><a href="#tsinghua-air">Tsinghua AIR</a></li><li data-depth="1"><a href="#hkust">HKUST</a></li><li data-depth="1"><a href="#megvii">Megvii</a></li><li data-depth="1"><a href="#uestc-cfm">UESTC CFM</a></li><li data-depth="0"><a href="#awards">Honors &amp; Awards</a></li><li data-depth="0"><a href="#visitors">Visitors</a></li></ol>
+        </div></div>
+      </nav>
+    </div>
+  </aside>
+  <main class="page-shell" id="main-content"><section class="profile" id="about" aria-labelledby="name-heading">
+    <div class="profile-copy">
+      <h1 class="" id="name-heading" tabindex="-1"><a class="heading-anchor" href="#name-heading">Xinrui Wu <span lang="zh-CN">吴欣锐</span></a></h1>
+      <p>I am an undergraduate student in Software Engineering at the University of Electronic Science and Technology of China (UESTC). I am also a visiting student at MBZUAI, advised by <a href="https://scholar.google.com/citations?user=ddDL9HMAAAAJ&amp;hl" class="" target="_blank" rel="noopener noreferrer">Prof. Yutong Xie <span aria-hidden="true">↗</span></a>, and a research intern at the Institute for AI Industry Research (AIR), Tsinghua University, advised by <a href="https://yuanchun-li.github.io/" class="" target="_blank" rel="noopener noreferrer">Prof. Yuanchun Li <span aria-hidden="true">↗</span></a>.</p>
+      <p>My research centers on clinical AI and world models, efficient language-model reasoning, and visual intelligence. I study how models reason over patient trajectories, control their reasoning budgets, and represent visual and temporal information.</p>
+      <p>I am currently seeking PhD positions for Fall 2027 and am open to job opportunities. Please contact me at <a href="mailto:xinruiwu.wxr@gmail.com">xinruiwu.wxr@gmail.com</a>.</p>
+    </div>
+    <img class="portrait" src="/assets/portraits/xinrui-wu-enhanced.png" width="1286" height="1223" alt="Xinrui Wu" fetchpriority="high" />
+    <div class="profile-links"><a href="/cv/">Curriculum Vitae</a><a href="https://scholar.google.com/citations?user=pJzltu8AAAAJ&amp;hl=en" class="" target="_blank" rel="noopener noreferrer">Google Scholar <span aria-hidden="true">↗</span></a><a href="https://www.alphaxiv.org/@xinrui-wu" class="" target="_blank" rel="noopener noreferrer">alphaXiv <span aria-hidden="true">↗</span></a><a href="https://github.com/gintmr" class="" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a><a href="mailto:xinruiwu.wxr@gmail.com">Email <span aria-hidden="true">↗</span></a></div>
+  </section>
+  <section class="section" id="education" aria-labelledby="education-heading">
+    <h2 class="section-title" id="education-heading" tabindex="-1"><a class="heading-anchor" href="#education-heading">Education</a></h2>
+    <article class="entry education-entry"><div class="institution-logo"><img src="/assets/institutions/uestc.png" alt="UESTC logo" width="80" height="64" loading="lazy" /></div><div><h3 class="" id="education-1-heading" tabindex="-1"><a class="heading-anchor" href="#education-1-heading">University of Electronic Science and Technology of China (UESTC) <span class="institution-badge">Project 985</span></a></h3><p>B.S. in Software Engineering (Embedded System)</p><p class="meta">Sep 2023 – Present <span class="separator">·</span> Sichuan, China · GPA: 3.63/4.0</p></div></article>
+  </section>
+  <section class="section" id="research" aria-labelledby="research-heading">
+    <h2 class="section-title" id="research-heading" tabindex="-1"><a class="heading-anchor" href="#research-heading">Research Interests</a></h2>
+    <ul class="interest-list"><li><strong>Clinical AI:</strong> Clinical reasoning, longitudinal prognosis, relational trajectory modeling.</li><li><strong>Efficient Reasoning &amp; Perception:</strong> Budget-aware LLM reasoning, lightweight segmentation, distillation.</li><li><strong>World Models:</strong> Visual world modeling, spatiotemporal consistency, causal reasoning.</li><li><strong>Spatial Intelligence:</strong> 3D perception, vision-language spatial reasoning, AR/VR.</li><li><strong>Generative Models:</strong> Controllable image generation, reference-guided editing, generative model evaluation.</li></ul>
+  </section>
+  <section class="section" id="experience" aria-labelledby="experience-heading">
+    <h2 class="section-title" id="experience-heading" tabindex="-1"><a class="heading-anchor" href="#experience-heading">Research &amp; Internship Experience</a></h2>
+    <div class="entry-list"><article class="entry experience-entry" id="mbzuai">
+      <div class="institution-logo"><img src="/assets/institutions/mbzuai.jpg" alt="MBZUAI logo" width="80" height="64" loading="lazy" /></div><div class="entry-content">
+        <div class="entry-heading"><h3 class="" id="mbzuai-heading" tabindex="-1"><a class="heading-anchor" href="#mbzuai-heading">Mohamed bin Zayed University of Artificial Intelligence</a></h3><span class="date">Jan 2026 – Present</span></div>
+        <p class="role">Visiting Student <span class="separator">·</span> <span class="meta">Abu Dhabi, UAE</span></p>
+        <p class="advisors">Advisor: <a href="https://scholar.google.com/citations?user=ddDL9HMAAAAJ&amp;hl" class="" target="_blank" rel="noopener noreferrer">Prof. Yutong Xie <span aria-hidden="true">↗</span></a></p>
+        <p class="experience-description">Developing structured clinical reasoning methods that integrate multi-stage patient information; studying longitudinal prognosis and training paradigms for clinical world models.</p>
+      </div></article><article class="entry experience-entry" id="tsinghua-air">
+      <div class="institution-logo"><img src="/assets/institutions/tsinghua-air.png" alt="Tsinghua AIR logo" width="80" height="64" loading="lazy" /></div><div class="entry-content">
+        <div class="entry-heading"><h3 class="" id="tsinghua-air-heading" tabindex="-1"><a class="heading-anchor" href="#tsinghua-air-heading">Tsinghua University, Institute for AI Industry Research</a></h3><span class="date">Jan 2025 – Present</span></div>
+        <p class="role">Research Intern <span class="separator">·</span> <span class="meta">Beijing, China</span></p>
+        <p class="advisors">Advisors: <a href="https://yuanchun-li.github.io/" class="" target="_blank" rel="noopener noreferrer">Prof. Yuanchun Li <span aria-hidden="true">↗</span></a>, <a href="https://scholar.google.com/citations?user=TFGBA9cAAAAJ&amp;hl=zh-CN" class="" target="_blank" rel="noopener noreferrer">Prof. Yunxin Liu <span aria-hidden="true">↗</span></a></p>
+        <p class="experience-description">Developed BudgetThinker for controllable chain-of-thought generation. Proportional control tokens and a two-stage training pipeline with reinforcement learning achieve over 95% budget adherence, with generalization to embodied spatial reasoning.</p>
+      </div></article><article class="entry experience-entry" id="hkust">
+      <div class="institution-logo"><img src="/assets/institutions/hkust.png" alt="HKUST logo" width="80" height="64" loading="lazy" /></div><div class="entry-content">
+        <div class="entry-heading"><h3 class="" id="hkust-heading" tabindex="-1"><a class="heading-anchor" href="#hkust-heading">Hong Kong University of Science and Technology, VGD Group</a></h3><span class="date">Jul 2025 – Aug 2025</span></div>
+        <p class="role">Research Intern <span class="separator">·</span> <span class="meta">Hong Kong</span></p>
+        <p class="advisors">Advisor: <a href="https://scholar.google.com/citations?user=16iMMwwAAAAJ&amp;hl=zh-CN" class="" target="_blank" rel="noopener noreferrer">Prof. Sai-Kit Yeung <span aria-hidden="true">↗</span></a></p>
+        <p class="experience-description">Developed MaskGuide for lightweight marine segmentation through feature separation and purification. Tiny-MSAM achieves 99.4% of SAM&#39;s accuracy with 0.5% of its parameters at 164.7 FPS.</p>
+      </div></article><article class="entry experience-entry" id="megvii">
+      <div class="institution-logo"><img src="/assets/institutions/megvii.png" alt="Megvii logo" width="80" height="64" loading="lazy" /></div><div class="entry-content">
+        <div class="entry-heading"><h3 class="" id="megvii-heading" tabindex="-1"><a class="heading-anchor" href="#megvii-heading">Megvii Technology Limited</a></h3><span class="date">Feb 2025 – Jul 2025</span></div>
+        <p class="role">CV Algorithm Intern <span class="separator">·</span> <span class="meta">Beijing, China</span></p>
+        <p class="advisors">Mentor: Dr. Wei Ge</p>
+        <p class="experience-description">Unified multimodal prompts as visual masks and built a data pipeline supporting billions of samples. Led the development and business deployment of an open-vocabulary detection model.</p>
+      </div></article><article class="entry experience-entry" id="uestc-cfm">
+      <div class="institution-logo"><img src="/assets/institutions/uestc.png" alt="UESTC CFM logo" width="80" height="64" loading="lazy" /></div><div class="entry-content">
+        <div class="entry-heading"><h3 class="" id="uestc-cfm-heading" tabindex="-1"><a class="heading-anchor" href="#uestc-cfm-heading">UESTC, Center for Future Media</a></h3><span class="date">Jun 2024 – Present</span></div>
+        <p class="role">Research Intern <span class="separator">·</span> <span class="meta">Sichuan, China</span></p>
+        <p class="advisors">Advisor: <a href="https://cfm.uestc.edu.cn/~yangyang/" class="" target="_blank" rel="noopener noreferrer">Prof. Yang Yang <span aria-hidden="true">↗</span></a></p>
+        <p class="experience-description">Studying open-vocabulary object detection and segmentation, including false-positive reduction and recognition of objects with diverse visual appearances.</p>
+      </div></article></div>
+  </section>
+  <section class="section" id="awards" aria-labelledby="awards-heading">
+    <h2 class="section-title" id="awards-heading" tabindex="-1"><a class="heading-anchor" href="#awards-heading">Honors &amp; Awards</a></h2>
+    <ul class="awards-list"><li><span class="date">2025</span><div><strong>UESTC Model Student Scholarship</strong><p class="meta">Top 5% · Sci-Tech Innovation · October</p></div></li><li><span class="date">2025</span><div><strong>National Third Prize</strong><p class="meta">China College Student Computer Design Competition · June</p></div></li><li><span class="date">2025</span><div><strong>National Third Prize</strong><p class="meta">National College Student Innovation and Entrepreneurship Competition · May</p></div></li><li><span class="date">2024</span><div><strong>UESTC Model Student Scholarship</strong><p class="meta">Top 5% · Sci-Tech Innovation · October</p></div></li><li><span class="date">2024</span><div><strong>National Second Prize</strong><p class="meta">C4 National College Student Network Technology Challenge · August</p></div></li><li><span class="date">2024</span><div><strong>National Third Prize</strong><p class="meta">C4 National College Student Network Technology Challenge · August</p></div></li><li><span class="date">2024</span><div><strong>Sichuan Provincial Second Prize</strong><p class="meta">China College Student Computer Design Competition · June</p></div></li></ul>
+  </section>
+  <section id="visitors" class="section visitor-section" aria-labelledby="visitors-heading">
+  <h2 id="visitors-heading" class="section-title" tabindex="-1"><a class="heading-anchor" href="#visitors-heading">Visitors</a></h2>
+  <div class="entry visitor-card" data-visitor-card data-state="unconfigured">
+    <div class="visitor-summary">
+      <dl class="visitor-totals">
+        <div><dt>Page views</dt><dd data-visitor-value="pageviews">—</dd></div>
+        <div><dt><abbr title="Daily unique visitors, summed across UTC days. Returning visitors on another day count again.">Visitor-days</abbr></dt><dd data-visitor-value="visitorDays">—</dd></div>
+        <div><dt>Countries &amp; regions</dt><dd data-visitor-value="countries">—</dd></div>
+      </dl>
+      <span class="visitor-demo-label" data-visitor-demo hidden>Design preview · sample data</span>
+    </div>
+    <div class="visitor-geography">
+      <figure class="visitor-map-figure">
+        <a class="visitor-map-original" href="/assets/maps/source/world-gs-2016-2948.jpg" target="_blank" rel="noopener noreferrer" aria-label="Open the original standard world map">
+          <img class="visitor-map" src="/assets/maps/source/world-gs-2016-2948.jpg" width="800" height="513" loading="lazy" alt="Standard world map, approval number GS(2016)2948. Visitor counts are listed separately by country or region.">
+        </a>
+        <figcaption class="visitor-map-source"><span>审图号 GS(2016)2948号</span><a href="https://beijing.tianditu.gov.cn/bzdt/" target="_blank" rel="noopener noreferrer">Map source ↗</a></figcaption>
+      </figure>
+      <div class="visitor-country-panel" data-visitor-country-panel hidden>
+        <p class="visitor-country-heading">Countries &amp; regions <span>Page views</span></p>
+        <ol class="visitor-country-list" data-visitor-country-list aria-label="Page views by country or region"></ol>
+        <details class="visitor-more-countries" data-visitor-more hidden><summary>All countries &amp; regions</summary><ol class="visitor-country-list" data-visitor-country-rest aria-label="More countries and regions"></ol></details>
+        <p class="visitor-unknown" data-visitor-unknown hidden></p>
       </div>
     </div>
-    <script src="js/jquery.min.js"></script>
-    <script src="js/jquery.waypoints.min.js"></script>
-    <script src="js/main.js"></script>
-
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-      // TODO: Add SDKs for Firebase products that you want to use
-      // https://firebase.google.com/docs/web/setup#available-libraries
-
-      // Your web app's Firebase configuration
-      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-      const firebaseConfig = {
-        apiKey: "AIzaSyBM5-cQema1PzjpTPtCxIdmvTrWH2p1nc8",
-        authDomain: "vinaysomawat-portfolio.firebaseapp.com",
-        projectId: "vinaysomawat-portfolio",
-        storageBucket: "vinaysomawat-portfolio.firebasestorage.app",
-        messagingSenderId: "996992279996",
-        appId: "1:996992279996:web:f296555eef216d501337b9",
-        measurementId: "G-8PVX0MLGSK",
-      };
-
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-
-      import {
-        getFirestore,
-        doc,
-        getDoc,
-        setDoc,
-        updateDoc,
-      } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-
-      // Initialize Firestore
-      const db = getFirestore(app);
-
-      // Reference to the visitor count document
-      const counterRef = doc(db, "visitors", "counter");
-
-      // Function to update visitor count
-      async function updateVisitorCount() {
-        try {
-          const docSnap = await getDoc(counterRef);
-
-          if (docSnap.exists()) {
-            let newCount = docSnap.data().count + 1;
-            await updateDoc(counterRef, { count: newCount });
-            document.getElementById(
-              "visitorCount"
-            ).innerText = `Visitor Count: ${newCount}`;
-          } else {
-            await setDoc(counterRef, { count: 1 });
-            document.getElementById("visitorCount").innerText =
-              "Visitor Count: 1";
-          }
-        } catch (error) {
-          console.error("Error updating visitor count:", error);
-        }
-      }
-
-      // Call function on page load
-      updateVisitorCount();
-    </script>
-    <!-- <a href="https://mapmyvisitors.com/web/1c0n7"  title="Visit tracker"><img src="https://mapmyvisitors.com/map.png?d=whRrj0_NTkSlVgc05ZPMr0-lSqqQS34vVP5UHcHtEdw&cl=ffffff&w=300" /></a> -->
-
-    <!-- <script type='text/javascript' id='mapmyvisitors' src='https://mapmyvisitors.com/map.js?cl=e9ea2d&w=70&t=tt&d=whRrj0_NTkSlVgc05ZPMr0-lSqqQS34vVP5UHcHtEdw&co=ffffff&ct=26c4c2&cmo=4d8c25&cmn=ea6cd7'></script> -->
-    <script type='text/javascript' id='mapmyvisitors' src='https://mapmyvisitors.com/map.js?cl=e9ea2d&w=1000&t=tt&d=whRrj0_NTkSlVgc05ZPMr0-lSqqQS34vVP5UHcHtEdw&co=ffffff&ct=26c4c2&cmo=4d8c25&cmn=ea6cd7'></script>
-  </body>
+    <div class="visitor-footer">
+      <p class="visitor-status" data-visitor-status role="status">Visitor statistics are not connected yet.</p>
+    </div>
+    <noscript><p class="visitor-status">Enable JavaScript to view visitor statistics.</p></noscript>
+  </div>
+</section></main>
+  <footer class="site-footer page-shell"><span>© 2026 Xinrui Wu</span><a href="mailto:xinruiwu.wxr@gmail.com">xinruiwu.wxr@gmail.com</a></footer>
+</body>
 </html>

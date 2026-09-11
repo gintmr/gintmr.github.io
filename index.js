@@ -1,646 +1,208 @@
-import {
-  bio,
-  hobbies,
-  education,
-  papers,
-  experience,
-  footer,
-  awards,
-} from "./user-data/data.js";
+const themeButton = document.getElementById('theme-toggle');
+const themeColor = document.querySelector('meta[name="theme-color"]');
+function updateThemeButton() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const label = `Switch to ${dark ? 'light' : 'dark'} theme`;
+  themeButton.setAttribute('aria-label', label);
+  themeButton.title = label;
+  themeColor.content = dark ? '#191919' : '#fffaff';
+}
+themeButton.addEventListener('click', () => {
+  const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem('xinrui-academic-theme', theme); } catch (_) {}
+  updateThemeButton();
+});
+updateThemeButton();
 
-import { URLs } from "./user-data/urls.js";
+const menuButton = document.getElementById('menu-toggle');
+const navigation = document.getElementById('site-nav');
+function closeMenu() {
+  navigation.classList.remove('is-open');
+  menuButton.setAttribute('aria-expanded', 'false');
+  menuButton.setAttribute('aria-label', 'Open navigation');
+}
+menuButton.addEventListener('click', () => {
+  const open = menuButton.getAttribute('aria-expanded') !== 'true';
+  navigation.classList.toggle('is-open', open);
+  menuButton.setAttribute('aria-expanded', String(open));
+  menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  if (open) navigation.querySelector('a').focus();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
+    closeMenu();
+    menuButton.focus();
+  }
+});
+document.addEventListener('click', event => {
+  if (!event.target.closest('.header-shell')) closeMenu();
+});
+navigation.addEventListener('click', event => {
+  if (event.target.closest('a')) closeMenu();
+});
+matchMedia('(min-width: 721px)').addEventListener('change', closeMenu);
 
-const { medium, gitConnected, gitRepo } = URLs;
+// Keep native self-links as a fallback; explicitly align and focus repeat clicks.
+document.querySelector('main').addEventListener('click', event => {
+  const link = event.target.closest('.heading-anchor');
+  if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  if (location.hash !== link.hash) history.pushState(null, '', link.hash);
+  const heading = link.closest('h1, h2, h3');
+  heading.focus({ preventScroll: true });
+  heading.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+});
 
-async function fetchBlogsFromMedium(url) {
-  try {
-    const response = await fetch(url);
-    const { items } = await response.json();
-    populateBlogs(items, "blogs");
-  } catch (error) {
-    throw new Error(
-      `Error in fetching the blogs from Medium profile: ${error}`
-    );
+// Keep the outline outside the centered content whenever the right gutter fits.
+const outline = document.querySelector('.page-outline');
+const outlineButton = document.getElementById('outline-toggle');
+const outlinePanel = document.getElementById('outline-panel');
+const outlineScroll = document.querySelector('.outline-scroll');
+const outlineLinks = [...document.querySelectorAll('.outline-list a')];
+const outlineTargets = outlineLinks.map(link => document.getElementById(link.hash.slice(1)));
+const rail = document.querySelector('.outline-rail');
+const segment = document.querySelector('.outline-segment');
+const dot = document.querySelector('.outline-dot');
+let activeIndex = -1;
+
+function closeOutline() {
+  outlinePanel.classList.remove('is-open');
+  outlineButton.setAttribute('aria-expanded', 'false');
+}
+
+function revealActiveOutlineLink() {
+  if (!outlinePanel.offsetHeight) return;
+  const active = outlineLinks[Math.max(0, activeIndex)];
+  if (active.offsetTop < outlineScroll.scrollTop) outlineScroll.scrollTop = active.offsetTop;
+  else if (active.offsetTop + active.offsetHeight > outlineScroll.scrollTop + outlineScroll.clientHeight) {
+    outlineScroll.scrollTop = active.offsetTop + active.offsetHeight - outlineScroll.clientHeight;
   }
 }
 
-async function fetchReposFromGit(url) {
-  try {
-    const response = await fetch(url);
-    const items = await response.json();
-    populateRepo(items, "repos");
-  } catch (error) {
-    throw new Error(`Error in fetching the blogs from repos: ${error}`);
-  }
-}
-
-async function fetchGitConnectedData(url) {
-  try {
-    const response = await fetch(url);
-    console.log(response);
-    const { basics } = await response.json();
-    // populateBlogs(items, "blogs");
-    mapBasicResponse(basics);
-  } catch (error) {
-    throw new Error(`Error in fetching the blogs from git connected: ${error}`);
-  }
-}
-
-function mapBasicResponse(basics) {
-  const {
-    name,
-    label,
-    image,
-    email,
-    phone,
-    url,
-    summary,
-    profiles,
-    headline,
-    blog,
-    yearsOfExperience,
-    username,
-    locationAsString,
-    region,
-    karma,
-    id,
-    followers,
-    following,
-    picture,
-    website,
-  } = basics;
-
-  // added title of page
-  window.parent.document.title = name;
-}
-
-function populateBio(items, id) {
-  const bioTag = document.getElementById(id);
-  items.forEach((bioItem) => {
-    const p = getElement("p", null);
-    p.innerHTML = bioItem;
-    bioTag.append(p);
+function drawOutline() {
+  if (!outlinePanel.offsetHeight) return;
+  const rows = outlineLinks.map(link => ({
+    x: link.parentElement.dataset.depth === '1' ? 16 : 8,
+    top: link.offsetTop,
+    height: link.offsetHeight,
+  }));
+  let path = `M${rows[0].x} 0`;
+  rows.forEach((row, index) => {
+    const previous = rows[index - 1];
+    if (previous && previous.x !== row.x) {
+      const y = row.top;
+      path += ` L${previous.x} ${y - 5} C${previous.x} ${y},${row.x} ${y},${row.x} ${y + 5}`;
+    }
+    path += ` L${row.x} ${row.top + row.height - 5}`;
   });
+  rail.setAttribute('d', path);
+  const row = rows[Math.max(0, activeIndex)];
+  segment.setAttribute('d', `M${row.x} ${row.top + 5} V${row.top + row.height - 5}`);
+  dot.setAttribute('cx', row.x);
+  dot.setAttribute('cy', row.top + row.height / 2);
 }
 
-function populateHobbies(items, id) {
-  const HobbiesTag = document.getElementById(id);
-  items.forEach((item) => {
-    const h3 = getElement("li", null);
-    h3.innerHTML = item;
-
-    const divProgressWrap = getElement("div", "progress-wrap");
-    divProgressWrap.append(h3);
-
-    const divAnimateBox = getElement("div", "col-md-12 animate-box");
-    divAnimateBox.append(divProgressWrap);
-
-    HobbiesTag.append(divAnimateBox);
+function updateOutline() {
+  const offset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) + 8;
+  let current = 0;
+  outlineTargets.forEach((target, index) => {
+    if (target.getBoundingClientRect().top <= offset) current = index;
   });
-}
-
-function populateTrekking(items) {
-  const HobbiesTag = document.getElementById('trekking');
-  items.forEach((item) => {
-    const h3 = getElement("li", null);
-    h3.innerHTML = item;
-
-    const divProgressWrap = getElement("div", "progress-wrap");
-    divProgressWrap.append(h3);
-
-    const divAnimateBox = getElement("div", "col-md-12 animate-box");
-    divAnimateBox.append(divProgressWrap);
-
-    HobbiesTag.append(divAnimateBox);
-  });
-}
-
-function populateBlogs(items, id) {
-  const projectdesign = document.getElementById(id);
-  const count = 3; // Number of blogs to display
-
-  for (let i = 0; i < count; i++) {
-      // Create a wrapper for the blog card
-      const blogCard = document.createElement("div");
-      blogCard.className = "blog-card";
-      blogCard.style = `
-          display: flex;
-          flex-direction: column;
-          border-radius: 12px;
-          padding: 16px;
-          font-size: 14px;
-          background: linear-gradient(135deg, rgb(255, 221, 153), rgb(249, 191, 63));
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          min-height: 150px;
-          cursor: pointer;
-      `;
-
-      // Wrap the card content in an anchor tag
-      const blogLink = document.createElement("a");
-      blogLink.href = items[i].link;
-      blogLink.target = "_blank";
-      blogLink.style = "text-decoration: none; color: black; display: block;";
-
-      blogCard.appendChild(blogLink);
-
-      // Blog Title
-      const blogTitle = document.createElement("h4");
-      blogTitle.className = "blog-heading";
-      blogTitle.innerHTML = items[i].title;
-      blogTitle.style = "margin: 0 0 8px; font-size: 18px; font-weight: bold;";
-      blogLink.appendChild(blogTitle);
-
-      // Publish Date
-      const pubDateEle = document.createElement("p");
-      pubDateEle.className = "publish-date";
-      pubDateEle.innerHTML = getBlogDate(items[i].pubDate);
-      pubDateEle.style = "margin: 0 0 12px; font-size: 12px; color: #555;";
-      blogLink.appendChild(pubDateEle);
-
-      // Blog Description
-      const blogDescription = document.createElement("p");
-      blogDescription.className = "blog-description";
-      const html = items[i].content;
-      const [, doc] = /<p>(.*?)<\/p>/g.exec(html) || [];
-      blogDescription.innerHTML = doc;
-      blogDescription.style = "margin: 0 0 12px; font-size: 12px; color: #000;";
-      blogLink.appendChild(blogDescription);
-
-      // Categories (Tags)
-      const categoriesDiv = document.createElement("div");
-      categoriesDiv.style = "display: flex; gap: 8px; margin-top: 12px;";
-
-      for (const category of items[i].categories) {
-          const badge = document.createElement("span");
-          badge.className = "badge";
-          badge.innerHTML = category;
-          badge.style = `
-              font-size: 12px;
-              padding: 4px 8px;
-              background-color: #007acc;
-              color: white;
-              border-radius: 4px;
-          `;
-          categoriesDiv.appendChild(badge);
-      }
-
-      blogLink.appendChild(categoriesDiv);
-
-      // Append the blog card to the container
-      projectdesign.appendChild(blogCard);
-  }
-}
-
-function populateRepo(items, id) {
-  const projectdesign = document.getElementById(id);
-  const count = 4; // Adjust this count based on the number of repos you want to display
-
-  // Set up a wrapper div to hold repo cards in rows of 2
-  const rowWrapper = document.createElement("div");
-  rowWrapper.style =
-    "display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;";
-  projectdesign.appendChild(rowWrapper);
-
-  for (let i = 0; i < count; i++) {
-  
-    // Create elements for each repo card
-    // const repoCard = document.createElement("div");
-    // repoCard.className = "repo-card";
-    // repoCard.style = `
-    //       flex: 1 0 48%;  /* Two cards in one row */
-    //       display: flex;
-    //       flex-direction: column;
-    //       justify-content: space-between;
-    //       border-radius: 12px;
-    //       padding: 16px;
-    //       font-size: 14px;
-    //       background: linear-gradient(135deg, #ffdd99, #f9bf3f);
-    //       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    //       transition: transform 0.2s ease-in-out;
-    //       cursor: pointer;
-    //   `;
-
-    // // Make the card clickable by wrapping the content inside an anchor tag
-    // const repoLink = document.createElement("a");
-    // repoLink.href = `https://github.com/${items[i].author}/${items[i].name}`;
-    // repoLink.target = "_blank";
-    // repoLink.style =
-    //   "text-decoration: none; color: black; display: block; height: 100%;";
-
-    // repoCard.appendChild(repoLink);
-
-    // Repository name
-    const repoName = document.createElement("h4");
-    repoName.className = "repo-heading";
-    repoName.innerHTML = items[i].name;
-    repoName.style = "margin: 0; font-size: 18px; font-weight: bold;";
-    repoLink.appendChild(repoName);
-
-    // Repository description
-    const repoDescription = document.createElement("p");
-    repoDescription.className = "repo-description";
-    repoDescription.innerHTML = items[i].description;
-    repoDescription.style = "margin-top: 8px; font-size: 12px; color: #555;";
-    repoLink.appendChild(repoDescription);
-
-    // Stats row (Language, Stars, Forks)
-    const statsRow = document.createElement("div");
-    statsRow.style = `
-          display: flex; 
-          align-items: center; 
-          gap: 16px; 
-          margin-top: 12px; 
-          font-size: 12px; 
-          color: #666;
-      `;
-
-    // Language
-    const languageDiv = document.createElement("div");
-    languageDiv.style = "display: flex; align-items: center; gap: 4px;";
-    languageDiv.innerHTML = `
-          <span style="width: 8px; height: 8px; background-color: #666; border-radius: 50%; display: inline-block;"></span>
-          ${items[i].language}
-      `;
-    statsRow.appendChild(languageDiv);
-
-    // Stars
-    const starsDiv = document.createElement("div");
-    starsDiv.style = "display: flex; align-items: center; gap: 4px;";
-    starsDiv.innerHTML = `
-          <img src="https://img.icons8.com/ios-filled/16/666666/star--v1.png" alt="Stars">
-          ${items[i].stars}
-      `;
-    statsRow.appendChild(starsDiv);
-
-    // Forks
-    const forksDiv = document.createElement("div");
-    forksDiv.style = "display: flex; align-items: center; gap: 4px;";
-    forksDiv.innerHTML = `
-          <img src="https://img.icons8.com/ios-filled/16/666666/code-fork.png" alt="Forks">
-          ${items[i].forks}
-      `;
-    statsRow.appendChild(forksDiv);
-
-    repoLink.appendChild(statsRow);
-
-    // Add the repo card to the row wrapper
-    rowWrapper.appendChild(repoCard);
-  }
-}
-
-
-function populatePapers(items, id) {
-  let mainContainer = document.getElementById(id);
-
-  const groups = [
-    {
-      key: "first",
-      title: "First / Co-first Author",
-      items: items.filter((item) => item.roleGroup === "first"),
-    },
-    {
-      key: "contributor",
-      title: "Contributing Author",
-      items: items.filter((item) => item.roleGroup === "contributor"),
-    },
-  ];
-
-  const columns = document.createElement("div");
-  columns.className = "paper-columns";
-  mainContainer.append(columns);
-
-  groups.forEach((group) => {
-    const column = document.createElement("div");
-    column.className = "paper-column";
-
-    const heading = document.createElement("h2");
-    heading.className = "paper-column-title";
-    heading.innerHTML = group.title;
-    column.append(heading);
-
-    const timeline = document.createElement("div");
-    timeline.className = "timeline-centered paper-column-timeline";
-    column.append(timeline);
-
-    group.items.forEach((item) => {
-      timeline.append(createPaperEntry(item));
+  // A short final section may never reach the header before the page ends.
+  if (scrollY > 0 && Math.ceil(scrollY + innerHeight) >= document.documentElement.scrollHeight - 2) current = outlineLinks.length - 1;
+  if (current !== activeIndex) {
+    activeIndex = current;
+    outlineLinks.forEach((link, index) => {
+      if (index === current) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
     });
+    document.querySelector('.outline-current').textContent = outlineLinks[current].textContent;
+    revealActiveOutlineLink();
+  }
+  drawOutline();
+}
 
-    timeline.append(createTimelineEnd());
-    columns.append(column);
+function layoutOutline() {
+  const headerHeight = document.querySelector('.site-header').getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+  const contentWidth = document.querySelector('main').getBoundingClientRect().width;
+  const panelWidth = parseFloat(getComputedStyle(outlinePanel).width);
+  const gap = parseFloat(getComputedStyle(outline).columnGap);
+  const sidebar = (document.documentElement.clientWidth - contentWidth) / 2 >= panelWidth + gap + 16;
+  outline.classList.toggle('is-sidebar', sidebar);
+  if (sidebar) closeOutline();
+  updateOutline();
+  revealActiveOutlineLink();
+}
+
+outlineButton.addEventListener('click', () => {
+  const open = outlineButton.getAttribute('aria-expanded') !== 'true';
+  closeMenu();
+  outlineButton.setAttribute('aria-expanded', String(open));
+  outlinePanel.classList.toggle('is-open', open);
+  if (open) {
+    revealActiveOutlineLink();
+    drawOutline();
+    outlineLinks[Math.max(0, activeIndex)].focus({ preventScroll: true });
+  }
+});
+outlinePanel.addEventListener('click', event => {
+  const link = event.target.closest('a');
+  if (!link) return;
+  closeOutline();
+  // Transfer keyboard focus to the destination, preserving native anchor scrolling.
+  const target = document.getElementById(link.hash.slice(1));
+  target.setAttribute('tabindex', '-1');
+  target.focus({ preventScroll: true });
+});
+document.addEventListener('click', event => {
+  if (!event.target.closest('.page-outline')) closeOutline();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && outlineButton.getAttribute('aria-expanded') === 'true') {
+    closeOutline();
+    outlineButton.focus();
+  }
+});
+let outlineFrame = 0;
+addEventListener('scroll', () => {
+  if (!outlineFrame) outlineFrame = requestAnimationFrame(() => {
+    updateOutline();
+    outlineFrame = 0;
   });
+}, { passive: true });
+addEventListener('resize', layoutOutline);
+addEventListener('load', layoutOutline);
+new ResizeObserver(layoutOutline).observe(document.querySelector('main'));
+new ResizeObserver(layoutOutline).observe(document.querySelector('.site-header'));
+document.fonts.ready.then(layoutOutline);
+layoutOutline();
+
+// Web fonts can change section positions after the browser's initial hash jump.
+// Real input cancels this correction so it cannot pull a reader back later.
+const initialTarget = document.getElementById(location.hash.slice(1));
+if (initialTarget) {
+  const initialHash = location.hash;
+  let readerInteracted = false;
+  const cancelAlignment = () => { readerInteracted = true; };
+  const inputEvents = ['pointerdown', 'keydown', 'wheel', 'touchstart'];
+  inputEvents.forEach(type => addEventListener(type, cancelAlignment, { passive: true, once: true }));
+  const pageLoaded = document.readyState === 'complete' ? Promise.resolve() : new Promise(resolve => addEventListener('load', resolve, { once: true }));
+  Promise.all([document.fonts.ready, pageLoaded]).then(() => requestAnimationFrame(() => {
+    layoutOutline();
+    if (!readerInteracted && location.hash === initialHash) initialTarget.scrollIntoView({ block: 'start', behavior: 'instant' });
+    inputEvents.forEach(type => removeEventListener(type, cancelAlignment));
+  }));
 }
 
-function createPaperEntry(item) {
-    let spanTimelineSublabel = document.createElement("span");
-    spanTimelineSublabel.className = "timeline-sublabel";
-    spanTimelineSublabel.innerHTML = item.authors;
-
-    let spanh2 = document.createElement("span");
-    spanh2.innerHTML = item.conference;
-
-    let h2TimelineLabel = document.createElement("h2");
-
-    if (item.link) {
-      let titleLink = document.createElement("a");
-      titleLink.href = item.link;
-      titleLink.target = "_blank";
-      titleLink.innerHTML = item.title;
-      h2TimelineLabel.append(titleLink);
-    } else {
-      h2TimelineLabel.innerHTML = item.title;
-    }
-    h2TimelineLabel.append(spanh2);
-
-    let divTimelineLabel = document.createElement("div");
-    divTimelineLabel.className = "timeline-label";
-    divTimelineLabel.append(h2TimelineLabel);
-    divTimelineLabel.append(spanTimelineSublabel);
-
-    for (let j = 0; j < item.abstract.length; j++) {
-      let pTimelineText = document.createElement("p");
-      pTimelineText.className = "timeline-text";
-      pTimelineText.innerHTML = "&blacksquare; " + item.abstract[j];
-      divTimelineLabel.append(pTimelineText);
-    }
-
-    let divTags = document.createElement("div");
-    for (let j = 0; j < item.tags.length; j++) {
-      let spanTags = document.createElement("span");
-      spanTags.className = "badge";
-      spanTags.innerHTML = item.tags[j];
-      divTags.append(spanTags);
-    }
-    divTimelineLabel.append(divTags);
-
-    let iFa = document.createElement("i");
-    iFa.className = "fa fa-" + item.icon;
-
-    let divTimelineIcon = document.createElement("div");
-    divTimelineIcon.className = "timeline-icon color-2";
-    divTimelineIcon.append(iFa);
-
-    let divTimelineEntryInner = document.createElement("div");
-    divTimelineEntryInner.className = "timeline-entry-inner";
-    divTimelineEntryInner.append(divTimelineIcon);
-    divTimelineEntryInner.append(divTimelineLabel);
-
-    let article = document.createElement("article");
-    article.className = "timeline-entry animate-box";
-    article.append(divTimelineEntryInner);
-
-    return article;
-}
-
-function createTimelineEnd() {
-  let divTimelineIcon = document.createElement("div");
-  divTimelineIcon.className = "timeline-icon color-2";
-
-  let divTimelineEntryInner = document.createElement("div");
-  divTimelineEntryInner.className = "timeline-entry-inner";
-  divTimelineEntryInner.append(divTimelineIcon);
-
-  let article = document.createElement("article");
-  article.className = "timeline-entry begin animate-box";
-  article.append(divTimelineEntryInner);
-
-  return article;
-}
-
-
-function populateExp_Edu(items, id) {
-  let mainContainer = document.getElementById(id);
-
-  for (let i = 0; i < items.length; i++) {
-    let spanTimelineSublabel = document.createElement("span");
-    spanTimelineSublabel.className = "timeline-sublabel";
-    spanTimelineSublabel.innerHTML = items[i].subtitle;
-
-    let spanh2 = document.createElement("span");
-    spanh2.innerHTML = items[i].duration;
-
-    let h2TimelineLabel = document.createElement("h2");
-    h2TimelineLabel.innerHTML = items[i].title;
-    h2TimelineLabel.append(spanh2);
-
-    let divTimelineLabel = document.createElement("div");
-    divTimelineLabel.className = "timeline-label";
-    divTimelineLabel.append(h2TimelineLabel);
-    divTimelineLabel.append(spanTimelineSublabel);
-
-    for (let j = 0; j < items[i].details.length; j++) {
-      let pTimelineText = document.createElement("p");
-      pTimelineText.className = "timeline-text";
-      pTimelineText.innerHTML = "&blacksquare; " + items[i].details[j];
-      divTimelineLabel.append(pTimelineText);
-    }
-
-    let divTags = document.createElement("div");
-    for (let j = 0; j < items[i].tags.length; j++) {
-      let spanTags = document.createElement("span");
-      spanTags.className = "badge";
-      spanTags.innerHTML = items[i].tags[j];
-      divTags.append(spanTags);
-    }
-    divTimelineLabel.append(divTags);
-
-    let iFa = document.createElement("i");
-    iFa.className = "fa fa-" + items[i].icon;
-
-    let divTimelineIcon = document.createElement("div");
-    divTimelineIcon.className = "timeline-icon color-2";
-    divTimelineIcon.append(iFa);
-
-    let divTimelineEntryInner = document.createElement("div");
-    divTimelineEntryInner.className = "timeline-entry-inner";
-    divTimelineEntryInner.append(divTimelineIcon);
-    divTimelineEntryInner.append(divTimelineLabel);
-
-    let article = document.createElement("article");
-    article.className = "timeline-entry animate-box";
-    article.append(divTimelineEntryInner);
-
-    mainContainer.append(article);
+// Preserve the full desktop interface inside each responsive project preview.
+const resizePreviews = new ResizeObserver(entries => {
+  for (const entry of entries) {
+    entry.target.style.setProperty('--preview-scale', String(entry.contentRect.width / 1280));
   }
+});
+document.querySelectorAll('.preview-viewport').forEach(viewport => resizePreviews.observe(viewport));
 
-  let divTimelineIcon = document.createElement("div");
-  divTimelineIcon.className = "timeline-icon color-2";
-
-  let divTimelineEntryInner = document.createElement("div");
-  divTimelineEntryInner.className = "timeline-entry-inner";
-  divTimelineEntryInner.append(divTimelineIcon);
-
-  let article = document.createElement("article");
-  article.className = "timeline-entry begin animate-box";
-  article.append(divTimelineEntryInner);
-
-  mainContainer.append(article);
-}
-
-function populateExp_Rew(items, id) {
-  let mainContainer = document.getElementById(id);
-
-  for (let i = 0; i < items.length; i++) {
-    let spanTimelineSublabel = document.createElement("span");
-    spanTimelineSublabel.className = "timeline-sublabel";
-    spanTimelineSublabel.innerHTML = items[i].subtitle;
-
-    let spanh2 = document.createElement("span");
-    spanh2.innerHTML = items[i].duration;
-
-    let h2TimelineLabel = document.createElement("h2");
-    h2TimelineLabel.innerHTML = items[i].title;
-    h2TimelineLabel.append(spanh2);
-
-    let divTimelineLabel = document.createElement("div");
-    divTimelineLabel.className = "timeline-label";
-    divTimelineLabel.append(h2TimelineLabel);
-    divTimelineLabel.append(spanTimelineSublabel);
-
-    let divTags = document.createElement("div");
-    for (let j = 0; j < items[i].tags.length; j++) {
-      let spanTags = document.createElement("span");
-      spanTags.className = "badge";
-      spanTags.innerHTML = items[i].tags[j];
-      divTags.append(spanTags);
-    }
-    divTimelineLabel.append(divTags);
-
-    let iFa = document.createElement("i");
-    iFa.className = "fa fa-" + items[i].icon;
-
-    let divTimelineIcon = document.createElement("div");
-    divTimelineIcon.className = "timeline-icon color-2";
-    divTimelineIcon.append(iFa);
-
-    let divTimelineEntryInner = document.createElement("div");
-    divTimelineEntryInner.className = "timeline-entry-inner";
-    divTimelineEntryInner.append(divTimelineIcon);
-    divTimelineEntryInner.append(divTimelineLabel);
-
-    let article = document.createElement("article");
-    article.className = "timeline-entry animate-box";
-    article.append(divTimelineEntryInner);
-
-    mainContainer.append(article);
-  }
-
-  let divTimelineIcon = document.createElement("div");
-  divTimelineIcon.className = "timeline-icon color-2";
-
-  let divTimelineEntryInner = document.createElement("div");
-  divTimelineEntryInner.className = "timeline-entry-inner";
-  divTimelineEntryInner.append(divTimelineIcon);
-
-  let article = document.createElement("article");
-  article.className = "timeline-entry begin animate-box";
-  article.append(divTimelineEntryInner);
-
-  mainContainer.append(article);
-}
-
-
-
-
-function populateLinks(items, id) {
-  let footer = document.getElementById(id);
-
-  items.forEach(function (item) {
-    if (item.label !== "copyright-text") {
-      let span = document.createElement("span");
-      span.className = "col";
-
-      let p = document.createElement("p");
-      p.className = "col-title";
-      p.innerHTML = item.label;
-      span.append(p);
-
-      let nav = document.createElement("nav");
-      nav.className = "col-list";
-
-      let ul = document.createElement("ul");
-      item.data.forEach(function (data) {
-        let li = document.createElement("li");
-        let a = document.createElement("a");
-        if (data.link) {
-          a.href = data.link;
-          a.target = "_blank";
-        }
-        if (data.func) {
-          a.setAttribute("onclick", data.func);
-        }
-        a.innerHTML = data.text;
-
-        li.append(a);
-        ul.append(li);
-      });
-      nav.append(ul);
-      span.append(nav);
-      footer.append(span);
-    }
-
-    if (item.label === "copyright-text") {
-      let div = document.createElement("div");
-      div.className = "copyright-text no-print";
-      item.data.forEach(function (copyright) {
-        let p = document.createElement("p");
-        p.innerHTML = copyright;
-        div.append(p);
-      });
-      footer.append(div);
-    }
-  });
-}
-
-function getElement(tagName, className) {
-  let item = document.createElement(tagName);
-  item.className = className;
-  return item;
-}
-
-function getBlogDate(publishDate) {
-  const elapsed = Date.now() - Date.parse(publishDate);
-
-  // Time conversions in milliseconds
-  const msPerSecond = 1000;
-  const msPerMinute = msPerSecond * 60;
-  const msPerHour = msPerMinute * 60;
-  const msPerDay = msPerHour * 24;
-  const msPerMonth = msPerDay * 30;
-  const msPerYear = msPerDay * 365;
-
-  if (elapsed < msPerMinute) {
-    const seconds = Math.floor(elapsed / msPerSecond);
-    return `${seconds} seconds ago`;
-  } else if (elapsed < msPerHour) {
-    const minutes = Math.floor(elapsed / msPerMinute);
-    return `${minutes} minutes ago`;
-  } else if (elapsed < msPerDay) {
-    const hours = Math.floor(elapsed / msPerHour);
-    return `${hours} hours ago`;
-  } else if (elapsed < msPerMonth) {
-    const days = Math.floor(elapsed / msPerDay);
-    return days == 1 ? `${days} day ago` : `${days} days ago`;
-  } else if (elapsed < msPerYear) {
-    const months = Math.floor(elapsed / msPerMonth);
-    return months == 1 ? `${months} month ago` : `${months} months ago`;
-  } else {
-    const years = Math.floor(elapsed / msPerYear);
-    return years == 1 ? `${years} year ago` : `${years} years ago`;
-  }
-}
-
-populateBio(bio, "bio");
-
-populateHobbies(hobbies, "hobbies");
-populateExp_Edu(education, "education");
-populatePapers(papers, "papers");
-
-fetchBlogsFromMedium(medium);
-fetchReposFromGit(gitRepo);
-fetchGitConnectedData(gitConnected);
-
-populateExp_Edu(experience, "experience");
-// populateTrekking(trekking);
-populateExp_Rew(awards, "awards")
-populateLinks(footer, "footer");
+// Keep shared links to the previous single-page publication section useful.
+if (location.pathname === '/' && location.hash === '#publications') location.replace('/publication/');

@@ -1,2 +1,11 @@
 .vscode
 .history
+.DS_Store
+node_modules/
+output/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+supabase/functions/.env
