@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { normalizeVisitorConfig, canRecordVisit, validateVisitorSummary } from '../visitors.js';
+import { normalizeVisitorConfig, canRecordVisit, validateVisitorSummary, initializeVisitors } from '../visitors.js';
 
 const config = normalizeVisitorConfig({ enabled: true,
   endpoint: 'https://example.supabase.co/functions/v1/visitor-analytics',
@@ -45,6 +45,77 @@ test('summary distinguishes empty real counts from unknown or invalid service re
   ]) {
     const value = makeSummary(); mutate(value);
     assert.equal(validateVisitorSummary(value), null);
+  }
+});
+
+test('visible visitor card reads after collection settles, and local previews only read', async t => {
+  for (const scenario of ['accepted', 'HTTP failure', 'network failure', 'local preview']) {
+    await t.test(scenario, { timeout: 3000 }, async t => {
+      const local = scenario === 'local preview';
+      const calls = [];
+      let resolvePost;
+      let rejectPost;
+      const pendingPost = new Promise((resolve, reject) => { resolvePost = resolve; rejectPost = reject; });
+      let resolveRead;
+      const readStarted = new Promise(resolve => { resolveRead = resolve; });
+      const nodes = new Map();
+      const totals = ['pageviews', 'visitorDays', 'countries'].map(visitorValue => ({
+        dataset: { visitorValue }, textContent: '—',
+      }));
+      const card = {
+        dataset: { state: 'unconfigured' },
+        querySelectorAll: () => totals,
+        querySelector(selector) {
+          if (!nodes.has(selector)) nodes.set(selector, { textContent: '', hidden: false, replaceChildren() {} });
+          return nodes.get(selector);
+        },
+      };
+      const summary = { version: 1, generatedAt: '2026-09-11T00:00:00Z', since: null,
+        totals: { pageviews: 0, visitorDays: 0 }, today: { date: '2026-09-11', pageviews: 0, visitors: 0 }, countries: [] };
+      const globals = {
+        location: new URL(local ? 'http://127.0.0.1:4173/' : 'https://gintmr.github.io/'),
+        navigator: {},
+        window: { addEventListener() {}, removeEventListener() {} },
+        document: {
+          visibilityState: 'visible',
+          getElementById: () => ({ textContent: JSON.stringify({ ...config, enabled: true }) }),
+          querySelector: () => card,
+        },
+        fetch: async (_url, options) => {
+          const method = options.method || 'GET';
+          calls.push(method);
+          if (method === 'POST') {
+            if (calls.length === 1) return pendingPost;
+            throw new Error('Simulated network failure on retry');
+          }
+          resolveRead();
+          return { ok: true, json: async () => summary };
+        },
+      };
+      const saved = Object.fromEntries(Object.keys(globals).map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
+      t.after(() => {
+        for (const [key, descriptor] of Object.entries(saved)) {
+          if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+          else delete globalThis[key];
+        }
+      });
+      for (const [key, value] of Object.entries(globals)) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
+
+      initializeVisitors();
+      await new Promise(resolve => setImmediate(resolve));
+      if (!local) {
+        assert.deepEqual(calls, ['POST'], 'a pending collection must not race with the summary GET');
+        assert.equal(card.dataset.state, 'loading');
+        if (scenario === 'network failure') rejectPost(new Error('Simulated network failure'));
+        else resolvePost({ ok: scenario === 'accepted', status: scenario === 'accepted' ? 202 : 403 });
+      }
+      await readStarted;
+      await new Promise(resolve => setImmediate(resolve));
+      assert.deepEqual(calls, local ? ['GET'] : scenario === 'network failure' ? ['POST', 'POST', 'GET'] : ['POST', 'GET']);
+      assert.equal(card.dataset.state, 'empty', 'the public summary must still render after failed collection');
+      assert.equal(totals[0].textContent, '0');
+      assert.equal(card.querySelector('[data-visitor-status]').textContent, 'No visits recorded yet.');
+    });
   }
 });
 

@@ -140,7 +140,7 @@ function designPreviewSummary() {
     totals: { pageviews: 359, visitorDays: 189 }, today: { date: '2026-09-11', pageviews: 15, visitors: 8 }, countries };
 }
 
-function initializeVisitorCard(card, config, demo) {
+function initializeVisitorCard(card, config, demo, recording = Promise.resolve()) {
   if (demo) { renderSummary(card, designPreviewSummary(), true); return; }
   if (!config) return;
   card.dataset.state = 'loading';
@@ -153,6 +153,11 @@ function initializeVisitorCard(card, config, demo) {
     loaded = true;
     observer?.disconnect();
     try {
+      // Read after this page's collection attempt so a first visit does not
+      // briefly become a permanent empty-state snapshot. Failed collection
+      // still allows the public totals to load.
+      await recording.catch(() => {});
+      if (pageController.signal.aborted) return;
       const summary = await requestWithTimeout(config.endpoint, { headers: { Accept: 'application/json' } }, 6500, pageController.signal, async response => {
         if (!response.ok) throw new Error('Visitor summary unavailable');
         return validateVisitorSummary(await response.json());
@@ -187,21 +192,24 @@ export function initializeVisitors() {
   catch { /* An unconfigured site intentionally shows no invented statistics. */ }
   const demo = LOCAL_HOSTS.has(location.hostname) && new URLSearchParams(location.search).get('visitor-demo') === '1';
   const card = document.querySelector('[data-visitor-card]');
-  if (card) initializeVisitorCard(card, config, demo);
+  let recording = Promise.resolve();
   if (!demo && canRecordVisit(config, location, {
     globalPrivacyControl: navigator.globalPrivacyControl,
     doNotTrack: navigator.doNotTrack || window.doNotTrack,
   })) {
-    if (document.visibilityState === 'visible') void recordVisit(config);
+    if (document.visibilityState === 'visible') recording = recordVisit(config);
     else {
-      const onVisible = () => {
-        if (document.visibilityState !== 'visible') return;
-        document.removeEventListener('visibilitychange', onVisible);
-        void recordVisit(config);
-      };
-      document.addEventListener('visibilitychange', onVisible);
+      recording = new Promise(resolve => {
+        const onVisible = () => {
+          if (document.visibilityState !== 'visible') return;
+          document.removeEventListener('visibilitychange', onVisible);
+          recordVisit(config).then(resolve, resolve);
+        };
+        document.addEventListener('visibilitychange', onVisible);
+      });
     }
   }
+  if (card) initializeVisitorCard(card, config, demo, recording);
 }
 
 if (typeof document !== 'undefined') initializeVisitors();

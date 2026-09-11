@@ -47,11 +47,19 @@ the normal local browser preview independently confirmed the same empty data.
 The frontend is enabled; localhost is excluded from tracking. Do not rerun that
 cleanup or smoke test. Existing blog data and unrelated SQL drafts were preserved.
 
+GitHub Pages deployed the new site successfully on 11 September (initial release
+`2acd1ba`, run `34553337572`). All four public pages return HTTP 200 with the
+collector enabled, and the served map matches the official source checksum.
+One normal production-browser page load after cleanup produced one pageview,
+one visitor-day and country `AE`, verified through the public API at 02:09 UTC.
+These are actual page loads after enablement, not the removed synthetic events.
+The Home card waits for its own collection attempt before requesting totals;
+other clients' cached aggregates can still be up to one minute old.
+
 The temporary token-protected `visitor-proxy-check` function was removed after
 the two-network verification. It never accessed the database or returned raw
-addresses. Only `visitor-analytics` remains deployed. The unit suite passes all
-29 tests after removing the unused choropleth-shading test. Never enable the
-frontend based only on unit tests.
+addresses. Only `visitor-analytics` remains deployed. The client, backend and
+database checks pass. Never enable the frontend based only on unit tests.
 
 ## What is implemented
 
