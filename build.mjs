@@ -8,8 +8,8 @@ import { visitorMarkup, visitorHistoryMarkup } from './visitor-markup.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 // All generated pages reference the same asset versions, so layout edits cannot
-// leave individual subpages using a previously cached stylesheet, script, or logo.
-const [stylesheetUrl, scriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl, effectsStyleUrl, effectsScriptUrl, historyScriptUrl] = await Promise.all(['/css/style.css', '/index.js', profile.logo, '/css/visitors.css', '/visitors.js', '/css/effects.css', '/effects.js', '/visit-history.js'].map(async path => {
+// leave individual subpages using a previously cached stylesheet, script, logo, or CV.
+const [stylesheetUrl, scriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl, effectsStyleUrl, effectsScriptUrl, historyScriptUrl, cvPdfUrl] = await Promise.all(['/css/style.css', '/index.js', profile.logo, '/css/visitors.css', '/visitors.js', '/css/effects.css', '/effects.js', '/visit-history.js', profile.cvPdfUrl].map(async path => {
   const version = createHash('sha256').update(await readFile(`${root}${path.slice(1)}`)).digest('hex').slice(0, 12);
   return `${path}?v=${version}`;
 }));
@@ -143,10 +143,10 @@ function projectPage() {
 
 function cvPage() {
   return `<div class="page-heading cv-heading">${linkedHeading('h1', 'cv-heading', 'Curriculum Vitae')}
-    <div class="cv-actions">${external(profile.cvPdfUrl, 'Open PDF')}<a href="${profile.cvPdfUrl}" download="Xinrui-Wu-CV.pdf">Download PDF <span aria-hidden="true">↓</span></a></div>
+    <div class="cv-actions">${external(cvPdfUrl, 'Open PDF')}<a href="${escape(cvPdfUrl)}" download="Xinrui-Wu-CV.pdf">Download PDF <span aria-hidden="true">↓</span></a></div>
   </div>
-  <object class="cv-document" data="${profile.cvPdfUrl}#view=FitH&amp;navpanes=0" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
-    <p>Your browser cannot display this PDF inline. ${external(profile.cvPdfUrl, 'Open the CV PDF')} or <a href="${profile.cvPdfUrl}" download>download a copy</a>.</p>
+  <object class="cv-document" data="${escape(cvPdfUrl)}#view=FitH&amp;navpanes=0" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
+    <p>Your browser cannot display this PDF inline. ${external(cvPdfUrl, 'Open the CV PDF')} or <a href="${escape(cvPdfUrl)}" download>download a copy</a>.</p>
   </object>`;
 }
 

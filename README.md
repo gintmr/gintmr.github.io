@@ -19,7 +19,7 @@ Open `http://127.0.0.1:4173/`. The generated HTML files can be served directly b
 - `css/style.css`: the shared UI, mobile layouts, themes, and print styles. Set `--site-max-width` and `--site-inline-padding` in `:root` to change the width and padding of every page, including the navigation and CV preview container.
 - `index.js`: theme preference, mobile navigation, page outline, and responsive iframe scaling.
 
-After changing content, templates, CSS, JavaScript, or the logo, regenerate the four public navigation pages and the unlisted history page. The build adds content-based version identifiers to the stylesheet, script, and logo URLs so all pages load the updated assets:
+After changing content, templates, CSS, JavaScript, the logo, or the CV PDF, regenerate the four public navigation pages and the unlisted history page. The build adds content-based version identifiers to the stylesheet, script, logo, and CV PDF URLs so all pages load the updated assets:
 
 ```sh
 node build.mjs
@@ -43,7 +43,9 @@ BudgetThinker and ParaThinker are accepted by EMNLP 2026, and MaskGuide is accep
 
 SeaTree: Tracing Marine Creatures through Taxonomic Tree is **Submitted to AAAI 2027** and retains its contributing-author role. Its author list is Yiwei Chen, Zheng Ziqiang, Xinrui Wu, Sai-Kit Yeung. All publication author lists render without hyperlinks, preserving name order, Xinrui Wu's bold emphasis, and any supplied contribution markers. No equal-contribution markers or paper URL are inferred for SeaTree.
 
-HKUST dates follow the CV (July–August 2025). The CV button and navigation open `/cv/`. This page embeds `assets/cv/Xinrui-Wu-CV.pdf`, copied from the accompanying CV project’s `Output/main.pdf`, and offers direct open/download links. To update the document, replace this repository’s PDF with the newly compiled CV; the build does not access the separate CV project.
+HKUST dates follow the CV (July–August 2025). The CV button and navigation open `/cv/`. This page embeds `assets/cv/Xinrui-Wu-CV.pdf`, copied from the accompanying CV project’s `Output/main.pdf`, and offers direct open/download links. The current CV selects six papers from the Publication page: BudgetThinker, MaskGuide, ImageTime, HiReT, Predicting the Future Is Not Enough: Toward Action-Aware Clinical World Models, and OCG. It uses a single Publication section without Core Author or Contributing Author subgroups and follows the website's latest titles, author lists, and submission statuses.
+
+To update the document, replace this repository’s PDF with the newly compiled CV, then run `node build.mjs`; the build does not access the separate CV project. It hashes the PDF's content and applies one shared `?v=` version to the embedded document, Open PDF link, download links, and fallback links. Updating the PDF therefore gives the browser a new URL while all CV entrypoints refer to the same document version.
 
 ## Visitor statistics
 
