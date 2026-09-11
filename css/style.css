@@ -151,11 +151,11 @@ main.page-shell { padding-top: 2.5rem; padding-bottom: 3.25rem; flex: 1; }
 .brand { display: inline-flex; align-items: center; gap: .7rem; flex-shrink: 0; color: var(--foreground); font-size: 1.08rem; font-weight: 650; letter-spacing: .01em; }
 .brand:hover { text-decoration: none; }
 .brand img { border-radius: .65rem; width: 38px; height: 38px; object-fit: cover; }
-.site-nav { display: flex; align-items: center; margin-left: auto; padding: 4px; border: 1px solid color-mix(in srgb, var(--border) 58%, transparent); border-radius: 999px; box-shadow: inset 0 1px 0 #ffffff0a; }
+.site-nav { display: flex; align-items: center; margin-left: auto; padding: 4px; }
 .site-nav a { position: relative; display: block; padding: .4rem .85rem; border-radius: .6rem; color: var(--foreground); font-size: .95rem; font-weight: 550; transition: background 160ms ease; }
 .site-nav a:hover { text-decoration: none; background: color-mix(in srgb, var(--accent) 8%, transparent); }
 .site-nav a[aria-current='page'] { background: color-mix(in srgb, var(--accent) 9%, transparent); color: var(--link); }
-.header-controls { display: none; padding: 3px; border: 1px solid color-mix(in srgb, var(--border) 58%, transparent); border-radius: 999px; }
+.header-controls { display: none; padding: 3px; }
 .js .header-controls { display: flex; }
 .header-controls button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; background: transparent; border-radius: 50%; }
 .header-controls button:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--link); }
