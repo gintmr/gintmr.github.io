@@ -28,6 +28,10 @@ const icon = (name) => {
   return `<svg class="icon icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 };
 const pages = [{ id: 'home', label: 'Home', path: '/' }, { id: 'publication', label: 'Publication', path: '/publication/' }, { id: 'project', label: 'Project', path: '/project/' }, { id: 'cv', label: 'CV', path: profile.cvUrl }];
+const publicationGroups = [
+  { id: 'core-author', label: 'Core Author', papers: publications.filter(paper => paper.role === 'first') },
+  { id: 'contributing-author', label: 'Contributing Author', papers: publications.filter(paper => paper.role === 'contributor') },
+];
 const linkedHeading = (tag, id, title, className = '') => `<${tag} class="${className}" id="${id}" tabindex="-1"><a class="heading-anchor" href="#${id}">${title}</a></${tag}>`;
 const heading = (id, title) => linkedHeading('h2', `${id}-heading`, title, 'section-title');
 const logo = (url, name) => `<div class="institution-logo"><img src="${url}" alt="${escape(name)} logo" width="80" height="64" loading="lazy" /></div>`;
@@ -43,9 +47,9 @@ function pageOutline(page) {
       { id: 'awards', label: 'Honors & Awards' },
       { id: 'visitors', label: 'Visitors' },
     ],
-    publication: ['accepted', 'submitted'].flatMap(status => [
-      { id: status, label: status === 'accepted' ? 'Accepted' : 'Submitted' },
-      ...publications.filter(item => item.status === status).map(item => ({ id: item.id, label: item.shortName, depth: 1 })),
+    publication: publicationGroups.flatMap(group => [
+      { id: group.id, label: group.label },
+      ...group.papers.map(item => ({ id: item.id, label: item.shortName, depth: 1 })),
     ]),
     project: projects.map(item => ({ id: item.id, label: item.name })),
     cv: [{ id: 'cv-heading', label: 'Curriculum Vitae' }],
@@ -108,15 +112,19 @@ function home() {
 }
 
 function publicationPage() {
-  const authors = (text) => escape(text).replace('Xinrui Wu', '<strong>Xinrui Wu</strong>').replaceAll('*', '<sup>*</sup>').replaceAll('Ma+', 'Ma<sup>+</sup>');
+  const authors = (paper) => paper.authors.split(', ').map(name => {
+    const label = escape(name).replace('Xinrui Wu', '<strong>Xinrui Wu</strong>').replaceAll('*', '<sup>*</sup>').replaceAll('Ma+', 'Ma<sup>+</sup>');
+    const url = paper.authorLinks?.[name];
+    return url ? `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>` : label;
+  }).join(', ');
   return `<div class="page-heading">${linkedHeading('h1', 'publication-heading', 'Publication')}${external(profile.scholarUrl, 'Google Scholar', 'heading-link')}</div>
     <p class="publication-note">* Equal contribution.</p>
-    ${['accepted', 'submitted'].map(status => `<section class="section publication-section" id="${status}" aria-labelledby="${status}-heading">
-      ${heading(status, `${status === 'accepted' ? 'Accepted' : 'Submitted'} <sup class="count">${publications.filter(p => p.status === status).length}</sup>`)}
-      <div class="publication-list">${publications.filter(p => p.status === status).map(paper => `<article class="paper entry" id="${paper.id}">
+    ${publicationGroups.map(group => `<section class="section publication-section" id="${group.id}" aria-labelledby="${group.id}-heading">
+      ${heading(group.id, `${group.label} <sup class="count">${group.papers.length}</sup>`)}
+      <div class="publication-list">${group.papers.map(paper => `<article class="paper entry" id="${paper.id}">
         ${linkedHeading('h3', `${paper.id}-heading`, escape(paper.title))}
-        <p class="authors">${authors(paper.authors)}</p>
-        <div class="paper-meta"><span class="venue">${status === 'submitted' ? 'Submitted to ' : ''}${escape(paper.venue)}${/\b20\d{2}\b/.test(paper.venue) ? '' : ` · ${paper.year}`}</span><span class="meta">${escape(paper.roleLabel)}</span></div>
+        <p class="authors">${authors(paper)}</p>
+        <div class="paper-meta"><span class="venue">${paper.status === 'submitted' ? 'Submitted to ' : ''}${escape(paper.venue)}${/\b20\d{2}\b/.test(paper.venue) ? '' : ` · ${paper.year}`}</span><span class="meta">${escape(paper.roleLabel)}</span></div>
         ${paper.links.length ? `<div class="paper-links">${paper.links.map(link => external(link.url, escape(link.label))).join('')}</div>` : ''}
       </article>`).join('')}</div>
     </section>`).join('')}`;
@@ -146,7 +154,7 @@ function cvPage() {
 function layout(page, content) {
   const description = {
     home: 'Xinrui Wu (吴欣锐), undergraduate at UESTC, visiting student at MBZUAI, and research intern at Tsinghua AIR. Research interests, education, academic experience, and awards.',
-    publication: 'Accepted publications and submitted manuscripts by Xinrui Wu in clinical AI, world models, efficient reasoning, and computer vision.',
+    publication: 'Research publications by Xinrui Wu, grouped by core and contributing authorship, in clinical AI, world models, efficient reasoning, and computer vision.',
     project: 'Research OS and FinGraph: personal projects by Xinrui Wu, with interactive previews and source repositories.',
     cv: 'Curriculum vitae of Xinrui Wu. View or download the PDF, including education, research experience, publications, and awards.',
   }[page.id];
