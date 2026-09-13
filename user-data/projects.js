@@ -15,4 +15,12 @@ export const projects = [
     repositoryUrl: "https://github.com/gintmr/FinGraph",
     previewLabel: "Interactive preview",
   },
+  {
+    id: "embedded-studio",
+    name: "UESTC SISE Embedded Studio",
+    description: "The official website and knowledge hub for Embedded Studio at UESTC’s School of Information and Software Engineering. It brings together learning resources, past recruitment challenges, and practical guides across robotics, IoT, edge AI, and computer systems.",
+    previewUrl: "https://uestc404.github.io/Embedded-Studio/",
+    repositoryUrl: "https://github.com/UESTC404/Embedded-Studio",
+    previewLabel: "Official website",
+  },
 ];

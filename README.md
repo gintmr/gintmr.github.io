@@ -114,12 +114,13 @@ Supabase dashboard editor; it contains no secrets.
 
 ## Project previews
 
-The official demo addresses are verified from each project's repository metadata and README:
+The project website addresses are verified from each project's repository metadata and source:
 
 - [Research OS](https://github.com/gintmr/ResearchOS-Public): [read-only demonstration](https://gintmr.github.io/ResearchOS-Public/), using fictional example research data.
 - [FinGraph](https://github.com/gintmr/FinGraph): [interactive dashboard](https://fin-graph-two.vercel.app/).
+- [UESTC SISE Embedded Studio](https://github.com/UESTC404/Embedded-Studio): [official website and knowledge hub](https://uestc404.github.io/Embedded-Studio/).
 
-Both previews load directly in sandboxed iframes. Each panel also provides a link to open the demo separately. Their availability and content are controlled by the respective deployments.
+All three previews load directly in sandboxed iframes. Each panel also provides a link to open the website separately. Their availability and content are controlled by the respective deployments.
 
 ## Fonts and credits
 
