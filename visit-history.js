@@ -3,6 +3,12 @@ const TRACKED_PATHS = new Set(['/', '/publication/', '/project/', '/cv/']);
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const numberFormat = new Intl.NumberFormat('en');
 const regionNames = typeof Intl.DisplayNames === 'function' ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
+const regionLabels = new Map([
+  ['CN', 'China mainland'],
+  ['HK', 'Hong Kong (China)'],
+  ['MO', 'Macao (China)'],
+  ['TW', 'Taiwan (China)'],
+]);
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const isTimestamp = value => typeof value === 'string' && value.length <= 40 && Number.isFinite(Date.parse(value));
 
@@ -37,6 +43,7 @@ export function validateVisitorActivity(value) {
 }
 
 const countryName = code => {
+  if (regionLabels.has(code)) return regionLabels.get(code);
   try { return regionNames?.of(code) || code; } catch { return code; }
 };
 
