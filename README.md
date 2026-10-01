@@ -116,11 +116,12 @@ Supabase dashboard editor; it contains no secrets.
 
 The project website addresses are verified from each project's repository metadata and source:
 
+- [Papertone](https://github.com/gintmr/Papertone): [bilingual paper-podcast listening library](https://gintmr.github.io/Papertone/).
 - [Research OS](https://github.com/gintmr/ResearchOS-Public): [read-only demonstration](https://gintmr.github.io/ResearchOS-Public/), using fictional example research data.
 - [FinGraph](https://github.com/gintmr/FinGraph): [interactive dashboard](https://fin-graph-two.vercel.app/).
 - [UESTC SISE Embedded Studio](https://github.com/UESTC404/Embedded-Studio): [official website and knowledge hub](https://uestc404.github.io/Embedded-Studio/).
 
-All three previews load directly in sandboxed iframes. Each panel also provides a link to open the website separately. Their availability and content are controlled by the respective deployments.
+All four previews load directly in sandboxed iframes. Each panel also provides a link to open the website separately. Their availability and content are controlled by the respective deployments.
 
 ## Fonts and credits
 

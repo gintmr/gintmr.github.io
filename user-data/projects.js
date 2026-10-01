@@ -1,5 +1,13 @@
 export const projects = [
   {
+    id: "papertone",
+    name: "Papertone",
+    description: "A listening library that turns alphaXiv paper podcasts into study material. Every paper becomes a card with a waveform player, a sentence-level timeline, bilingual and dictation transcripts, and an offline copy of the library for focused listening practice.",
+    previewUrl: "https://gintmr.github.io/Papertone/",
+    repositoryUrl: "https://github.com/gintmr/Papertone",
+    previewLabel: "Interactive preview",
+  },
+  {
     id: "researchos",
     name: "Research OS",
     description: "A local-first workspace that connects research questions, literature, experiments, and evidence. Insights link directly to supporting experiment tables, preserving project context for the next experiment, paper draft, or AI-assisted session.",
