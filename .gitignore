@@ -9,3 +9,6 @@ output/
 supabase/.temp/
 supabase/.branches/
 supabase/functions/.env
+
+# 组件库的本地工作副本：故意不跟踪（私有 submodule 会让 Pages 的 checkout 失败）
+/vendor/

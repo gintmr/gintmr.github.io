@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { profile, researchAreas, publications, experience, education, awards } from './user-data/data.js';
@@ -8,9 +9,21 @@ import { visitorMarkup, visitorHistoryMarkup } from './visitor-markup.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
-// 组件库以 submodule 挂在 vendor/gintmr-ui，构建时把 dist/ 拷进仓库根的 ui/。
-// GitHub Pages 不做构建、也不会拉 submodule，所以线上真正被引用的必须是这份拷贝。
+// 组件库以本地工作副本挂在 vendor/gintmr-ui，构建时把 dist/ 拷进仓库根的 ui/。
+//
+// 这一份副本【故意不跟踪】、不进仓库：GitHub Pages 的构建会递归拉 submodule，
+// 而组件库是私有仓库、Actions 的令牌拿不到，构建会直接卡在 checkout
+// （annotations: repository 'https://github.com/gintmr/gintmr-ui.git/' not found）。
+// 线上真正被引用的就是下面这份 ui/ 拷贝，所以只要它进了仓库，Pages 就能直发。
 const libraryDist = `${root}vendor/gintmr-ui/dist/`;
+if (!existsSync(libraryDist)) {
+  throw new Error(
+    `找不到组件库产物：${libraryDist}\n` +
+      '学术站的 vendor/gintmr-ui 是本地工作副本，不随仓库走。新克隆后先放好它：\n' +
+      '  git clone git@github.com:gintmr/gintmr-ui.git vendor/gintmr-ui\n' +
+      '  (cd vendor/gintmr-ui && node build.mjs)'
+  );
+}
 await mkdir(`${root}ui`, { recursive: true });
 for (const file of ['gintmr-ui.css', 'gintmr-ui.js', 'theme-preload.js']) {
   await copyFile(`${libraryDist}${file}`, `${root}ui/${file}`);

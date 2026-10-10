@@ -16,15 +16,22 @@ Open `http://127.0.0.1:4173/`. The generated HTML files can be served directly b
 - `profile.logo` points to the selected illustrated avatar in `assets/branding/`, shared by the navigation, favicon, and Apple touch icon. It is an unchanged copy of `output/logo-concepts-2026-09-11/01-color-flat.png`. `profile.portrait` independently controls the homepage and social preview photograph, currently the approved 1286 × 1223 AI-enhanced image in `assets/portraits/`. The original `个人照2.jpg` is retained.
 - `user-data/projects.js`: project descriptions, official demo URLs, and repository links.
 - `build.mjs`: shared page templates and metadata.
-- `vendor/gintmr-ui` (submodule): the shared UI library used by this site and the personal blog. It owns the design tokens, navigation, page outline, decorative effects, and content cards. Edit styles or behaviour there, not here.
+- `vendor/gintmr-ui`: the shared UI library used by this site and the personal blog. It owns the design tokens, navigation, page outline, decorative effects, and content cards. Edit styles or behaviour there, not here. **This directory is a local working copy and is deliberately untracked** — see below.
 - `css/visitors.css` and `visitors.js`: the visitor card, its table controls, and the analytics data contract, which stay local to this repository.
 
-GitHub Pages serves committed files and never checks out submodules, so the build copies the library's `dist/` into the repository's own `ui/` directory. Every page references `/ui/gintmr-ui.css` and `/ui/gintmr-ui.js`; that copy is what ships. Set `--gintmr_ui-max-width` and `--gintmr_ui-inline-padding` in the library to change the width and padding of every page, including the navigation and CV preview container.
+The library is not tracked here on purpose. GitHub Pages' build checks out submodules recursively, and the library is a private repository, so the checkout step fails outright (`repository 'https://github.com/gintmr/gintmr-ui.git/' not found`) and nothing gets deployed. Instead the build copies the library's `dist/` into this repository's own `ui/` directory, and that committed copy is what ships. Every page references `/ui/gintmr-ui.css` and `/ui/gintmr-ui.js`.
 
-After changing content, templates, or the CV PDF — and after every library update — regenerate the four public navigation pages and the unlisted history page. The build re-copies `ui/` from the submodule and adds content-based version identifiers to the stylesheet, script, logo, and CV PDF URLs so all pages load the updated assets:
+A fresh clone therefore needs the library placed manually — and so does the build, which stops with an explicit message if it is missing:
 
 ```sh
-git -C vendor/gintmr-ui pull        # or: git submodule update --remote vendor/gintmr-ui
+git clone git@github.com:gintmr/gintmr-ui.git vendor/gintmr-ui
+(cd vendor/gintmr-ui && node build.mjs)   # 产出 dist/
+``` Set `--gintmr_ui-max-width` and `--gintmr_ui-inline-padding` in the library to change the width and padding of every page, including the navigation and CV preview container.
+
+After changing content, templates, or the CV PDF — and after every library update — regenerate the four public navigation pages and the unlisted history page. The build re-copies `ui/` from the library working copy and adds content-based version identifiers to the stylesheet, script, logo, and CV PDF URLs so all pages load the updated assets:
+
+```sh
+git -C vendor/gintmr-ui pull        # 更新这份本地副本
 node build.mjs
 ```
 
