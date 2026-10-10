@@ -1716,3 +1716,256 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
   .gintmr_ui-viewer__progress-value { transition: none; }
 }
 
+
+/* ── components/visitor-card.css ─────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 访客卡
+   一块卡：总计（浏览 / 访客日 / 国家地区）+ 世界地图 + 今日 + 地区方块图 + 状态行。
+   数据由站点提供（见 components/visitor-card.js 的数据契约），这里只管观感。
+   地图 SVG 不在这里，由站点在构建期内联：visitorCardMarkup({ mapSvg })。
+   ========================================================================= */
+
+/* 数字与标签统一走无衬线 + 等宽数字：站点的正文是衬线体，衬线数字在统计块里会显得松散 */
+.gintmr_ui-visitor-card {
+  --gintmr_ui-visitor-sans: var(--gintmr_ui-font-sans);
+  padding: 1.1rem 1.25rem .9rem;
+}
+.gintmr_ui-visitor-card dt,
+.gintmr_ui-visitor-card dd,
+.gintmr_ui-visitor-card .gintmr_ui-visitor-status,
+.gintmr_ui-visitor-card .gintmr_ui-visitor-detail-note,
+.gintmr_ui-visitor-tip {
+  font-family: var(--gintmr_ui-visitor-sans);
+}
+.gintmr_ui-visitor-card dd,
+.gintmr_ui-visitor-card .gintmr_ui-visitor-status,
+.gintmr_ui-visitor-tip dd { font-variant-numeric: tabular-nums; }
+
+/* ── 总计行 ────────────────────────────────────────────────────────────── */
+.gintmr_ui-visitor-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem 1.2rem;
+}
+.gintmr_ui-visitor-totals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0;
+  margin: 0;
+}
+.gintmr_ui-visitor-totals > div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: .1rem;
+  min-width: 5.6rem;
+  padding-left: 1.35rem;
+  border-left: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 70%, transparent);
+}
+.gintmr_ui-visitor-totals > div:first-child { padding-left: 0; border-left: 0; }
+.gintmr_ui-visitor-totals dt {
+  color: var(--gintmr_ui-secondary);
+  font-size: .72rem;
+  line-height: 1.5;
+  letter-spacing: .02em;
+}
+.gintmr_ui-visitor-totals dd {
+  margin: 0;
+  color: var(--gintmr_ui-fg);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -.01em;
+}
+.gintmr_ui-visitor-totals abbr {
+  text-decoration: underline dotted color-mix(in srgb, var(--gintmr_ui-secondary) 45%, transparent);
+  text-underline-offset: .22em;
+  cursor: help;
+}
+.gintmr_ui-visitor-demo-label {
+  color: var(--gintmr_ui-link);
+  border: 1px solid var(--gintmr_ui-line);
+  border-radius: var(--gintmr_ui-radius-pill);
+  padding: .18rem .7rem;
+  font-size: .72rem;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* ── 地图 ──────────────────────────────────────────────────────────────── */
+.gintmr_ui-visitor-geography { margin: 1.1rem 0 0; }
+.gintmr_ui-visitor-map-figure { min-width: 0; max-width: 44rem; margin: 0 auto; }
+.gintmr_ui-visitor-map { display: block; width: 100%; height: auto; }
+.gintmr_ui-visitor-map-land {
+  fill: color-mix(in srgb, var(--gintmr_ui-link) 8%, var(--gintmr_ui-bg));
+  stroke: color-mix(in srgb, var(--gintmr_ui-link) 26%, var(--gintmr_ui-bg));
+  stroke-width: .65;
+  stroke-linejoin: round;
+}
+.gintmr_ui-visitor-map-land [data-country] {
+  fill: color-mix(in srgb, var(--gintmr_ui-link) var(--gintmr_ui-visitor-country-strength, 8%), var(--gintmr_ui-bg));
+  transition: fill var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-visitor-map-figure .gintmr_ui-visitor-detail-note {
+  margin: .5rem 0 0;
+  text-align: right;
+}
+
+/* ── 分析区：左边今日、右边按地区 ──────────────────────────────────────── */
+.gintmr_ui-visitor-analysis {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  align-items: start;
+  gap: 1.1rem 1.6rem;
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 65%, transparent);
+}
+.gintmr_ui-visitor-zone-label {
+  display: flex;
+  align-items: baseline;
+  gap: .1rem .5rem;
+  margin: 0 0 .6rem;
+  color: var(--gintmr_ui-secondary);
+  font-family: var(--gintmr_ui-visitor-sans);
+  font-size: .7rem;
+  line-height: 1.5;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.gintmr_ui-visitor-zone-label > span {
+  font-size: .67rem;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: .78;
+}
+.gintmr_ui-visitor-today { display: block; }
+.gintmr_ui-visitor-today-totals { gap: 0; }
+.gintmr_ui-visitor-today-totals > div { min-width: 4.2rem; padding-left: 1rem; }
+.gintmr_ui-visitor-today-totals dd { font-size: 1.25rem; }
+.gintmr_ui-visitor-today-totals dt { font-size: .7rem; }
+
+/* ── 地区方块图 ──────────────────────────────────────────────────────────
+   高度写死、内部不滚动、长尾不合并：所有地区都在这块画布里。
+   面积按 √浏览量缩放（保留排名，又不会让头两名吃掉整块画布）。
+   每个地区一个色相（按排名取黄金角，相邻块差异最大）；方块小到放不下
+   文字时，靠悬停或键盘聚焦弹出的提示来读数。 */
+.gintmr_ui-visitor-country-panel { min-width: 0; position: relative; }
+.gintmr_ui-visitor-treemap { position: relative; height: 176px; }
+/* 每个色块三个颜色都由 JS 按自己的色相写进来：浅底、更深的同色系边框、
+   以及同色系深色文字（浅底上白字会糊，深色字才读得清） */
+.gintmr_ui-visitor-block {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 5px 7px;
+  border: 1px solid var(--gintmr_ui-visitor-block-line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--gintmr_ui-visitor-block-fill);
+  color: var(--gintmr_ui-visitor-block-ink);
+  font-family: var(--gintmr_ui-visitor-sans);
+  font-size: .7rem;
+  line-height: 1.3;
+  text-align: left;
+  transition: filter var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-visitor-block b {
+  font-size: .755rem;
+  font-weight: 650;
+  letter-spacing: .005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gintmr_ui-visitor-block span {
+  font-size: .735rem;
+  font-weight: 600;
+  margin-top: -.05rem;
+  font-variant-numeric: tabular-nums;
+  opacity: .95;
+}
+.gintmr_ui-visitor-block:hover { filter: brightness(1.05) saturate(1.06); }
+/* 用同色系深色画焦点环：浅底上白环看不见 */
+.gintmr_ui-visitor-block:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+
+/* 悬停提示：给出名称、浏览量、访客日；很小的方块也能靠它读数 */
+.gintmr_ui-visitor-tip {
+  position: absolute;
+  z-index: 3;
+  min-width: 9rem;
+  padding: .45rem .6rem;
+  border: 1px solid var(--gintmr_ui-line);
+  border-radius: var(--gintmr_ui-radius-md);
+  background: color-mix(in srgb, var(--gintmr_ui-bg) 95%, transparent);
+  color: var(--gintmr_ui-fg);
+  font-size: .72rem;
+  line-height: 1.55;
+  box-shadow: 0 14px 30px -22px rgb(0 0 0 / 78%);
+  pointer-events: none;
+}
+.gintmr_ui-visitor-tip[hidden] { display: none; }
+.gintmr_ui-visitor-tip b { display: flex; align-items: center; gap: .4rem; margin-bottom: .2rem; font-weight: 650; font-size: .74rem; }
+.gintmr_ui-visitor-tip-swatch { width: .62rem; height: .62rem; flex: none; border: 1.5px solid; border-radius: 3px; }
+.gintmr_ui-visitor-tip div { display: flex; justify-content: space-between; gap: 1.1rem; }
+.gintmr_ui-visitor-tip dt { color: var(--gintmr_ui-secondary); }
+.gintmr_ui-visitor-tip dd { margin: 0; font-weight: 600; }
+
+/* ── 状态行 ────────────────────────────────────────────────────────────── */
+.gintmr_ui-visitor-detail-note {
+  margin: .3rem 0 .5rem;
+  color: var(--gintmr_ui-secondary);
+  font-size: .72rem;
+  line-height: 1.7;
+}
+.gintmr_ui-visitor-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .4rem 1.5rem;
+  margin-top: .9rem;
+  padding-top: .55rem;
+  border-top: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 60%, transparent);
+}
+.gintmr_ui-visitor-status {
+  margin: 0;
+  color: var(--gintmr_ui-secondary);
+  font-size: .72rem;
+  letter-spacing: .01em;
+}
+.gintmr_ui-visitor-section [hidden] { display: none !important; }
+
+/* ── 通用表格（学术站的访问历史页复用）──────────────────────────────────── */
+.gintmr_ui-visitor-table-scroll:focus-visible { outline: 2px solid var(--gintmr_ui-link); outline-offset: 4px; border-radius: .2rem; }
+.gintmr_ui-visitor-table-scroll { width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--gintmr_ui-line) transparent; }
+.gintmr_ui-visitor-table { width: 100%; margin: 0; border-collapse: collapse; font-size: .8rem; text-align: left; }
+.gintmr_ui-visitor-table th, .gintmr_ui-visitor-table td { padding: .55rem .8rem; line-height: 1.65; vertical-align: top; border-bottom: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 50%, transparent); }
+.gintmr_ui-visitor-table th:first-child, .gintmr_ui-visitor-table td:first-child { padding-left: 0; }
+.gintmr_ui-visitor-table th:last-child, .gintmr_ui-visitor-table td:last-child { padding-right: 0; }
+.gintmr_ui-visitor-table thead th { color: var(--gintmr_ui-secondary); font-size: .72rem; font-weight: 400; white-space: nowrap; }
+.gintmr_ui-visitor-table tbody th { font-weight: 400; }
+.gintmr_ui-visitor-table tbody tr:last-child > * { border-bottom: 0; }
+
+/* ── 窄屏 ──────────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .gintmr_ui-visitor-card { padding: 1rem; }
+  .gintmr_ui-visitor-totals > div { min-width: 4.4rem; padding-left: .9rem; }
+  .gintmr_ui-visitor-totals dd { font-size: 1.45rem; }
+  .gintmr_ui-visitor-analysis { grid-template-columns: minmax(0, 1fr); gap: .9rem; }
+  .gintmr_ui-visitor-today-totals > div { min-width: 4rem; }
+  .gintmr_ui-visitor-treemap { height: 150px; }
+  .gintmr_ui-visitor-table { font-size: .76rem; }
+  .gintmr_ui-visitor-table th, .gintmr_ui-visitor-table td { padding: .5rem .6rem; }
+}
+@media (max-width: 420px) {
+  .gintmr_ui-visitor-totals { justify-content: space-between; width: 100%; }
+  .gintmr_ui-visitor-totals dt { font-size: .67rem; }
+  .gintmr_ui-visitor-today-totals { gap: 0; }
+  .gintmr_ui-visitor-table th, .gintmr_ui-visitor-table td { padding-inline: .35rem; }
+  .gintmr_ui-visitor-table thead th { white-space: normal; }
+}
+

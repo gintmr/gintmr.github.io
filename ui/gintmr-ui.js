@@ -1319,6 +1319,490 @@ function initImageViewer(options = {}) {
   addEventListener('resize', () => { if (open) fit(); });
 }
 
+/* ── components/visitor-card.js ── */
+/* ============================================================================
+   gintmr-ui · 访客卡
+
+   一块卡：总计（浏览 / 访客日 / 国家地区）+ 世界地图 + 今日 + 国家明细 + 状态行。
+   观感全在 components/visitor-card.css；这里负责标记、取数、渲染与生命周期。
+
+   ── 数据契约（version 1）────────────────────────────────────────────────
+   站点提供取数函数，库只认下面这个形状，校验不过就报错，不猜、不兜底：
+
+     window.gintmrUIVisitors = {
+       load: async () => ({
+         version: 1,
+         generatedAt: '2026-10-10T12:00:00Z',   // 统计生成时间
+         since: '2026-09-11T00:00:00Z' | null,  // 统计起点
+         totals: { pageviews: 349, visitorDays: 279 },
+         today: { date: '2026-10-10', pageviews: 4, visitors: 3 },
+         countries: [{ code: 'SG', pageviews: 125, visitorDays: 125 }, …],
+       }),
+       demo?: () => summary,   // 可选：?gintmr_ui-visitor-demo=1 时用的样例数据
+     };
+
+   为什么取数不放进库：两个站的数据来源本来就不同（学术站是自己的访客接口，
+   博客是 Supabase 的 RPC）。库统一的是「形状 + 观感」，管道由站点接。
+
+   ── 用法 ────────────────────────────────────────────────────────────────
+
+     <Fragment set:html={visitorCardMarkup({ mapSvg, heading: 'Visitors' })} />
+
+   取数函数要在页面脚本里先挂上（构建期或运行期都行）。元素级初始化由
+   index.js 的 refresh() 负责，客户端路由换页后会自动重新接管。
+   ========================================================================= */
+
+/** 站点提供的取数来源；没有就当未接入处理，不编数字 */
+const sourceOf = () =>
+  (typeof window !== 'undefined' ? window.gintmrUIVisitors : null) || {};
+
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+const DEFAULT_LABELS = {
+  heading: 'Visitors',
+  pageviews: 'Page views',
+  visitorDays: 'Visitor-days',
+  visitorDaysHint: 'Daily unique visitors, summed across UTC days. Returning visitors on another day count again.',
+  countries: 'Countries & regions',
+  today: 'Today',
+  regions: 'By region',
+  visitors: 'Visitors',
+  demo: 'Design preview · sample data',
+  demoNote: 'Sample data for design review. No visits are recorded in this preview.',
+  notConnected: 'Visitor statistics are not connected yet.',
+  loading: 'Loading visitor statistics…',
+  unavailable: 'Visitor statistics are temporarily unavailable.',
+  empty: 'No visits recorded yet.',
+  countriesEmpty: 'No country or region totals recorded yet.',
+  unknownCountry: 'Unknown location',
+  mapLabel: 'Visitor locations by country or region',
+  mapNote: 'Simplified world map shaded by page views. The adjacent country and region list provides the visitor counts.',
+  noscript: 'Enable JavaScript to view visitor statistics.',
+  regionTotalsLabel: 'Visitor totals by country or region',
+  since: 'Since',
+  updated: 'Updated',
+};
+
+/** 部分地区在展示上要按站点一贯的写法，不交给 Intl 决定；中英各一份 */
+const REGION_OVERRIDES = {
+  en: new Map([
+    ['CN', 'China mainland'],
+    ['HK', 'Hong Kong (China)'],
+    ['MO', 'Macao (China)'],
+    ['TW', 'Taiwan (China)'],
+  ]),
+  zh: new Map([
+    ['CN', '中国大陆'],
+    ['HK', '中国香港'],
+    ['MO', '中国澳门'],
+    ['TW', '中国台湾'],
+  ]),
+};
+
+const escapeHtml = value =>
+  String(value).replace(/[&<>"']/g, ch =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]
+  );
+
+/** 卡片标记。mapSvg 由站点在构建期内联（124K，不塞进 JS 包） */
+function visitorCardMarkup({ mapSvg = '', heading, labels = {}, id = 'visitors' } = {}) {
+  const t = { ...DEFAULT_LABELS, ...labels };
+  const headingId = `${id}-heading`;
+  return `<section id="${escapeHtml(id)}" class="gintmr_ui-section gintmr_ui-visitor-section" aria-labelledby="${escapeHtml(headingId)}">
+  <h2 id="${escapeHtml(headingId)}" class="gintmr_ui-section-title" tabindex="-1"><a class="gintmr_ui-heading-anchor" href="#${escapeHtml(headingId)}">${escapeHtml(heading || t.heading)}</a></h2>
+  <div class="gintmr_ui-entry gintmr_ui-visitor-card" data-gintmr_ui-visitor-card data-state="unconfigured">
+    <div class="gintmr_ui-visitor-summary">
+      <dl class="gintmr_ui-visitor-totals">
+        <div><dt>${escapeHtml(t.pageviews)}</dt><dd data-gintmr_ui-visitor-value="pageviews">—</dd></div>
+        <div><dt><abbr title="${escapeHtml(t.visitorDaysHint)}">${escapeHtml(t.visitorDays)}</abbr></dt><dd data-gintmr_ui-visitor-value="visitorDays">—</dd></div>
+        <div><dt>${escapeHtml(t.countries)}</dt><dd data-gintmr_ui-visitor-value="countries">—</dd></div>
+      </dl>
+      <span class="gintmr_ui-visitor-demo-label" data-gintmr_ui-visitor-demo hidden>${escapeHtml(t.demo)}</span>
+    </div>
+    <div class="gintmr_ui-visitor-geography">
+      <figure class="gintmr_ui-visitor-map-figure">
+        ${mapSvg.replace('<svg ', `<svg role="img" aria-label="${escapeHtml(t.mapLabel)}" `)}
+        <figcaption class="gintmr_ui-visitor-detail-note">${escapeHtml(t.mapNote)}</figcaption>
+      </figure>
+    </div>
+    <div class="gintmr_ui-visitor-analysis">
+      <div class="gintmr_ui-visitor-today">
+        <p class="gintmr_ui-visitor-zone-label">${escapeHtml(t.today)} <span data-gintmr_ui-visitor-today-date>UTC</span></p>
+        <dl class="gintmr_ui-visitor-totals gintmr_ui-visitor-today-totals">
+          <div><dt>${escapeHtml(t.pageviews)}</dt><dd data-gintmr_ui-visitor-today-value="pageviews">—</dd></div>
+          <div><dt>${escapeHtml(t.visitors)}</dt><dd data-gintmr_ui-visitor-today-value="visitors">—</dd></div>
+        </dl>
+      </div>
+      <div class="gintmr_ui-visitor-country-panel">
+        <p class="gintmr_ui-visitor-zone-label">${escapeHtml(t.regions)}</p>
+        <div class="gintmr_ui-visitor-treemap" data-gintmr_ui-visitor-treemap role="list" aria-label="${escapeHtml(t.regionTotalsLabel)}"></div>
+        <p class="gintmr_ui-visitor-detail-note" data-gintmr_ui-visitor-countries-status>${escapeHtml(t.countriesEmpty)}</p>
+        <div class="gintmr_ui-visitor-tip" data-gintmr_ui-visitor-tip role="tooltip" hidden></div>
+      </div>
+    </div>
+    <div class="gintmr_ui-visitor-footer">
+      <p class="gintmr_ui-visitor-status" data-gintmr_ui-visitor-status role="status">${escapeHtml(t.notConnected)}</p>
+    </div>
+    <noscript><p class="gintmr_ui-visitor-status">${escapeHtml(t.noscript)}</p></noscript>
+  </div>
+</section>`;
+}
+
+/* ── 数据校验：宁可不显示，也不显示一个看起来像真的错数字 ────────────────── */
+const isCount = value => Number.isSafeInteger(value) && value >= 0;
+const isTimestamp = value =>
+  typeof value === 'string' && value.length <= 40 && Number.isFinite(Date.parse(value));
+
+function validateVisitorSummary(value) {
+  if (
+    !value || value.version !== 1 || !isTimestamp(value.generatedAt) ||
+    (value.since !== null && !isTimestamp(value.since)) ||
+    !isCount(value.totals?.pageviews) || !isCount(value.totals?.visitorDays) ||
+    value.totals.visitorDays > value.totals.pageviews ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(value.today?.date || '') ||
+    !isCount(value.today?.pageviews) || !isCount(value.today?.visitors) ||
+    value.today.visitors > value.today.pageviews ||
+    !Array.isArray(value.countries) || value.countries.length > 300
+  ) return null;
+  const seen = new Set();
+  let mappedViews = 0;
+  let mappedDays = 0;
+  for (const country of value.countries) {
+    if (
+      !country ||
+      (country.code !== null && !/^[A-Z]{2}$/.test(country.code)) ||
+      seen.has(country.code) ||
+      !isCount(country.pageviews) || !isCount(country.visitorDays) ||
+      country.visitorDays > country.pageviews
+    ) return null;
+    seen.add(country.code);
+    mappedViews += country.pageviews;
+    mappedDays += country.visitorDays;
+  }
+  if (
+    !Number.isSafeInteger(mappedViews) || mappedViews > value.totals.pageviews ||
+    !Number.isSafeInteger(mappedDays) || mappedDays > value.totals.visitorDays
+  ) return null;
+  return value;
+}
+
+/** 只在本地、只在显式带参数时使用的样张数据；绝不作为失败时的兜底 */
+function designPreviewSummary() {
+  const countries = [
+    { code: 'CN', pageviews: 138, visitorDays: 73 },
+    { code: 'US', pageviews: 92, visitorDays: 48 },
+    { code: 'AE', pageviews: 53, visitorDays: 26 },
+    { code: 'GB', pageviews: 26, visitorDays: 15 },
+    { code: 'DE', pageviews: 18, visitorDays: 9 },
+    { code: 'JP', pageviews: 12, visitorDays: 7 },
+    { code: 'SG', pageviews: 9, visitorDays: 4 },
+    { code: 'AU', pageviews: 6, visitorDays: 3 },
+    { code: null, pageviews: 5, visitorDays: 4 },
+  ];
+  return {
+    version: 1,
+    generatedAt: '2026-09-11T12:00:00Z',
+    since: '2026-09-01T00:00:00Z',
+    totals: { pageviews: 359, visitorDays: 189 },
+    today: { date: '2026-09-11', pageviews: 15, visitors: 8 },
+    countries,
+  };
+}
+
+/* ── 渲染 ──────────────────────────────────────────────────────────────── */
+function locale() {
+  if (typeof document === 'undefined') return 'en';
+  return document.documentElement.lang || 'en';
+}
+
+function regionName(code) {
+  const overrides = REGION_OVERRIDES[locale().toLowerCase().startsWith('zh') ? 'zh' : 'en'];
+  if (overrides.has(code)) return overrides.get(code);
+  try {
+    const names = new Intl.DisplayNames([locale()], { type: 'region' });
+    return names.of(code) || code;
+  } catch (_) {
+    return code;
+  }
+}
+
+/* 黄金角：相邻排名的色相互相错开最多，因此邻居块颜色差别最大。
+   每个地区一个色相，地区多了自然就是彩色一片。 */
+const GOLDEN_ANGLE = 137.508;
+const hueOf = rank => (rank * GOLDEN_ANGLE) % 360;
+
+
+/** 交替切分的简易 treemap：按 √浏览量铺满固定画布，永远不滚动 */
+function layoutTreemap(items) {
+  const blocks = [];
+  const slice = (list, x, y, w, h, horizontal) => {
+    if (!list.length) return;
+    if (list.length === 1) {
+      blocks.push({ item: list[0], x, y, w, h });
+      return;
+    }
+    const sum = list.reduce((total, entry) => total + entry.weight, 0);
+    let acc = 0;
+    let cut = 1;
+    for (let i = 0; i < list.length - 1; i += 1) {
+      acc += list[i].weight;
+      cut = i + 1;
+      if (acc / sum >= 0.55) break;
+    }
+    const first = list.slice(0, cut);
+    const second = list.slice(cut);
+    const ratio = first.reduce((total, entry) => total + entry.weight, 0) / (sum || 1);
+    if (horizontal) {
+      slice(first, x, y, w * ratio, h, false);
+      slice(second, x + w * ratio, y, w * (1 - ratio), h, false);
+    } else {
+      slice(first, x, y, w, h * ratio, true);
+      slice(second, x, y + h * ratio, w, h * (1 - ratio), true);
+    }
+  };
+  slice(items, 0, 0, 100, 100, true);
+  return blocks;
+}
+
+function renderTreemap(container, countries, formatter, labels) {
+  if (!countries.length) {
+    container.replaceChildren();
+    return;
+  }
+  // 用实际像素判断字放不放得下，避免扁色块把文字切一半
+  const box = container.getBoundingClientRect();
+  const boxWidth = box.width || 320;
+  const boxHeight = box.height || 176;
+  // √ 缩放：保留排名与量级关系，同时不让头两名吃掉整块画布
+  const weighted = countries.map(country => ({ ...country, weight: Math.sqrt(country.pageviews) }));
+  const maximumWeight = weighted[0].weight || 1;
+  container.replaceChildren(
+    ...layoutTreemap(weighted).map(({ item, x, y, w, h }, rank) => {
+      const name = item.code === null ? labels.unknownCountry : regionName(item.code);
+      const block = document.createElement('div');
+      block.className = 'gintmr_ui-visitor-block';
+      block.setAttribute('role', 'listitem');
+      block.tabIndex = 0;
+      block.dataset.gintmr_uiVisitorName = name;
+      block.dataset.gintmr_uiVisitorViews = String(item.pageviews);
+      block.dataset.gintmr_uiVisitorDays = String(item.visitorDays);
+      // 内缩半个缝宽：色块之间、以及与画布边缘之间都留出均匀的缝
+      const gapX = 0.45;
+      const gapY = 0.8;
+      const bx = x + gapX / 2;
+      const by = y + gapY / 2;
+      const bw = Math.max(w - gapX, 0.5);
+      const bh = Math.max(h - gapY, 0.5);
+      block.style.cssText = `left:${bx}%;top:${by}%;width:${bw}%;height:${bh}%`;
+      const hue = hueOf(rank);
+      block.style.setProperty('--gintmr_ui-visitor-block-fill', `hsl(${hue.toFixed(1)} 72% 66%)`);
+      block.style.setProperty('--gintmr_ui-visitor-block-line', `hsl(${hue.toFixed(1)} 60% 40%)`);
+      block.style.setProperty('--gintmr_ui-visitor-block-ink', `hsl(${hue.toFixed(1)} 65% 17%)`);
+      block.setAttribute(
+        'aria-label',
+        `${name}: ${formatter.format(item.pageviews)} ${labels.pageviews}, ${formatter.format(item.visitorDays)} ${labels.visitorDays}`
+      );
+      // 放得下就写名称与浏览量，放不下就只写数字，再小就交给悬停提示
+      const widthPx = (bw / 100) * boxWidth;
+      const heightPx = (bh / 100) * boxHeight;
+      const lineHeight = 15;
+      if (widthPx >= 72 && heightPx >= lineHeight * 2 + 8) {
+        const title = document.createElement('b');
+        title.textContent = name;
+        block.append(title);
+      }
+      if (widthPx >= 30 && heightPx >= lineHeight + 6) {
+        const count = document.createElement('span');
+        count.textContent = formatter.format(item.pageviews);
+        block.append(count);
+      }
+      return block;
+    })
+  );
+}
+
+function renderSummary(card, summary, { demo = false, labels = DEFAULT_LABELS } = {}) {
+  const formatter = new Intl.NumberFormat(locale());
+  const countries = summary.countries
+    .filter(country => country.code !== null && country.pageviews > 0)
+    .sort((a, b) => b.pageviews - a.pageviews || a.code.localeCompare(b.code));
+  const values = { ...summary.totals, countries: countries.length };
+  card.querySelectorAll('[data-gintmr_ui-visitor-value]').forEach(node => {
+    node.textContent = formatter.format(values[node.dataset.gintmr_uiVisitorValue] ?? 0);
+  });
+  card.querySelectorAll('[data-gintmr_ui-visitor-today-value]').forEach(node => {
+    node.textContent = formatter.format(summary.today[node.dataset.gintmr_uiVisitorTodayValue] ?? 0);
+  });
+  card.querySelector('[data-gintmr_ui-visitor-today-date]').textContent = `${summary.today.date} UTC`;
+
+  // 地图按浏览量的对数强度上色：最大值的国家最亮，没访问过的保持底色
+  const viewsByCountry = new Map(countries.map(country => [country.code, country.pageviews]));
+  const maximumViews = Math.max(1, ...viewsByCountry.values());
+  card.querySelectorAll('.gintmr_ui-visitor-map [data-country]').forEach(shape => {
+    const views = viewsByCountry.get(shape.dataset.country) || 0;
+    const strength = views > 0
+      ? 20 + (45 * Math.log1p(views)) / Math.log1p(maximumViews)
+      : 8;
+    shape.style.setProperty('--gintmr_ui-visitor-country-strength', `${strength}%`);
+  });
+
+  card.dataset.state = summary.totals.pageviews > 0 ? 'ready' : 'empty';
+  const demoLabel = card.querySelector('[data-gintmr_ui-visitor-demo]');
+  if (demoLabel) demoLabel.hidden = !demo;
+
+  const unknown = summary.countries.find(country => country.code === null);
+  const allCountries = unknown?.pageviews ? [...countries, unknown] : countries;
+  renderTreemap(
+    card.querySelector('[data-gintmr_ui-visitor-treemap]'),
+    allCountries,
+    formatter,
+    labels
+  );
+  const countryStatus = card.querySelector('[data-gintmr_ui-visitor-countries-status]');
+  countryStatus.hidden = allCountries.length > 0;
+
+  const dateFormat = new Intl.DateTimeFormat(locale(), {
+    day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
+  });
+  const since = summary.since ? `${dateFormat.format(new Date(summary.since))}` : '';
+  card.querySelector('[data-gintmr_ui-visitor-status]').textContent = demo
+    ? labels.demoNote
+    : summary.totals.pageviews === 0
+      ? labels.empty
+      : `${since ? `${labels.since || 'Since'} ${since} · ` : ''}${labels.updated || 'Updated'} ${dateFormat.format(new Date(summary.generatedAt))} UTC`;
+}
+
+/* ── 生命周期 ──────────────────────────────────────────────────────────── */
+const isDemoRequest = () =>
+  typeof location !== 'undefined' &&
+  LOCAL_HOSTS.has(location.hostname) &&
+  new URLSearchParams(location.search).get('gintmr_ui-visitor-demo') === '1';
+
+/** 悬停或聚焦时弹出的小提示：名称 + 浏览量 + 访客日。很小的方块也能靠它读数 */
+function bindTooltip(card) {
+  const area = card.querySelector('[data-gintmr_ui-visitor-treemap]');
+  const tip = card.querySelector('[data-gintmr_ui-visitor-tip]');
+  if (!area || !tip || area.dataset.gintmr_uiTipBound === 'true') return;
+  area.dataset.gintmr_uiTipBound = 'true';
+  const labels = { ...DEFAULT_LABELS, ...(sourceOf().labels || {}) };
+  const formatter = new Intl.NumberFormat(locale());
+
+  const show = (block, event) => {
+    if (!block) return;
+    tip.textContent = '';
+    const name = document.createElement('b');
+    const swatch = document.createElement('i');
+    swatch.className = 'gintmr_ui-visitor-tip-swatch';
+    swatch.style.background = getComputedStyle(block).backgroundColor;
+    swatch.style.borderColor = getComputedStyle(block).borderTopColor;
+    name.append(swatch, document.createTextNode(block.dataset.gintmr_uiVisitorName || ''));
+    const list = document.createElement('dl');
+    for (const [label, key] of [[labels.pageviews, 'gintmr_uiVisitorViews'], [labels.visitorDays, 'gintmr_uiVisitorDays']]) {
+      const row = document.createElement('div');
+      const dt = document.createElement('dt');
+      const dd = document.createElement('dd');
+      dt.textContent = label;
+      dd.textContent = formatter.format(Number(block.dataset[key] || 0));
+      row.append(dt, dd);
+      list.append(row);
+    }
+    tip.append(name, list);
+    tip.hidden = false;
+    // 贴着指针，但不越出方块图的范围
+    const areaRect = area.getBoundingClientRect();
+    const tipRect = tip.getBoundingClientRect();
+    const blockRect = block.getBoundingClientRect();
+    let left = (event && event.clientX ? event.clientX - areaRect.left + 12 : blockRect.left - areaRect.left + 6);
+    let top = (event && event.clientY ? event.clientY - areaRect.top + 14 : blockRect.top - areaRect.top + 6);
+    left = Math.max(4, Math.min(left, areaRect.width - tipRect.width - 4));
+    top = Math.max(4, Math.min(top, areaRect.height - tipRect.height - 4));
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  };
+  const hide = () => { tip.hidden = true; };
+
+  area.addEventListener('pointerover', event => {
+    show(event.target.closest('.gintmr_ui-visitor-block'), event);
+  });
+  area.addEventListener('pointermove', event => {
+    const block = event.target.closest('.gintmr_ui-visitor-block');
+    if (block) show(block, event);
+  });
+  area.addEventListener('pointerout', event => {
+    if (!event.relatedTarget || !event.relatedTarget.closest('.gintmr_ui-visitor-block')) hide();
+  });
+  area.addEventListener('focusin', event => show(event.target.closest('.gintmr_ui-visitor-block')));
+  area.addEventListener('focusout', hide);
+}
+
+function initCard(card) {
+  if (card.dataset.gintmr_uiReady === 'true') return;
+  card.dataset.gintmr_uiReady = 'true';
+
+  const source = sourceOf();
+  const labels = { ...DEFAULT_LABELS, ...(source.labels || {}) };
+  bindTooltip(card);
+  const status = () => card.querySelector('[data-gintmr_ui-visitor-status]');
+  const demo = isDemoRequest();
+
+  if (demo) {
+    renderSummary(card, (source.demo || designPreviewSummary)(), { demo: true, labels });
+    return;
+  }
+  if (typeof source.load !== 'function') return; // 未接入：保留「尚未接入」的原话
+
+  card.dataset.state = 'loading';
+  status().textContent = labels.loading;
+
+  let controller = new AbortController();
+  let observer;
+  let loaded = false;
+
+  const load = async () => {
+    if (loaded || controller.signal.aborted) return;
+    loaded = true;
+    observer?.disconnect();
+    const active = controller;
+    try {
+      const value = await source.load({ signal: active.signal });
+      if (active.signal.aborted) return;
+      const summary = validateVisitorSummary(value);
+      if (!summary) throw new Error('Invalid visitor summary');
+      renderSummary(card, summary, { labels });
+    } catch (_) {
+      if (active.signal.aborted) return;
+      card.dataset.state = 'error';
+      status().textContent = labels.unavailable;
+    }
+  };
+
+  const stop = () => { observer?.disconnect(); controller.abort(); };
+  window.addEventListener('pagehide', stop);
+  // 从 bfcache 恢复时，之前被中止的懒加载要能继续
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    controller = new AbortController();
+    if (card.dataset.state === 'loading') { loaded = false; observe(); }
+  });
+
+  const observe = () => {
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) void load();
+      }, { rootMargin: '250px' });
+      observer.observe(card);
+    } else {
+      void load();
+    }
+  };
+  observe();
+}
+
+/** 元素级初始化：同一张卡只初始化一次，客户端路由换页可以安全重跑 */
+function initVisitorCard(doc = document) {
+  doc.querySelectorAll('[data-gintmr_ui-visitor-card]').forEach(initCard);
+}
+
 /* ── index.js ── */
 /* ============================================================================
    gintmr-ui · 脚本入口
@@ -1347,6 +1831,7 @@ const elementInits = [
   initQuotes,
   initGalleries,
   initSidenav,
+  initVisitorCard,
 ];
 
 let booted = false;
@@ -1395,6 +1880,9 @@ if (typeof window !== 'undefined') {
     initGalleries,
     initImageViewer,
     initSidenav,
+    initVisitorCard,
+    visitorCardMarkup,
+    designPreviewSummary,
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

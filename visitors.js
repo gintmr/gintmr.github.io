@@ -1,14 +1,14 @@
+/* 学术站的访客接入
+   只做两件事：记录本次访问、向上取数。
+   渲染（总计 / 地图 / 今日 / 地区方块图 / 提示）全部交给组件库的访客卡：
+     src/components/visitor-card.js
+   库那边读 window.gintmrUIVisitors.load()，数据契约也定义在那个文件里。
+   注意加载顺序：本文件必须排在 /ui/gintmr-ui.js 之前，否则库启动时取数函数还没定义。 */
+
 const TRACKED_PATHS = new Set(['/', '/publication/', '/project/', '/cv/']);
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
-const numberFormat = new Intl.NumberFormat('en');
-const regionNames = typeof Intl.DisplayNames === 'function' ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
-const regionLabels = new Map([
-  ['CN', 'China mainland'],
-  ['HK', 'Hong Kong (China)'],
-  ['MO', 'Macao (China)'],
-  ['TW', 'Taiwan (China)'],
-]);
 
+/** 站点把自己的接口配置放在 <script id="visitor-config"> 里 */
 export function normalizeVisitorConfig(value) {
   if (!value || value.enabled !== true) return null;
   try {
@@ -32,38 +32,6 @@ export function canRecordVisit(config, location, privacy = {}) {
     && privacy.doNotTrack !== '1' && privacy.doNotTrack !== 'yes');
 }
 
-const isCount = value => Number.isSafeInteger(value) && value >= 0;
-const isTimestamp = value => typeof value === 'string' && value.length <= 40 && Number.isFinite(Date.parse(value));
-export function validateVisitorSummary(value) {
-  if (!value || value.version !== 1 || !isTimestamp(value.generatedAt)
-    || (value.since !== null && !isTimestamp(value.since))
-    || !isCount(value.totals?.pageviews) || !isCount(value.totals?.visitorDays)
-    || value.totals.visitorDays > value.totals.pageviews
-    || !/^\d{4}-\d{2}-\d{2}$/.test(value.today?.date || '')
-    || !isCount(value.today?.pageviews) || !isCount(value.today?.visitors)
-    || value.today.visitors > value.today.pageviews
-    || !Array.isArray(value.countries) || value.countries.length > 300) return null;
-  const seen = new Set();
-  let mappedViews = 0;
-  let mappedDays = 0;
-  for (const country of value.countries) {
-    if (!country || (country.code !== null && !/^[A-Z]{2}$/.test(country.code))
-      || seen.has(country.code) || !isCount(country.pageviews) || !isCount(country.visitorDays)
-      || country.visitorDays > country.pageviews) return null;
-    seen.add(country.code);
-    mappedViews += country.pageviews;
-    mappedDays += country.visitorDays;
-  }
-  if (!Number.isSafeInteger(mappedViews) || mappedViews > value.totals.pageviews
-    || !Number.isSafeInteger(mappedDays) || mappedDays > value.totals.visitorDays) return null;
-  return value;
-}
-
-const countryName = code => {
-  if (regionLabels.has(code)) return regionLabels.get(code);
-  try { return regionNames?.of(code) || code; } catch { return code; }
-};
-
 async function requestWithTimeout(url, options = {}, milliseconds = 6500, parentSignal, consume = response => response) {
   const controller = new AbortController();
   const abort = () => controller.abort();
@@ -81,7 +49,7 @@ async function requestWithTimeout(url, options = {}, milliseconds = 6500, parent
 
 async function recordVisit(config) {
   if (typeof crypto.randomUUID !== 'function') return;
-  // One ID per document, reused for a transient retry. Never persisted as an identity.
+  // 每个文档一个事件 id，只用于同一次提交的瞬时重试；不作为身份持久化
   const body = JSON.stringify({ eventId: crypto.randomUUID(), path: location.pathname });
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
@@ -89,125 +57,17 @@ async function recordVisit(config) {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true,
       }, 4000);
       if (response.ok || response.status < 500) return;
-    } catch { /* A failed statistic must never affect the academic page. */ }
+    } catch { /* 统计失败绝不影响学术页本身 */ }
     if (attempt === 0) await new Promise(resolve => setTimeout(resolve, 800));
   }
-}
-
-function createCountryRow(country) {
-  const row = document.createElement('tr');
-  const name = document.createElement('th');
-  name.scope = 'row';
-  name.textContent = country.code === null ? 'Unknown location' : countryName(country.code);
-  row.append(name);
-  for (const value of [country.pageviews, country.visitorDays]) {
-    const count = document.createElement('td');
-    count.textContent = numberFormat.format(value);
-    row.append(count);
-  }
-  return row;
-}
-
-function renderSummary(card, summary, demo) {
-  const countries = summary.countries.filter(country => country.code !== null && country.pageviews > 0)
-    .sort((a, b) => b.pageviews - a.pageviews || a.code.localeCompare(b.code));
-  const values = { ...summary.totals, countries: countries.length };
-  for (const node of card.querySelectorAll('[data-visitor-value]')) node.textContent = numberFormat.format(values[node.dataset.visitorValue]);
-  for (const node of card.querySelectorAll('[data-visitor-today-value]')) node.textContent = numberFormat.format(summary.today[node.dataset.visitorTodayValue]);
-  card.querySelector('[data-visitor-today-date]').textContent = `${summary.today.date} UTC`;
-  const viewsByCountry = new Map(countries.map(country => [country.code, country.pageviews]));
-  const maximumViews = Math.max(1, ...viewsByCountry.values());
-  for (const shape of card.querySelectorAll('.visitor-map [data-country]')) {
-    const views = viewsByCountry.get(shape.dataset.country) || 0;
-    const strength = views > 0 ? 20 + 45 * Math.log1p(views) / Math.log1p(maximumViews) : 8;
-    shape.style.setProperty('--visitor-country-strength', `${strength}%`);
-  }
-  card.dataset.state = summary.totals.pageviews > 0 ? 'ready' : 'empty';
-  card.querySelector('[data-visitor-demo]').hidden = !demo;
-  const unknown = summary.countries.find(country => country.code === null);
-  const allCountries = unknown?.pageviews ? [...countries, unknown] : countries;
-  card.querySelector('[data-visitor-country-rows]').replaceChildren(...allCountries.map(createCountryRow));
-  const countryStatus = card.querySelector('[data-visitor-countries-status]');
-  countryStatus.hidden = allCountries.length > 0;
-  countryStatus.textContent = 'No country or region totals recorded yet.';
-  const dateFormat = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-  const since = summary.since ? `Since ${dateFormat.format(new Date(summary.since))}` : '';
-  card.querySelector('[data-visitor-status]').textContent = demo
-    ? 'Sample data for design review. No visits are recorded in this preview.'
-    : summary.totals.pageviews === 0
-      ? 'No visits recorded yet.'
-      : `${since ? `${since} · ` : ''}Updated ${dateFormat.format(new Date(summary.generatedAt))} UTC`;
-}
-
-// Explicitly local-only, never a fallback for a failed service or real statistics.
-function designPreviewSummary() {
-  const countries = [
-    { code: 'CN', pageviews: 138, visitorDays: 73 }, { code: 'US', pageviews: 92, visitorDays: 48 },
-    { code: 'AE', pageviews: 53, visitorDays: 26 }, { code: 'GB', pageviews: 26, visitorDays: 15 },
-    { code: 'DE', pageviews: 18, visitorDays: 9 }, { code: 'JP', pageviews: 12, visitorDays: 7 },
-    { code: 'SG', pageviews: 9, visitorDays: 4 }, { code: 'AU', pageviews: 6, visitorDays: 3 },
-    { code: null, pageviews: 5, visitorDays: 4 },
-  ];
-  return { version: 1, generatedAt: '2026-09-11T12:00:00Z', since: '2026-09-01T00:00:00Z',
-    totals: { pageviews: 359, visitorDays: 189 }, today: { date: '2026-09-11', pageviews: 15, visitors: 8 }, countries };
-}
-
-function initializeVisitorCard(card, config, demo, recording = Promise.resolve()) {
-  if (demo) { renderSummary(card, designPreviewSummary(), true); return; }
-  if (!config) return;
-  card.dataset.state = 'loading';
-  card.querySelector('[data-visitor-status]').textContent = 'Loading visitor statistics…';
-  let pageController = new AbortController();
-  let observer;
-  let loaded = false;
-  const load = async () => {
-    if (loaded || pageController.signal.aborted) return;
-    loaded = true;
-    observer?.disconnect();
-    const controller = pageController;
-    try {
-      // Read after this page's collection attempt so a first visit does not
-      // briefly become a permanent empty-state snapshot. Failed collection
-      // still allows the public totals to load.
-      await recording.catch(() => {});
-      if (controller.signal.aborted) return;
-      const summary = await requestWithTimeout(config.endpoint, { headers: { Accept: 'application/json' } }, 6500, controller.signal, async response => {
-        if (!response.ok) throw new Error('Visitor summary unavailable');
-        return validateVisitorSummary(await response.json());
-      });
-      if (!summary) throw new Error('Invalid visitor summary');
-      if (!controller.signal.aborted) renderSummary(card, summary, false);
-    } catch {
-      if (!controller.signal.aborted) {
-        card.dataset.state = 'error';
-        card.querySelector('[data-visitor-status]').textContent = 'Visitor statistics are temporarily unavailable.';
-      }
-    }
-  };
-  const stop = () => { observer?.disconnect(); pageController.abort(); };
-  window.addEventListener('pagehide', stop);
-  // A page restored from the back/forward cache can resume an aborted lazy load.
-  const resume = event => {
-    if (!event.persisted) return;
-    pageController = new AbortController();
-    if (card.dataset.state === 'loading') { loaded = false; observe(); }
-  };
-  window.addEventListener('pageshow', resume);
-  const observe = () => {
-    if ('IntersectionObserver' in window) {
-      observer = new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting)) void load(); }, { rootMargin: '250px' });
-      observer.observe(card);
-    } else { void load(); }
-  };
-  observe();
 }
 
 export function initializeVisitors() {
   let config = null;
   try { config = normalizeVisitorConfig(JSON.parse(document.getElementById('visitor-config')?.textContent || '{}')); }
-  catch { /* An unconfigured site intentionally shows no invented statistics. */ }
+  catch { /* 未配置的站点就不显示任何编造的统计 */ }
   const demo = LOCAL_HOSTS.has(location.hostname) && new URLSearchParams(location.search).get('visitor-demo') === '1';
-  const card = document.querySelector('[data-visitor-card]');
+
   let recording = Promise.resolve();
   if (!demo && canRecordVisit(config, location, {
     globalPrivacyControl: navigator.globalPrivacyControl,
@@ -225,7 +85,20 @@ export function initializeVisitors() {
       });
     }
   }
-  if (card) initializeVisitorCard(card, config, demo, recording);
+
+  // 交给组件库渲染：这里只负责把接口响应原样交出去（接口本来就是契约形状）
+  window.gintmrUIVisitors = {
+    ...(window.gintmrUIVisitors || {}),
+    load: async ({ signal } = {}) => {
+      if (!config) throw new Error('Visitor statistics are not configured');
+      // 先等本次记录提交完再读，免得首次访问被读成一个永久的空状态
+      await recording.catch(() => {});
+      return requestWithTimeout(config.endpoint, { headers: { Accept: 'application/json' } }, 6500, signal, async response => {
+        if (!response.ok) throw new Error('Visitor summary unavailable');
+        return response.json();
+      });
+    },
+  };
 }
 
 if (typeof document !== 'undefined') initializeVisitors();

@@ -1,48 +1,15 @@
 import { readFileSync } from 'node:fs';
+import { visitorCardMarkup } from './vendor/gintmr-ui/src/components/visitor-card.js';
 
-const worldMap = readFileSync(new URL('./assets/maps/world-countries.svg', import.meta.url), 'utf8').trim();
+// 地图与卡片标记都由组件库提供，站点只负责在构建期把地图内联进页面
+const worldMap = readFileSync(
+  new URL('./vendor/gintmr-ui/src/components/assets/world-countries.svg', import.meta.url),
+  'utf8'
+).trim();
 
 export function visitorMarkup() {
-  return `<section id="visitors" class="gintmr_ui-section visitor-section" aria-labelledby="visitors-heading">
-  <h2 id="visitors-heading" class="gintmr_ui-section-title" tabindex="-1"><a class="gintmr_ui-heading-anchor" href="#visitors-heading">Visitors</a></h2>
-  <div class="gintmr_ui-entry visitor-card" data-visitor-card data-state="unconfigured">
-    <div class="visitor-summary">
-      <dl class="visitor-totals">
-        <div><dt>Page views</dt><dd data-visitor-value="pageviews">—</dd></div>
-        <div><dt><abbr title="Daily unique visitors, summed across UTC days. Returning visitors on another day count again.">Visitor-days</abbr></dt><dd data-visitor-value="visitorDays">—</dd></div>
-        <div><dt>Countries &amp; regions</dt><dd data-visitor-value="countries">—</dd></div>
-      </dl>
-      <span class="visitor-demo-label" data-visitor-demo hidden>Design preview · sample data</span>
-    </div>
-    <div class="visitor-geography">
-      <figure class="visitor-map-figure">
-        ${worldMap}
-      </figure>
-    </div>
-    <div class="visitor-analysis">
-      <div class="visitor-today">
-        <p class="visitor-detail-label">Today <span data-visitor-today-date>UTC</span></p>
-        <dl class="visitor-totals visitor-today-totals">
-          <div><dt>Page views</dt><dd data-visitor-today-value="pageviews">—</dd></div>
-          <div><dt>Visitors</dt><dd data-visitor-today-value="visitors">—</dd></div>
-        </dl>
-      </div>
-      <div class="visitor-country-panel">
-        <div class="visitor-table-scroll visitor-country-scroll" tabindex="0" aria-label="Visitor totals by country or region">
-          <table class="visitor-table visitor-country-table" aria-label="Visitor totals by country or region">
-            <thead><tr><th scope="col">Country / region</th><th scope="col">Page views</th><th scope="col"><abbr title="Daily unique visitors, summed across UTC days.">Visitor-days</abbr></th></tr></thead>
-            <tbody data-visitor-country-rows></tbody>
-          </table>
-        </div>
-        <p class="visitor-detail-note" data-visitor-countries-status>Country totals are not available yet.</p>
-      </div>
-    </div>
-    <div class="visitor-footer">
-      <p class="visitor-status" data-visitor-status role="status">Visitor statistics are not connected yet.</p>
-    </div>
-    <noscript><p class="visitor-status">Enable JavaScript to view visitor statistics.</p></noscript>
-  </div>
-</section>`;
+  // 观感、数据契约、渲染逻辑都在库里；这里只传地图与标题
+  return visitorCardMarkup({ mapSvg: worldMap, heading: 'Visitors', id: 'visitors' });
 }
 
 export function visitorHistoryMarkup() {

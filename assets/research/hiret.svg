@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 208" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Hierarchical trajectories</title>
+  <desc id="desc">A high-level pathway connects to three groups of longitudinal states at a finer scale. The abstract structure is illustrative rather than an empirical result.</desc>
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" stroke="#78629a" stroke-opacity=".07"/></pattern>
+  </defs>
+  <path fill="#f1eef5" d="M0 0h320v208H0z"/>
+  <path fill="url(#grid)" d="M0 0h320v208H0z"/>
+  <text x="23" y="31" fill="#78629a" font-family="monospace" font-size="9" letter-spacing="1.4">HIERARCHICAL TRAJECTORIES</text>
+  <path d="M64 82h192" stroke="#78629a" stroke-width="2"/>
+  <path d="M64 93v24m96-24v24m96-24v24" stroke="#78629a" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="3 4"/>
+  <g fill="#78629a"><rect x="52" y="70" width="24" height="24" rx="7"/><rect x="148" y="70" width="24" height="24" rx="7"/></g>
+  <rect x="244" y="70" width="24" height="24" rx="7" fill="#527f77"/>
+  <rect x="24" y="124" width="80" height="52" rx="10" fill="#e8e2ef" stroke="#78629a" stroke-opacity=".22"/>
+  <rect x="120" y="124" width="80" height="52" rx="10" fill="#e8e2ef" stroke="#78629a" stroke-opacity=".22"/>
+  <rect x="216" y="124" width="80" height="52" rx="10" fill="#e8eeea" stroke="#527f77" stroke-opacity=".28"/>
+  <path d="m38 157 25-13 27 8m44 6 25-16 27 6" stroke="#78629a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m230 153 25-12 27 7" stroke="#527f77" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#f1eef5" stroke="#78629a" stroke-width="1.7"><circle cx="38" cy="157" r="4"/><circle cx="63" cy="144" r="4"/><circle cx="90" cy="152" r="4"/><circle cx="134" cy="158" r="4"/><circle cx="159" cy="142" r="4"/><circle cx="186" cy="148" r="4"/></g>
+  <g fill="#f1eef5" stroke="#527f77" stroke-width="1.7"><circle cx="230" cy="153" r="4"/><circle cx="255" cy="141" r="4"/><circle cx="282" cy="148" r="4"/></g>
+</svg>

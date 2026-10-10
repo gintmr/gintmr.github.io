@@ -10,9 +10,9 @@ test('public pages contain no history entrypoint, activity markup, or history sc
   }
   const home = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.doesNotMatch(home, /<details|More visitor details|Visitor-days sum/);
-  assert.match(home, /data-visitor-today-value="visitors"/);
-  assert.match(home, /data-visitor-country-rows/);
-  assert.match(home, /class="visitor-map"/);
+  assert.match(home, /data-gintmr_ui-visitor-today-value="visitors"/);
+  assert.match(home, /data-gintmr_ui-visitor-treemap/);
+  assert.match(home, /class="gintmr_ui-visitor-map"/);
 });
 
 test('unlisted history page opts out of indexing and uses only its read-only entrypoint', async () => {

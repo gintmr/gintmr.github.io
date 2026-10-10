@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 208" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Visual reasoning through time</title>
+  <desc id="desc">Three frames follow an abstract orb along an imagined trajectory, suggesting temporal visual reasoning. This is a decorative conceptual diagram.</desc>
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" stroke="#78629a" stroke-opacity=".07"/></pattern>
+  </defs>
+  <path fill="#f1eef5" d="M0 0h320v208H0z"/>
+  <path fill="url(#grid)" d="M0 0h320v208H0z"/>
+  <text x="23" y="31" fill="#78629a" font-family="monospace" font-size="9" letter-spacing="1.4">VISUAL REASONING IN TIME</text>
+  <g fill="#e8e2ef" stroke="#78629a" stroke-opacity=".3">
+    <rect x="24" y="69" width="80" height="89" rx="9"/>
+    <rect x="120" y="69" width="80" height="89" rx="9"/>
+    <rect x="216" y="69" width="80" height="89" rx="9"/>
+  </g>
+  <g stroke="#78629a" stroke-opacity=".25" stroke-linecap="round">
+    <path d="M34 144h60M130 144h60M226 144h60"/>
+    <path d="M40 129q18-43 47-35M136 129q18-43 47-35M232 129q18-43 47-35" stroke-dasharray="3 4"/>
+  </g>
+  <circle cx="44" cy="122" r="13" fill="#78629a"/>
+  <circle cx="160" cy="100" r="13" fill="#78629a"/>
+  <circle cx="274" cy="94" r="13" fill="#527f77"/>
+  <g fill="#f1eef5" fill-opacity=".4"><circle cx="40" cy="118" r="3"/><circle cx="156" cy="96" r="3"/><circle cx="270" cy="90" r="3"/></g>
+  <path d="M107 115h10m-3-3 3 3-3 3M203 115h10m-3-3 3 3-3 3" stroke="#78629a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M44 177h230m-5-4 5 4-5 4" stroke="#78629a" stroke-opacity=".4" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#78629a"><circle cx="44" cy="177" r="2.5"/><circle cx="160" cy="177" r="2.5"/></g><circle cx="274" cy="177" r="2.5" fill="#527f77"/>
+</svg>

@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { normalizeVisitorConfig, canRecordVisit, validateVisitorSummary, initializeVisitors } from '../visitors.js';
+import { normalizeVisitorConfig, canRecordVisit, initializeVisitors } from '../visitors.js';
+// 卡片的数据校验与渲染现在由组件库负责
+import { validateVisitorSummary, initVisitorCard } from '../vendor/gintmr-ui/src/components/visitor-card.js';
 import { normalizeVisitHistoryConfig, validateVisitorActivity, initializeVisitHistory } from '../visit-history.js';
 
 const config = normalizeVisitorConfig({ enabled: true,
@@ -15,10 +17,14 @@ const makeSummary = () => ({ version: 1, generatedAt: '2026-09-11T00:00:00Z', si
 
 function makeNode() {
   const listeners = new Map();
-  return { children: [], textContent: '', value: '', hidden: false, disabled: false, open: false, validityMessage: '',
+  return { children: [], textContent: '', value: '', hidden: false, disabled: false, open: false, validityMessage: '', dataset: {},
     setCustomValidity(message) { this.validityMessage = message; },
     reportValidity() { return this.validityMessage === ''; },
     append(...nodes) { this.children.push(...nodes); },
+    getBoundingClientRect() { return { width: 320, height: 176, top: 0, left: 0 }; },
+    setAttribute(name, value) { this[name] = value; },
+    getAttribute(name) { return this[name]; },
+    style: { cssText: '', setProperty() {} },
     replaceChildren(...nodes) { this.children = nodes; },
     addEventListener(type, handler) {
       if (!listeners.has(type)) listeners.set(type, []);
@@ -33,10 +39,11 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
 
 function setupVisitorDOM(t, fetch, search = '', surface = 'history') {
   const nodes = new Map();
-  const totals = ['pageviews', 'visitorDays', 'countries'].map(visitorValue => ({ dataset: { visitorValue }, textContent: '—' }));
-  const today = ['pageviews', 'visitors'].map(visitorTodayValue => ({ dataset: { visitorTodayValue }, textContent: '—' }));
+  const totals = ['pageviews', 'visitorDays', 'countries'].map(visitorValue => ({ dataset: { gintmr_uiVisitorValue: visitorValue }, textContent: '—' }));
+  const today = ['pageviews', 'visitors'].map(visitorTodayValue => ({ dataset: { gintmr_uiVisitorTodayValue: visitorTodayValue }, textContent: '—' }));
   const card = { dataset: { state: 'unconfigured' },
-    querySelectorAll: selector => selector === '[data-visitor-value]' ? totals : selector === '[data-visitor-today-value]' ? today : [],
+    querySelectorAll: selector => selector === '[data-gintmr_ui-visitor-value]' ? totals
+      : selector === '[data-gintmr_ui-visitor-today-value]' ? today : [],
     querySelector(selector) {
       if (!nodes.has(selector)) nodes.set(selector, makeNode());
       return nodes.get(selector);
@@ -44,9 +51,10 @@ function setupVisitorDOM(t, fetch, search = '', surface = 'history') {
   };
   const window = makeNode();
   const globals = { location: new URL(`http://127.0.0.1:4173/${surface === 'history' ? 'visit-history/' : ''}${search}`), navigator: {}, window, fetch,
-    document: { visibilityState: 'visible', createElement: () => makeNode(),
+    document: { visibilityState: 'visible', documentElement: { lang: 'en' }, createElement: () => makeNode(),
       getElementById: () => ({ textContent: JSON.stringify({ ...config, enabled: true }) }),
-      querySelector: selector => selector === (surface === 'history' ? '[data-visitor-history]' : '[data-visitor-card]') ? card : null },
+      querySelector: selector => selector === (surface === 'history' ? '[data-visitor-history]' : '[data-gintmr_ui-visitor-card]') ? card : null,
+      querySelectorAll: selector => selector === '[data-gintmr_ui-visitor-card]' && surface !== 'history' ? [card] : [] },
   };
   const saved = Object.fromEntries(Object.keys(globals).map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
   t.after(() => {
@@ -115,12 +123,14 @@ test('Home reads only the summary and renders its compact today/country informat
   }, '', 'home');
   initializeVisitors();
   initializeVisitHistory(); // No history root: even an accidental call is inert.
+  // 站点只提供取数函数，渲染由库完成
+  initVisitorCard(globalThis.document);
   await settle();
   assert.equal(calls.length, 1);
   assert.equal(calls[0].method, 'GET');
   assert.equal(calls[0].url.search, '');
   assert.equal(today[1].textContent, '1');
-  assert.equal(node('[data-visitor-country-rows]').children.length, 2);
+  assert.equal(node('[data-gintmr_ui-visitor-treemap]').children.length, 2);
   const source = await readFile(new URL('../visitors.js', import.meta.url), 'utf8');
   assert.equal(source.includes('data-visitor-activity'), false);
   assert.equal(source.includes('data-visitor-details'), false);
@@ -347,11 +357,11 @@ test('visible visitor card reads after collection settles, and local previews on
       const readStarted = new Promise(resolve => { resolveRead = resolve; });
       const nodes = new Map();
       const totals = ['pageviews', 'visitorDays', 'countries'].map(visitorValue => ({
-        dataset: { visitorValue }, textContent: '—',
+        dataset: { gintmr_uiVisitorValue: visitorValue }, textContent: '—',
       }));
       const card = {
         dataset: { state: 'unconfigured' },
-        querySelectorAll: selector => selector === '[data-visitor-value]' ? totals : [],
+        querySelectorAll: selector => selector === '[data-gintmr_ui-visitor-value]' ? totals : [],
         querySelector(selector) {
           if (!nodes.has(selector)) nodes.set(selector, makeNode());
           return nodes.get(selector);
@@ -365,8 +375,10 @@ test('visible visitor card reads after collection settles, and local previews on
         window: { addEventListener() {}, removeEventListener() {} },
         document: {
           visibilityState: 'visible',
+          documentElement: { lang: 'en' },
           getElementById: () => ({ textContent: JSON.stringify({ ...config, enabled: true }) }),
           querySelector: () => card,
+          querySelectorAll: () => [card],
         },
         fetch: async (_url, options) => {
           const method = options.method || 'GET';
@@ -389,6 +401,7 @@ test('visible visitor card reads after collection settles, and local previews on
       for (const [key, value] of Object.entries(globals)) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
 
       initializeVisitors();
+      initVisitorCard(globalThis.document);
       await new Promise(resolve => setImmediate(resolve));
       if (!local) {
         assert.deepEqual(calls, ['POST'], 'a pending collection must not race with the summary GET');
@@ -401,7 +414,7 @@ test('visible visitor card reads after collection settles, and local previews on
       assert.deepEqual(calls, local ? ['GET'] : scenario === 'network failure' ? ['POST', 'POST', 'GET'] : ['POST', 'GET']);
       assert.equal(card.dataset.state, 'empty', 'the public summary must still render after failed collection');
       assert.equal(totals[0].textContent, '0');
-      assert.equal(card.querySelector('[data-visitor-status]').textContent, 'No visits recorded yet.');
+      assert.equal(card.querySelector('[data-gintmr_ui-visitor-status]').textContent, 'No visits recorded yet.');
     });
   }
 });
@@ -414,9 +427,9 @@ test('generated pages load one collector each; only Home includes the map and ou
     assert.equal((html.match(/id="visitor-config"/g) || []).length, 1);
     const value = JSON.parse(html.match(/id="visitor-config" type="application\/json">(.*?)<\/script>/s)[1]);
     assert.deepEqual(Object.keys(value).sort(), ['allowedOrigins', 'enabled', 'endpoint']);
-    assert.equal(html.includes('data-visitor-card'), page === 'index.html');
+    assert.equal(html.includes('data-gintmr_ui-visitor-card'), page === 'index.html');
     if (page === 'index.html') {
-      assert.ok(html.includes('href="#visitors"'));
+      assert.ok(html.includes('href="#visitors-heading"'));
       assert.ok(html.includes('Visitor statistics are not connected yet.'));
       assert.ok(html.includes('tabindex="-1"'));
     }

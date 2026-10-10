@@ -45,10 +45,13 @@
   </script>
   <link rel="stylesheet" href="/assets/fonts/noto-serif-sc/index.css" />
   <link rel="stylesheet" href="/assets/fonts/noto-sans-sc/index.css" />
-  <link rel="stylesheet" href="/ui/gintmr-ui.css?v=de8b1ba3c89c" />
-  <script src="/ui/gintmr-ui.js?v=860b20a12e6a" defer></script>
-  <link rel="stylesheet" href="/css/visitors.css?v=27b04cfe7e37" />
-  <script id="visitor-config" type="application/json">{"enabled":true,"endpoint":"https://gjofwuihpzjfqeaysuuy.supabase.co/functions/v1/visitor-analytics","allowedOrigins":["https://gintmr.github.io"]}</script>
+  <link rel="stylesheet" href="/ui/gintmr-ui.css?v=7234c4e75518" />
+  <!-- visitors.js 必须排在库脚本之前：库的 boot() 会在 DOMContentLoaded 之前就初始化访客卡，
+       那时取数函数还没定义，卡片会停在「尚未接入」。两者都是 defer，按文档顺序执行。
+       只读的那个历史页不挂它，那里走自己的只读脚本。 -->
+
+  <script src="/ui/gintmr-ui.js?v=68541cc20cca" defer></script>
+  <link rel="stylesheet" href="/css/visitors.css?v=94fc71392c01" />
   <script src="/visit-history.js?v=093369a19eb9" type="module"></script>
   <script>if (location.pathname === '/' && location.hash === '#publications') location.replace('/publication/');</script>
 

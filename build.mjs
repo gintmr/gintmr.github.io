@@ -210,10 +210,14 @@ function layout(page, content) {
   <link rel="stylesheet" href="/assets/fonts/noto-serif-sc/index.css" />
   <link rel="stylesheet" href="/assets/fonts/noto-sans-sc/index.css" />
   <link rel="stylesheet" href="${libraryStyleUrl}" />
+  <!-- visitors.js 必须排在库脚本之前：库的 boot() 会在 DOMContentLoaded 之前就初始化访客卡，
+       那时取数函数还没定义，卡片会停在「尚未接入」。两者都是 defer，按文档顺序执行。
+       只读的那个历史页不挂它，那里走自己的只读脚本。 -->
+  ${page.id === 'visit-history' ? '' : `<script src="${visitorScriptUrl}" type="module"></script>
+  <script id="visitor-config" type="application/json">${JSON.stringify(visitorConfig).replaceAll('<', '\\u003c')}</script>`}
   <script src="${libraryScriptUrl}" defer></script>
   ${page.id === 'home' || page.id === 'visit-history' ? `<link rel="stylesheet" href="${visitorStyleUrl}" />` : ''}
-  <script id="visitor-config" type="application/json">${JSON.stringify(visitorConfig).replaceAll('<', '\\u003c')}</script>
-  <script src="${page.id === 'visit-history' ? historyScriptUrl : visitorScriptUrl}" type="module"></script>
+  ${page.id === 'visit-history' ? `<script src="${historyScriptUrl}" type="module"></script>` : ''}
   <script>if (location.pathname === '/' && location.hash === '#publications') location.replace('/publication/');</script>
   ${page.id === 'home' ? `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name: profile.name, alternateName: profile.chineseName, url: 'https://gintmr.github.io/', sameAs: [profile.scholarUrl, profile.alphaXivUrl, profile.githubUrl], knowsAbout: researchAreas.map(a => a.title) })}</script>` : ''}
 </head>

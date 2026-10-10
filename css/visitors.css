@@ -1,30 +1,7 @@
-/* Visitor statistics use the same translucent academic cards and theme tokens. */
-.visitor-card { padding: 1.3rem 1.4rem 1rem; }
-.visitor-summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.visitor-totals { display: flex; flex-wrap: wrap; gap: .8rem 2.6rem; margin: 0; }
-.visitor-totals > div { display: flex; flex-direction: column-reverse; }
-.visitor-totals dt { color: var(--gintmr_ui-secondary); font-size: .76rem; line-height: 1.6; }
-.visitor-totals dd { margin: 0; color: var(--gintmr_ui-fg); font-size: 1.65rem; line-height: 1.45; font-variant-numeric: tabular-nums; font-weight: 600; }
-.visitor-totals abbr { text-decoration: underline dotted color-mix(in srgb, var(--gintmr_ui-secondary) 45%, transparent); text-underline-offset: .2em; cursor: help; }
-.visitor-demo-label { color: var(--gintmr_ui-link); border: 1px solid var(--gintmr_ui-line); border-radius: 999px; padding: .15rem .65rem; font-size: .73rem; }
-.visitor-geography { margin-top: .65rem; }
-.visitor-map-figure { min-width: 0; width: 100%; max-width: 900px; margin: 0 auto; }
-.visitor-map { display: block; width: 100%; height: auto; }
-.visitor-map-land { fill: color-mix(in srgb, var(--gintmr_ui-link) 8%, var(--gintmr_ui-bg)); stroke: color-mix(in srgb, var(--gintmr_ui-link) 28%, var(--gintmr_ui-bg)); stroke-width: .65; stroke-linejoin: round; }
-.visitor-map-land [data-country] { fill: color-mix(in srgb, var(--gintmr_ui-link) var(--visitor-country-strength, 8%), var(--gintmr_ui-bg)); }
+/* 学术站的访客页样式：只保留「访问历史」页那部分。
+   卡片本身的观感已进组件库（vendor/gintmr-ui/src/components/visitor-card.css）。 */
+
 .visitor-page-button:focus-visible, .visitor-page-jump input:focus-visible, .visitor-table-scroll:focus-visible { outline: 2px solid var(--gintmr_ui-link); outline-offset: 4px; border-radius: .2rem; }
-.visitor-analysis { display: grid; grid-template-columns: minmax(12rem, .8fr) minmax(0, 1.65fr); align-items: center; gap: 1.5rem; margin-top: .75rem; padding-top: .8rem; border-top: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 65%, transparent); }
-.visitor-today { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .45rem; }
-.visitor-detail-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem; margin: 0; font-size: .82rem; }
-.visitor-detail-label > span { color: var(--gintmr_ui-secondary); font-size: .67rem; }
-.visitor-today-totals { gap: .5rem 2rem; }
-.visitor-today-totals dd { font-size: 1.3rem; }
-.visitor-today-totals dt { font-size: .7rem; }
-.visitor-country-panel { min-width: 0; }
-.visitor-country-scroll { max-height: 180px; overflow-y: auto; overscroll-behavior: contain; }
-.visitor-analysis .visitor-country-table th, .visitor-analysis .visitor-country-table td { padding-block: .3rem; font-size: .74rem; line-height: 1.5; }
-.visitor-analysis .visitor-country-table thead th { position: sticky; top: 0; background: var(--gintmr_ui-bg); font-size: .67rem; }
-.visitor-country-table abbr { text-decoration: none; cursor: help; }
 .visitor-history-card { padding: 1.2rem 1.4rem; }
 .visitor-history-heading { margin-bottom: 1rem; }
 .visitor-history-meta { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem 1rem; margin-bottom: .4rem; }
@@ -38,7 +15,6 @@
 .visitor-table thead th { color: var(--gintmr_ui-secondary); font-size: .72rem; font-weight: 400; white-space: nowrap; }
 .visitor-table tbody th { font-weight: 400; }
 .visitor-table tbody tr:last-child > * { border-bottom: 0; }
-.visitor-country-table td, .visitor-country-table th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
 .visitor-activity-table time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .visitor-activity-table td:last-child { white-space: nowrap; }
 .visitor-activity-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; margin-top: .75rem; }
@@ -52,24 +28,13 @@
 .visitor-page-jump label { color: var(--gintmr_ui-secondary); font-size: .73rem; }
 .visitor-page-jump input { width: 4.2rem; min-width: 0; padding: .35rem .4rem; border: 1px solid var(--gintmr_ui-line); border-radius: .35rem; background: color-mix(in srgb, var(--gintmr_ui-bg) 70%, transparent); color: var(--gintmr_ui-fg); font: inherit; font-size: .75rem; font-variant-numeric: tabular-nums; }
 .visitor-page-jump input:disabled { opacity: .5; }
-.visitor-footer { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem 1.5rem; margin-top: .65rem; padding-top: .5rem; border-top: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 65%, transparent); font-size: .72rem; color: var(--gintmr_ui-secondary); }
-.visitor-status { font-size: .72rem; color: var(--gintmr_ui-secondary); }
 .visitor-section [hidden] { display: none !important; }
 @media (max-width: 760px) {
   .visitor-card, .visitor-history-card { padding: 1rem; }
-  .visitor-totals { gap: .7rem 1.7rem; }
-  .visitor-totals dd { font-size: 1.4rem; }
-  .visitor-analysis { grid-template-columns: minmax(0, 1fr); gap: .75rem; }
-  .visitor-today { flex-direction: row; align-items: center; justify-content: space-between; gap: 1rem; }
-  .visitor-detail-label { flex-direction: column; align-items: flex-start; gap: .15rem; }
   .visitor-table { font-size: .76rem; }
   .visitor-table th, .visitor-table td { padding: .5rem .6rem; }
 }
 @media (max-width: 420px) {
-  .visitor-summary > .visitor-totals { justify-content: space-between; width: 100%; gap: .5rem; }
-  .visitor-totals dt { font-size: .67rem; }
-  .visitor-today { justify-content: space-between; gap: .7rem; }
-  .visitor-today-totals { gap: 1rem; }
   .visitor-table th, .visitor-table td { padding-inline: .35rem; }
   .visitor-pagination { align-items: stretch; }
   .visitor-page-navigation { width: 100%; justify-content: space-between; }

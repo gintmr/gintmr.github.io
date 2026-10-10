@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 208" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Budget-aware reasoning</title>
+  <desc id="desc">A conceptual chain of reasoning tokens passes through a budget gate to a final response. This illustration does not represent empirical results.</desc>
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" stroke="#78629a" stroke-opacity=".07"/></pattern>
+  </defs>
+  <path fill="#f1eef5" d="M0 0h320v208H0z"/>
+  <path fill="url(#grid)" d="M0 0h320v208H0z"/>
+  <text x="23" y="31" fill="#78629a" font-family="monospace" font-size="9" letter-spacing="1.4">BUDGET-AWARE REASONING</text>
+  <path d="M30 112H282" stroke="#78629a" stroke-opacity=".38" stroke-width="1.5"/>
+  <g fill="#e4ddeb" stroke="#78629a" stroke-width="1.5">
+    <rect x="29" y="97" width="29" height="30" rx="7"/>
+    <rect x="72" y="97" width="29" height="30" rx="7"/>
+    <rect x="115" y="97" width="29" height="30" rx="7"/>
+  </g>
+  <g stroke="#78629a" stroke-width="2" stroke-linecap="round">
+    <path d="M39 107h9m-9 8h6M82 107h9m-9 8h6M125 107h9m-9 8h6"/>
+  </g>
+  <path d="M175 143V84a13 13 0 0 1 26 0v59" stroke="#78629a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M169 145h38" stroke="#78629a" stroke-opacity=".4" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="m184 113 4 4 7-9" stroke="#527f77" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="235" y="92" width="49" height="40" rx="10" fill="#527f77"/>
+  <path d="m250 111 6 6 12-13" stroke="#f1eef5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M43 148v8h86v-8" stroke="#78629a" stroke-opacity=".35" stroke-linecap="round"/>
+  <text x="64" y="174" fill="#78629a" fill-opacity=".72" font-family="monospace" font-size="8" letter-spacing="1">THINK</text>
+  <text x="178" y="169" fill="#78629a" fill-opacity=".72" font-family="monospace" font-size="8" letter-spacing="1">GATE</text>
+</svg>
