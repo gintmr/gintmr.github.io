@@ -1581,23 +1581,26 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 /* ── components/viewer.css ───────────────────────────────── */
 /* ============================================================================
    gintmr-ui · 图片查看器
-   一个安静的浮层：黑底、无彩色背光、无胶囊计数器。
-   顶栏（计数 + 进度）与说明文字的宽度跟着图片走，尺寸由 viewer.js 按原始比例算。
-   浮层在明暗主题下都是深底，所以这里的文字颜色是固定的浅色，不跟主题令牌走；
-   只有强调色取自调色板。
+   一个安静的浮层：黑底、无彩色背光。
+   规则沿用站点旧版：计数与进度条在**图片下方**，左右按钮贴在图片两侧，
+   图片按原图比例缩放、不放大也不裁切。
+   这里的文字颜色是固定的浅色，不跟主题令牌走（浮层在明暗主题下都是深底）；
+   只有强调色取自调色板。尺寸由 viewer.js 按原始比例算好后写进 --gintmr_ui-viewer-w，
+   所以下方的计数与进度条跟图片同宽，不会从图片两侧探出去。
    ========================================================================= */
 
 .gintmr_ui-viewer {
   --gintmr_ui-viewer-ink: #f4ecff;
   --gintmr_ui-viewer-ink-soft: color-mix(in srgb, #f4ecff 58%, transparent);
   --gintmr_ui-viewer-line: color-mix(in srgb, #f4ecff 16%, transparent);
+  --gintmr_ui-viewer-nav: 2.75rem;
   position: fixed;
   inset: 0;
   z-index: 120;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 2.25rem 1rem 1.5rem;
+  padding: 2rem 1rem 1.25rem;
   background: color-mix(in srgb, #0a090d 92%, transparent);
   backdrop-filter: blur(10px);
 }
@@ -1607,38 +1610,8 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: min(94vw, var(--gintmr_ui-viewer-w, 94vw));
-}
-
-/* ── 顶栏：一行细字 + 一条 2px 进度 ─────────────────────────────────────── */
-.gintmr_ui-viewer__bar {
-  display: flex;
-  flex-direction: column;
-  gap: .45rem;
-  width: 100%;
-  margin-bottom: .7rem;
-}
-.gintmr_ui-viewer__counter {
-  font-family: var(--gintmr_ui-font-mono);
-  font-size: .74rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: .02em;
-  color: var(--gintmr_ui-viewer-ink-soft);
-}
-.gintmr_ui-viewer__progress {
-  display: block;
-  width: 100%;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--gintmr_ui-viewer-line);
-  overflow: hidden;
-}
-.gintmr_ui-viewer__progress-value {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: color-mix(in srgb, var(--gintmr_ui-palette-accent) 82%, transparent);
-  transition: width var(--gintmr_ui-duration-fast) ease;
+  /* 92vw 与 viewer.js 里的视口上限一致，图片、说明、底栏才会同宽 */
+  width: min(92vw, var(--gintmr_ui-viewer-w, 64rem));
 }
 
 /* ── 画布与图片：只按原图比例缩放，不放大小图 ───────────────────────────── */
@@ -1648,33 +1621,49 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
   width: auto;
   height: auto;
   max-width: 100%;
+  /* 74vh 与 viewer.js 里的同一档：由脚本算尺寸、CSS 不再另外压一次，
+     否则实际图片会比算出的小，底栏就会比图片宽出一条 */
   max-height: 74vh;
   border-radius: var(--gintmr_ui-radius-sm);
   background: color-mix(in srgb, #fff 3%, transparent);
+  transition: opacity var(--gintmr_ui-duration-fast) ease;
 }
+/* 换图期间压暗上一张的尺寸还在，量好新尺寸再一起亮回来，避免舞台先塌再撑 */
+.gintmr_ui-viewer[data-gintmr_ui-loading='true'] .gintmr_ui-viewer__img { opacity: .45; }
 
-/* ── 翻页：只有箭头，没有圆底 ───────────────────────────────────────────── */
+/* ── 翻页：细描边圆钮，默认贴在图片外侧 ─────────────────────────────────── */
 .gintmr_ui-viewer__nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 1;
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: var(--gintmr_ui-viewer-nav);
+  height: var(--gintmr_ui-viewer-nav);
   padding: 0;
-  border: 0;
+  border: 1px solid var(--gintmr_ui-viewer-line);
   border-radius: 50%;
-  background: transparent;
+  background: color-mix(in srgb, #0a090d 62%, transparent);
   color: var(--gintmr_ui-viewer-ink-soft);
-  transition: color var(--gintmr_ui-duration-fast) ease, background var(--gintmr_ui-duration-fast) ease;
+  transition: color var(--gintmr_ui-duration-fast) ease,
+              background var(--gintmr_ui-duration-fast) ease,
+              border-color var(--gintmr_ui-duration-fast) ease;
 }
-.gintmr_ui-viewer__nav svg { width: 26px; height: 26px; }
-.gintmr_ui-viewer__nav:hover { color: var(--gintmr_ui-viewer-ink); background: color-mix(in srgb, #fff 8%, transparent); }
+.gintmr_ui-viewer__nav svg { width: 24px; height: 24px; }
+.gintmr_ui-viewer__nav:hover {
+  color: var(--gintmr_ui-viewer-ink);
+  background: color-mix(in srgb, #0a090d 82%, transparent);
+  border-color: color-mix(in srgb, #f4ecff 30%, transparent);
+}
 .gintmr_ui-viewer__nav[disabled] { opacity: .25; cursor: default; }
-.gintmr_ui-viewer__nav[disabled]:hover { background: transparent; }
-.gintmr_ui-viewer__nav--prev { left: -3.25rem; }
-.gintmr_ui-viewer__nav--next { right: -3.25rem; }
+.gintmr_ui-viewer__nav[disabled]:hover { background: color-mix(in srgb, #0a090d 62%, transparent); border-color: var(--gintmr_ui-viewer-line); color: var(--gintmr_ui-viewer-ink-soft); }
+.gintmr_ui-viewer__nav--prev { left: calc(-1 * (var(--gintmr_ui-viewer-nav) + .75rem)); }
+.gintmr_ui-viewer__nav--next { right: calc(-1 * (var(--gintmr_ui-viewer-nav) + .75rem)); }
+/* 图片宽到两侧放不下按钮时，viewer.js 会把它们挪到图片上，此时按钮自带底色，
+   压在图上也看得清、点得到 */
+.gintmr_ui-viewer[data-gintmr_ui-nav='inside'] .gintmr_ui-viewer__nav--prev { left: .6rem; }
+.gintmr_ui-viewer[data-gintmr_ui-nav='inside'] .gintmr_ui-viewer__nav--next { right: .6rem; }
 
 .gintmr_ui-viewer__close {
   position: absolute;
@@ -1695,25 +1684,58 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 .gintmr_ui-viewer__close:hover { color: var(--gintmr_ui-viewer-ink); background: color-mix(in srgb, #fff 8%, transparent); }
 
 .gintmr_ui-viewer__caption {
-  margin: .8rem 0 0;
+  margin: .75rem 0 0;
   width: 100%;
   color: var(--gintmr_ui-viewer-ink-soft);
   font-size: .82rem;
   line-height: 1.6;
+  text-align: center;
 }
 .gintmr_ui-viewer__caption[hidden] { display: none; }
 
+/* ── 底栏：一行计数 + 一条进度，宽度跟着图片走 ──────────────────────────── */
+.gintmr_ui-viewer__bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  margin-top: .8rem;
+}
+.gintmr_ui-viewer__counter {
+  flex-shrink: 0;
+  font-family: var(--gintmr_ui-font-mono);
+  font-size: .74rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+  color: var(--gintmr_ui-viewer-ink-soft);
+}
+.gintmr_ui-viewer__progress {
+  flex: 1;
+  display: block;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--gintmr_ui-viewer-line);
+  overflow: hidden;
+}
+.gintmr_ui-viewer__progress-value {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--gintmr_ui-palette-accent) 82%, transparent);
+  transition: width var(--gintmr_ui-duration-fast) ease;
+}
+
 @media (max-width: 720px) {
-  .gintmr_ui-viewer { padding: 1.25rem .75rem 1rem; }
-  .gintmr_ui-viewer__nav { width: 2.25rem; height: 2.25rem; }
-  .gintmr_ui-viewer__nav svg { width: 22px; height: 22px; }
-  .gintmr_ui-viewer__nav--prev { left: -2.5rem; }
-  .gintmr_ui-viewer__nav--next { right: -2.5rem; }
-  .gintmr_ui-viewer__img { max-height: 68vh; }
+  .gintmr_ui-viewer { padding: 1.15rem .75rem .9rem; }
+  .gintmr_ui-viewer { --gintmr_ui-viewer-nav: 2.4rem; }
+  .gintmr_ui-viewer__nav svg { width: 20px; height: 20px; }
+  .gintmr_ui-viewer__bar { margin-top: .65rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gintmr_ui-viewer__progress-value { transition: none; }
+  .gintmr_ui-viewer__progress-value,
+  .gintmr_ui-viewer__img { transition: none; }
 }
 
 

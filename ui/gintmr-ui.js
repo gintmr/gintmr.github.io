@@ -1151,9 +1151,11 @@ function initGalleries(doc = document) {
 /* ============================================================================
    gintmr-ui · 图片查看器
    只在需要时创建 DOM：点开才建，关掉只隐藏。
-   排版按每张图自己的比例算：先取原始宽高，再按视口留白算出实际显示尺寸，
-   既不放大小图，也不让横竖图各自套同一个框，浮层里的进度条与说明文字
-   宽度跟着图片走，所以竖图不会出现一条悬空的宽标题栏。
+   规则与站点旧版一致，只在这几处做得更稳：
+     · 收集范围是整篇文档里的正文图，所以能一路左右翻到底，不是只看当前图组
+     · 计数与进度条在图片下方（旧版如此），位置跟着图片走
+     · 左右按钮默认贴在图片外侧；图片太宽时自动挪到图片上，避免被挤出屏幕
+     · 换图时先留着上一张的尺寸，等新图量好再换，舞台不会来回跳
    ========================================================================= */
 
 let bound = false;
@@ -1175,16 +1177,16 @@ function ensureViewer() {
   viewer.innerHTML = `
     <button class="gintmr_ui-viewer__close" type="button" aria-label="关闭预览">${ICON_CLOSE}</button>
     <div class="gintmr_ui-viewer__stage">
-      <div class="gintmr_ui-viewer__bar">
-        <span class="gintmr_ui-viewer__counter"></span>
-        <span class="gintmr_ui-viewer__progress"><span class="gintmr_ui-viewer__progress-value"></span></span>
-      </div>
       <div class="gintmr_ui-viewer__canvas">
         <button class="gintmr_ui-viewer__nav gintmr_ui-viewer__nav--prev" type="button" aria-label="上一张">${ICON_PREV}</button>
         <img class="gintmr_ui-viewer__img" alt="" />
         <button class="gintmr_ui-viewer__nav gintmr_ui-viewer__nav--next" type="button" aria-label="下一张">${ICON_NEXT}</button>
       </div>
       <p class="gintmr_ui-viewer__caption"></p>
+      <div class="gintmr_ui-viewer__bar">
+        <span class="gintmr_ui-viewer__counter"></span>
+        <span class="gintmr_ui-viewer__progress"><span class="gintmr_ui-viewer__progress-value"></span></span>
+      </div>
     </div>`;
   document.body.append(viewer);
   return viewer;
@@ -1192,13 +1194,14 @@ function ensureViewer() {
 
 function initImageViewer(options = {}) {
   const {
-    scope = 'main',
-    // 只有正文里的图参与浏览：图集项、图文块，或站点显式标注的容器。
-    // 这样音乐卡封面、媒体卡封面这类"界面图"不会被误收进来。
+    // 整篇文档都参与浏览：正文可能在 main 之外（页面顶部的图、解密后插入的正文等）
+    scope = 'body',
+    // 组件库自己的图组、普通 <figure>，或站点显式标注的正文容器
     selector = '.gintmr_ui-figure img, .gintmr_ui-gallery img, [data-gintmr_ui-viewer] img',
     // 太小的图（图标、表情、头像）不参与浏览
     minSize = 120,
-    exclude = '.gintmr_ui-track, .gintmr_ui-media-card, .gintmr_ui-link-card, button',
+    // 界面图不算正文图：顶栏、音乐卡封面、媒体卡封面、链接卡缩略图、按钮里的图标
+    exclude = '.gintmr_ui-header, .gintmr_ui-track, .gintmr_ui-media-card, .gintmr_ui-link-card, button',
   } = options;
 
   const collect = () => {
@@ -1227,42 +1230,69 @@ function initImageViewer(options = {}) {
   const el = ensureViewer();
   const image = el.querySelector('.gintmr_ui-viewer__img');
   const stage = el.querySelector('.gintmr_ui-viewer__stage');
-  const caption = el.querySelector('.gintmr_ui-viewer__caption');
+  const capture = el.querySelector('.gintmr_ui-viewer__caption');
   const counter = el.querySelector('.gintmr_ui-viewer__counter');
   const progress = el.querySelector('.gintmr_ui-viewer__progress-value');
   const prev = el.querySelector('.gintmr_ui-viewer__nav--prev');
   const next = el.querySelector('.gintmr_ui-viewer__nav--next');
+  const closeButton = el.querySelector('.gintmr_ui-viewer__close');
 
   let slides = [];
   let index = 0;
   let open = false;
+  let lastFocus = null;
 
-  /* 按原始比例 + 当前视口算出显示尺寸，并让整条顶栏跟着图片宽度走 */
+  /* 按原始比例 + 当前视口算显示尺寸：不放大小图，横竖图各自贴合，
+     再把尺寸写到舞台上，让下方的计数与进度条也跟图片同宽 */
   const fit = () => {
     const natural = image.naturalWidth;
     const naturalHeight = image.naturalHeight;
     if (!natural || !naturalHeight) return;
-    const maxWidth = window.innerWidth * 0.94;
+
+    // 视口宽高上限要与 viewer.css 上的舞台宽度、图片限高一致，
+    // 否则下方的计数与进度条会比图片宽出一截
+    const maxWidth = window.innerWidth * 0.92;
     const maxHeight = window.innerHeight * 0.74;
     const scale = Math.min(1, maxWidth / natural, maxHeight / naturalHeight);
     const width = Math.round(natural * scale);
     const height = Math.round(naturalHeight * scale);
     stage.style.setProperty('--gintmr_ui-viewer-w', `${width}px`);
+
     // 形状由实际显示尺寸决定，方便站点对竖长图做额外处理
     const shape = Math.abs(width - height) <= 2 ? 'square' : width > height ? 'landscape' : 'portrait';
     el.setAttribute('data-gintmr_ui-shape', shape);
+
+    // 图片两侧放不下按钮时，把按钮挪到图片上，否则会被挤出屏幕点不到
+    const stageWidth = Math.min(window.innerWidth * 0.88, width);
+    el.setAttribute('data-gintmr_ui-nav', stageWidth > window.innerWidth - 172 ? 'inside' : 'outside');
+  };
+
+  /* 提前把相邻两张取回来，左右翻的时候不再等网络 */
+  const preload = () => {
+    if (slides.length <= 1) return;
+    [index + 1, index - 1].forEach(step => {
+      const slide = slides[((step % slides.length) + slides.length) % slides.length];
+      if (!slide?.src) return;
+      const ahead = new Image();
+      ahead.decoding = 'async';
+      ahead.src = slide.src;
+    });
   };
 
   const render = next => {
     if (!slides.length) return;
     index = ((next % slides.length) + slides.length) % slides.length;
     const slide = slides[index];
+
+    // 先把上一张的尺寸留着，等新图量好再换，舞台就不会先塌再撑
+    el.setAttribute('data-gintmr_ui-loading', 'true');
     image.src = slide.src;
     image.alt = slide.alt;
-    stage.style.removeProperty('--gintmr_ui-viewer-w');
-    if (image.complete) fit();
-    caption.textContent = slide.caption;
-    caption.hidden = !slide.caption;
+    if (image.complete && image.naturalWidth) settle();
+    else image.addEventListener('load', settle, { once: true });
+
+    capture.textContent = slide.caption;
+    capture.hidden = !slide.caption;
     counter.textContent = `${index + 1} / ${slides.length}`;
     progress.style.width = `${((index + 1) / slides.length) * 100}%`;
     const single = slides.length <= 1;
@@ -1270,11 +1300,19 @@ function initImageViewer(options = {}) {
     next.disabled = single;
   };
 
+  function settle() {
+    el.removeAttribute('data-gintmr_ui-loading');
+    fit();
+    preload();
+  }
+
   const close = () => {
     if (!open) return;
     el.setAttribute('data-gintmr_ui-open', 'false');
     document.body.style.overflow = '';
     open = false;
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+    lastFocus = null;
   };
 
   const show = node => {
@@ -1282,17 +1320,42 @@ function initImageViewer(options = {}) {
     const position = eligible.indexOf(node);
     if (position < 0) return;
     slides = eligible.map(describe);
+    lastFocus = document.activeElement;
     el.setAttribute('data-gintmr_ui-open', 'true');
     document.body.style.overflow = 'hidden';
     open = true;
     render(position);
+    closeButton.focus({ preventScroll: true });
+  };
+
+  /* 点在图上就打开；图被包在图组链接里时，点链接的留白也算 */
+  const targetImage = event => {
+    const direct = event.target instanceof Element ? event.target.closest('img') : null;
+    if (direct instanceof HTMLImageElement) return direct;
+    const anchor = event.target instanceof Element
+      ? event.target.closest('a[data-gallery-image], a[data-gintmr_ui-viewer]')
+      : null;
+    const nested = anchor?.querySelector('img');
+    return nested instanceof HTMLImageElement ? nested : null;
   };
 
   image.addEventListener('load', fit);
   prev.addEventListener('click', () => render(index - 1));
   next.addEventListener('click', () => render(index + 1));
-  el.querySelector('.gintmr_ui-viewer__close').addEventListener('click', close);
+  closeButton.addEventListener('click', close);
   el.addEventListener('click', event => { if (event.target === el) close(); });
+
+  // 触屏左右滑：手机上不必去够边缘的小按钮
+  let swipeFrom = null;
+  el.addEventListener('pointerdown', event => { if (open) swipeFrom = { x: event.clientX, y: event.clientY }; });
+  el.addEventListener('pointerup', event => {
+    if (!open || !swipeFrom) return;
+    const dx = event.clientX - swipeFrom.x;
+    const dy = event.clientY - swipeFrom.y;
+    swipeFrom = null;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+    render(dx < 0 ? index + 1 : index - 1);
+  });
 
   if (bound) return;
   bound = true;
@@ -1302,8 +1365,8 @@ function initImageViewer(options = {}) {
     if (event.target.closest('.gintmr_ui-viewer')) return;
     // 必须点在图片本身：早先的"向上找容器里的 img"会把卡片封面也算进来，
     // 于是点播放按钮会弹出图片预览。
-    const candidate = event.target.closest('img');
-    if (!(candidate instanceof HTMLImageElement)) return;
+    const candidate = targetImage(event);
+    if (!candidate) return;
     if (!collect().includes(candidate)) return;
     event.preventDefault();
     show(candidate);
@@ -1737,7 +1800,6 @@ function bindTooltip(card) {
 
 function initCard(card) {
   if (card.dataset.gintmr_uiReady === 'true') return;
-  card.dataset.gintmr_uiReady = 'true';
 
   const source = sourceOf();
   const labels = { ...DEFAULT_LABELS, ...(source.labels || {}) };
@@ -1746,10 +1808,14 @@ function initCard(card) {
   const demo = isDemoRequest();
 
   if (demo) {
+    card.dataset.gintmr_uiReady = 'true';
     renderSummary(card, (source.demo || designPreviewSummary)(), { demo: true, labels });
     return;
   }
-  if (typeof source.load !== 'function') return; // 未接入：保留「尚未接入」的原话
+  // 站点还没挂取数函数时**不置就绪标记**：脚本加载顺序不该决定卡片能否显示，
+  // 稍后任何一次 refresh() 都还能把它接上。
+  if (typeof source.load !== 'function') return;
+  card.dataset.gintmr_uiReady = 'true';
 
   card.dataset.state = 'loading';
   status().textContent = labels.loading;
