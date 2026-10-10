@@ -16,12 +16,15 @@ Open `http://127.0.0.1:4173/`. The generated HTML files can be served directly b
 - `profile.logo` points to the selected illustrated avatar in `assets/branding/`, shared by the navigation, favicon, and Apple touch icon. It is an unchanged copy of `output/logo-concepts-2026-09-11/01-color-flat.png`. `profile.portrait` independently controls the homepage and social preview photograph, currently the approved 1286 × 1223 AI-enhanced image in `assets/portraits/`. The original `个人照2.jpg` is retained.
 - `user-data/projects.js`: project descriptions, official demo URLs, and repository links.
 - `build.mjs`: shared page templates and metadata.
-- `css/style.css`: the shared UI, mobile layouts, themes, and print styles. Set `--site-max-width` and `--site-inline-padding` in `:root` to change the width and padding of every page, including the navigation and CV preview container.
-- `index.js`: theme preference, mobile navigation, page outline, and responsive iframe scaling.
+- `vendor/gintmr-ui` (submodule): the shared UI library used by this site and the personal blog. It owns the design tokens, navigation, page outline, decorative effects, and content cards. Edit styles or behaviour there, not here.
+- `css/visitors.css` and `visitors.js`: the visitor card, its table controls, and the analytics data contract, which stay local to this repository.
 
-After changing content, templates, CSS, JavaScript, the logo, or the CV PDF, regenerate the four public navigation pages and the unlisted history page. The build adds content-based version identifiers to the stylesheet, script, logo, and CV PDF URLs so all pages load the updated assets:
+GitHub Pages serves committed files and never checks out submodules, so the build copies the library's `dist/` into the repository's own `ui/` directory. Every page references `/ui/gintmr-ui.css` and `/ui/gintmr-ui.js`; that copy is what ships. Set `--gintmr_ui-max-width` and `--gintmr_ui-inline-padding` in the library to change the width and padding of every page, including the navigation and CV preview container.
+
+After changing content, templates, or the CV PDF — and after every library update — regenerate the four public navigation pages and the unlisted history page. The build re-copies `ui/` from the submodule and adds content-based version identifiers to the stylesheet, script, logo, and CV PDF URLs so all pages load the updated assets:
 
 ```sh
+git -C vendor/gintmr-ui pull        # or: git submodule update --remote vendor/gintmr-ui
 node build.mjs
 ```
 
@@ -31,7 +34,7 @@ Every page includes an outline with native section anchors and scroll-based high
 
 All content headings are self-links. Clicking one updates the URL fragment, smoothly aligns it below the sticky navigation, and gives it keyboard focus. A small purple accent fades into the heading's normal text color; hovering or focusing gently extends that gradient over 320ms. Reduced-motion preferences disable the transition and smooth scrolling; forced-colors and print modes use solid text. Paper resource links remain beneath each paper title.
 
-All four pages share the decorative effects in `css/effects.css` and `effects.js`: a slow background glow, eight softly twinkling points (four on mobile), and short mouse-click particle bursts. The layers pass pointer events through and are hidden from assistive technology. Reduced-motion preferences disable the effects, and hidden pages pause them and clear particles. Click particles are bounded and removed when their animations finish; no continuous JavaScript render loop or animation library is used. Theme colors follow the site's shared palette.
+All four pages share the decorative effects owned by the library: a slow background glow, eight softly twinkling points (four on mobile), and short mouse-click particle bursts. The layers pass pointer events through and are hidden from assistive technology. Reduced-motion preferences disable the effects, and hidden pages pause them and clear particles. Click particles are bounded and removed when their animations finish; no continuous JavaScript render loop or animation library is used. Theme colors follow the library palette, which derives every surface from eight input colors.
 
 ## Content sources
 

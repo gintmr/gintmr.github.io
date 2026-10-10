@@ -1,0 +1,3 @@
+[submodule "vendor/gintmr-ui"]
+	path = vendor/gintmr-ui
+	url = git@github.com:gintmr/gintmr-ui.git

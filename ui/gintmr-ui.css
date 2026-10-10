@@ -1,0 +1,1718 @@
+/*! gintmr-ui v0.1.0 | 生成物，请改 src/ 后重新构建 */
+/* ============================================================================
+   gintmr-ui · 样式入口
+   顺序有依赖：令牌 → 基础 → 背景 → 原语 → 组件。
+   dist 里的单文件样式由 build.mjs 读这个文件里的 @import 列表拼接而成，
+   所以新增文件只需要在这里登记一次。
+   ========================================================================= */
+
+
+/* ── tokens/tokens.css ───────────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 令牌层
+   三层结构：① 调色输入  ② 语义派生  ③ 尺度（尺寸/字体/圆角/动效）
+   换整套配色只需要改第 ① 层的 8 个变量。
+   ========================================================================= */
+
+/* ── ① 调色输入：默认薰衣草 ──────────────────────────────────────────────── */
+:root {
+  --gintmr_ui-palette-canvas: #fffaff;      /* 画布底 */
+  --gintmr_ui-palette-canvas-veil: #fffcff;  /* 卡片底（会比画布略亮/略暖） */
+  --gintmr_ui-palette-ink: #2f2638;          /* 正文 */
+  --gintmr_ui-palette-ink-soft: #706379;     /* 次要文字 */
+  --gintmr_ui-palette-accent: #b992ff;       /* 强调色：光晕、粒子、选中 */
+  --gintmr_ui-palette-link: #74509f;         /* 链接（对比度达标的深一档） */
+  --gintmr_ui-palette-line: #e4d2ef;         /* 分隔线、卡片描边 */
+  --gintmr_ui-palette-watermark: #765394;    /* 花体水印 */
+}
+html[data-gintmr_ui-theme='dark'] {
+  --gintmr_ui-palette-canvas: #191919;
+  --gintmr_ui-palette-canvas-veil: #1d1b20;
+  --gintmr_ui-palette-ink: #f4ecff;
+  --gintmr_ui-palette-ink-soft: #c7bdce;
+  --gintmr_ui-palette-accent: #d7a2ff;
+  --gintmr_ui-palette-link: #d7a2ff;
+  --gintmr_ui-palette-line: #8b74ad;
+  --gintmr_ui-palette-watermark: #f1d5ff;
+}
+
+/* ── ② 语义派生：全部由 ① 层算出，不在组件里写死颜色 ───────────────────── */
+:root {
+  --gintmr_ui-bg: var(--gintmr_ui-palette-canvas);
+  --gintmr_ui-fg: var(--gintmr_ui-palette-ink);
+  --gintmr_ui-link: var(--gintmr_ui-palette-link);
+  --gintmr_ui-secondary: var(--gintmr_ui-palette-ink-soft);
+  --gintmr_ui-line: var(--gintmr_ui-palette-line);
+  --gintmr_ui-muted: color-mix(in srgb, var(--gintmr_ui-palette-accent) 22%, var(--gintmr_ui-palette-canvas));
+  --gintmr_ui-watermark: var(--gintmr_ui-palette-watermark);
+
+  /* 强调色透明度阶梯：组件只引用档位，不再各自写百分比 */
+  --gintmr_ui-accent-08: color-mix(in srgb, var(--gintmr_ui-palette-accent) 8%, transparent);
+  --gintmr_ui-accent-16: color-mix(in srgb, var(--gintmr_ui-palette-accent) 16%, transparent);
+  --gintmr_ui-accent-24: color-mix(in srgb, var(--gintmr_ui-palette-accent) 24%, transparent);
+  --gintmr_ui-accent-40: color-mix(in srgb, var(--gintmr_ui-palette-accent) 40%, transparent);
+  --gintmr_ui-line-hairline: color-mix(in srgb, var(--gintmr_ui-line) 56%, transparent);
+  --gintmr_ui-line-faint: color-mix(in srgb, var(--gintmr_ui-line) 50%, transparent);
+  --gintmr_ui-selection: color-mix(in srgb, var(--gintmr_ui-palette-accent) 65%, transparent);
+
+  /* 表面五件套：卡片/面板统一走这组，不再各写渐变与阴影 */
+  --gintmr_ui-surface-bg: color-mix(in srgb, var(--gintmr_ui-palette-canvas-veil) 80%, transparent);
+  --gintmr_ui-surface-bg-strong: color-mix(in srgb, var(--gintmr_ui-palette-canvas-veil) 94%, transparent);
+  --gintmr_ui-surface-border: var(--gintmr_ui-line-hairline);
+  --gintmr_ui-surface-highlight: color-mix(in srgb, #fff 55%, transparent);
+  --gintmr_ui-surface-shadow: 0 14px 34px color-mix(in srgb, var(--gintmr_ui-palette-ink) 10%, transparent);
+
+  /* 极光流带：默认在薰衣草旁配青与粉，想换整套极光配色就覆盖这四个 */
+  --gintmr_ui-aurora-1: var(--gintmr_ui-palette-accent);
+  --gintmr_ui-aurora-2: #7af9ff;
+  --gintmr_ui-aurora-3: #ff9ad5;
+  --gintmr_ui-aurora-4: #9d8bff;
+  --gintmr_ui-aurora-alpha: .19;
+  --gintmr_ui-aurora-blur: 56px;
+  --gintmr_ui-aurora-duration: 19s;
+
+  /* 特效元素（星点、点击粒子） */
+  --gintmr_ui-sparkle: color-mix(in srgb, var(--gintmr_ui-palette-link) 70%, transparent);
+  --gintmr_ui-particle: var(--gintmr_ui-palette-link);
+  color-scheme: light;
+}
+html[data-gintmr_ui-theme='dark'] {
+  /* 深色下细线本身带透明度，与原实现的 #8b74ad4d 一致 */
+  --gintmr_ui-line: color-mix(in srgb, var(--gintmr_ui-palette-line) 30%, transparent);
+  --gintmr_ui-surface-highlight: color-mix(in srgb, #fff 12%, transparent);
+  --gintmr_ui-surface-shadow: 0 14px 34px #00000059;
+  --gintmr_ui-aurora-alpha: .40;
+  --gintmr_ui-sparkle: color-mix(in srgb, var(--gintmr_ui-palette-accent) 85%, transparent);
+  --gintmr_ui-particle: var(--gintmr_ui-palette-accent);
+  color-scheme: dark;
+}
+
+/* ── ③ 尺度 ─────────────────────────────────────────────────────────────── */
+:root {
+  /* 字体栈：两个站点的并集，五条 */
+  --gintmr_ui-font-serif: 'Noto Serif SC Variable', 'Source Han Serif SC', 'Songti SC', 'Times New Roman', serif;
+  --gintmr_ui-font-sans: 'Noto Sans SC Variable', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  --gintmr_ui-font-display: 'Snell Roundhand', 'Apple Chancery', 'Segoe Script', 'Brush Script MT', cursive;
+  --gintmr_ui-font-hand: 'Ma Shan Zheng', 'Kaiti SC', 'STKaiti', 'KaiTi', cursive;
+  --gintmr_ui-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* 版式尺度 */
+  --gintmr_ui-font-size: 16px;
+  --gintmr_ui-line-height: 1.75;
+  --gintmr_ui-font-size-mobile: 15px;
+  --gintmr_ui-h1-size: 2.1rem;
+  --gintmr_ui-h2-size: 1.5rem;
+  --gintmr_ui-h3-size: 1rem;
+  --gintmr_ui-meta-size: .85rem;
+
+  /* 布局尺度：宽版（学术站）为默认，窄版（博客）挂 data-gintmr_ui-width="narrow" */
+  --gintmr_ui-max-width: 75rem;
+  --gintmr_ui-inline-padding: 1rem;
+  --gintmr_ui-header-height: 5.1rem;
+  --gintmr_ui-outline-width: 13.75rem;
+  --gintmr_ui-outline-gap: 1.5rem;
+
+  /* 圆角 */
+  --gintmr_ui-radius-sm: .5rem;
+  --gintmr_ui-radius-md: .6rem;
+  --gintmr_ui-radius-lg: 1rem;
+  --gintmr_ui-radius-xl: 1.1rem;
+  --gintmr_ui-radius-pill: 999px;
+
+  /* 动效：只允许这一条缓动曲线 */
+  --gintmr_ui-ease: cubic-bezier(.22, 1, .36, 1);
+  --gintmr_ui-duration-fast: 160ms;
+  --gintmr_ui-duration-base: 320ms;
+  --gintmr_ui-duration-slow: 14s;
+}
+html[data-gintmr_ui-width='narrow'] {
+  --gintmr_ui-max-width: 48rem;
+}
+
+
+/* ── base/base.css ───────────────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 基础层
+   重置、正文排版、焦点与降级。所有规则都建立在令牌层之上。
+   ========================================================================= */
+
+* { box-sizing: border-box; }
+
+html {
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  /* 锚点跳转要停在吸顶栏下方 */
+  scroll-padding-top: calc(var(--gintmr_ui-header-height) + 4rem);
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  background-color: var(--gintmr_ui-bg);
+  color: var(--gintmr_ui-fg);
+  font-family: var(--gintmr_ui-font-serif);
+  font-size: var(--gintmr_ui-font-size);
+  line-height: var(--gintmr_ui-line-height);
+}
+
+a { color: var(--gintmr_ui-link); text-decoration: none; text-underline-offset: .2em; }
+a:hover { text-decoration: underline; }
+a, button { -webkit-tap-highlight-color: transparent; }
+button { color: inherit; font: inherit; cursor: pointer; }
+button, a { touch-action: manipulation; }
+
+:focus-visible {
+  outline: 2px solid var(--gintmr_ui-link);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+::selection { background: var(--gintmr_ui-selection); color: var(--gintmr_ui-fg); }
+
+img { display: block; max-width: 100%; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: var(--gintmr_ui-h1-size); font-weight: 650; line-height: 1.35; letter-spacing: -.025em; }
+h2 { font-size: var(--gintmr_ui-h2-size); font-weight: 650; line-height: 1.4; }
+h3 { font-size: var(--gintmr_ui-h3-size); font-weight: 650; line-height: 1.65; }
+strong { font-weight: 650; }
+
+/* 标题链接：强调色从左侧点亮，正文本身保持中性。
+   用 background-clip 实现，不支持时自动退回普通链接色。 */
+.gintmr_ui-heading-anchor { color: inherit; }
+.gintmr_ui-heading-anchor:hover { text-decoration: none; }
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .gintmr_ui-heading-anchor {
+    background-image: linear-gradient(90deg, var(--gintmr_ui-link) 63%, var(--gintmr_ui-fg) 70%);
+    background-size: 250% 100%;
+    background-position: 100% 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: background-position var(--gintmr_ui-duration-base) var(--gintmr_ui-ease);
+  }
+  .gintmr_ui-heading-anchor:is(:hover, :focus-visible) { background-position: 92% 0; }
+  /* 标题强调线是可选开关：默认关闭，开启后在标题下方展开一条渐变线 */
+  html[data-gintmr_ui-beam='on'] .gintmr_ui-heading-anchor {
+    background-image:
+      linear-gradient(90deg, var(--gintmr_ui-link) 63%, var(--gintmr_ui-fg) 70%),
+      linear-gradient(90deg, var(--gintmr_ui-accent-40), transparent);
+    background-size: 250% 100%, 100% 2px;
+    background-position: 100% 0, 0 100%;
+    background-repeat: no-repeat;
+  }
+  html[data-gintmr_ui-beam='on'] .gintmr_ui-heading-anchor:is(:hover, :focus-visible) {
+    background-position: 92% 0, 0 100%;
+  }
+}
+
+/* 容器：内容列与顶栏共用同一把宽度尺 */
+.gintmr_ui-shell,
+.gintmr_ui-nav-container {
+  width: 100%;
+  max-width: var(--gintmr_ui-max-width);
+  padding-inline: var(--gintmr_ui-inline-padding);
+  margin-inline: auto;
+}
+main.gintmr_ui-shell { padding-top: 2.5rem; padding-bottom: 3.25rem; flex: 1; }
+
+.gintmr_ui-meta,
+.gintmr_ui-date { color: var(--gintmr_ui-secondary); font-size: var(--gintmr_ui-meta-size); }
+.gintmr_ui-separator { margin-inline: .25rem; color: var(--gintmr_ui-secondary); }
+.gintmr_ui-icon { width: 20px; height: 20px; display: block; flex-shrink: 0; }
+
+.gintmr_ui-skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -6rem;
+  z-index: 100;
+  background: var(--gintmr_ui-bg);
+  border: 1px solid var(--gintmr_ui-link);
+  padding: .65rem 1rem;
+}
+.gintmr_ui-skip-link:focus { top: 1rem; }
+
+@media (max-width: 720px) {
+  body { font-size: var(--gintmr_ui-font-size-mobile); }
+  main.gintmr_ui-shell { padding-top: 1.8rem; }
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.35rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; }
+}
+
+@media (forced-colors: active) {
+  .gintmr_ui-heading-anchor { background: none; color: LinkText; }
+}
+
+@media print {
+  :root,
+  html[data-gintmr_ui-theme='dark'] {
+    --gintmr_ui-bg: #fff;
+    --gintmr_ui-fg: #111;
+    --gintmr_ui-link: #332044;
+    --gintmr_ui-secondary: #444;
+    --gintmr_ui-line: #ccc;
+    --gintmr_ui-surface-bg: #fff;
+    --gintmr_ui-surface-border: #ccc;
+    color-scheme: light;
+  }
+  body { background: #fff; font-size: 10pt; }
+  .gintmr_ui-header,
+  .gintmr_ui-skip-link,
+  .gintmr_ui-outline,
+  .gintmr_ui-project-preview,
+  .gintmr_ui-ambient,
+  .gintmr_ui-click-layer,
+  .gintmr_ui-cursor-glow { display: none !important; }
+  body::before, body::after { display: none !important; }
+  main.gintmr_ui-shell { padding-top: 0; }
+  .gintmr_ui-shell { max-width: none; }
+  .gintmr_ui-entry, .gintmr_ui-project-panel { break-inside: avoid; }
+  .gintmr_ui-section { margin-top: 1.5rem; }
+  .gintmr_ui-section-title { break-after: avoid; }
+  a { color: #332044; }
+  .gintmr_ui-heading-anchor { background: none; color: inherit; }
+}
+
+
+/* ── base/background.css ─────────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 背景与氛围层
+   田字格 / 环境光晕 / 花体水印 / 鼠标跟随辉光
+   四者互相独立，各自有开关；默认只开光晕与水印。
+   ========================================================================= */
+
+/* ── 田字格：默认关闭，需要时 <html data-gintmr_ui-grid="on"> ───────────── */
+html[data-gintmr_ui-grid='on'] body {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--gintmr_ui-line) 58%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--gintmr_ui-line) 58%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-attachment: fixed;
+  background-position: center top;
+}
+@media (max-width: 720px) {
+  html[data-gintmr_ui-grid='on'] body { background-size: 22px 22px; }
+}
+
+/* ── 环境光晕：静态双径向渐变；总开关打开时加 14s 呼吸 ──────────────────── */
+body::before {
+  content: '';
+  pointer-events: none;
+  position: fixed;
+  inset: -22vh -14vw auto -14vw;
+  height: 48vh;
+  z-index: -1;
+  background:
+    radial-gradient(42% 52% at 14% 30%, var(--gintmr_ui-accent-24), transparent 72%),
+    radial-gradient(32% 48% at 88% 18%, var(--gintmr_ui-accent-16), transparent 75%);
+  opacity: .85;
+  filter: blur(32px);
+}
+html[data-gintmr_ui-effects='on'] body::before {
+  inset: -16vh -14vw auto;
+  height: 85vh;
+  background:
+    radial-gradient(35% 48% at 14% 28%, var(--gintmr_ui-accent-24), transparent 75%),
+    radial-gradient(30% 46% at 88% 68%, var(--gintmr_ui-accent-16), transparent 75%);
+  animation: gintmr_ui-ambient-breathe var(--gintmr_ui-duration-slow) ease-in-out infinite;
+}
+@keyframes gintmr_ui-ambient-breathe {
+  0%, 100% { opacity: .4; transform: translate3d(-1vw, -1vh, 0) scale(1); }
+  50% { opacity: .9; transform: translate3d(1vw, 2vh, 0) scale(1.04); }
+}
+
+/* ── 花体水印：文案写在 <body data-gintmr_ui-watermark="…"> 上 ───────────── */
+body::after {
+  content: attr(data-gintmr_ui-watermark);
+  pointer-events: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  font-family: var(--gintmr_ui-font-display);
+  font-size: clamp(7.4rem, 20vw, 16rem);
+  line-height: .82;
+  font-weight: 400;
+  letter-spacing: .02em;
+  color: color-mix(in srgb, var(--gintmr_ui-watermark) 28%, transparent);
+  white-space: nowrap;
+  transform: translate(-50%, -50%) rotate(-9deg);
+  opacity: .18;
+  text-shadow:
+    0 0 1px color-mix(in srgb, var(--gintmr_ui-watermark) 22%, transparent),
+    0 0 24px color-mix(in srgb, var(--gintmr_ui-accent) 14%, transparent),
+    0 0 52px #8ab8ff14;
+  filter: saturate(108%);
+}
+html[data-gintmr_ui-watermark='off'] body::after { content: none; }
+
+/* ── 鼠标跟随辉光：默认关闭，由 primitives/cursor-glow.js 注入元素 ───────── */
+.gintmr_ui-cursor-glow {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gintmr_ui-accent-24), transparent 65%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity var(--gintmr_ui-duration-base) ease;
+}
+html[data-gintmr_ui-cursor='on'] .gintmr_ui-cursor-glow { opacity: .9; }
+
+@media (max-width: 720px) {
+  body::after {
+    top: 48%;
+    font-size: clamp(7rem, 27vw, 10rem);
+    transform: translate(-50%, -50%) rotate(-8deg);
+    opacity: .15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-gintmr_ui-effects='on'] body::before { animation: none; }
+  .gintmr_ui-cursor-glow { display: none; }
+}
+
+
+/* ── primitives/header.css ───────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 顶栏
+   一个骨架，两种观感：
+     .gintmr_ui-header--flat  通栏细线（学术站默认观感）
+     .gintmr_ui-header--pill  胶囊壳（个人博客原观感）
+   两者共用品牌区、导航、共享元素滑块、工具按钮与移动端菜单逻辑。
+   ========================================================================= */
+
+.gintmr_ui-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* 独立转场名：View Transitions 会把带名字的元素从 root 快照里剥离出来，
+     于是切换页面时页面在动、顶栏原地不动，不会跟着整页一起缩放位移。 */
+  view-transition-name: gintmr-ui-header;
+  /* 底色向下渐隐而不是一整块：文字所在的上班段保持足够不透明度，
+     下沿化开，内容从顶栏底下经过时不会切出一条硬黑边。 */
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--gintmr_ui-bg) 74%, transparent) 0%,
+    color-mix(in srgb, var(--gintmr_ui-bg) 62%, transparent) 58%,
+    transparent 100%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+.gintmr_ui-nav-container { padding-top: .65rem; }
+
+.gintmr_ui-header-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-height: 4.4rem;
+  padding: .7rem 1rem;
+}
+
+/* ── 观感 A：通栏细线 ───────────────────────────────────────────────────── */
+.gintmr_ui-header--flat {
+  border-bottom: 1px solid color-mix(in srgb, var(--gintmr_ui-palette-accent) 25%, var(--gintmr_ui-line));
+  box-shadow: 0 18px 40px -34px color-mix(in srgb, var(--gintmr_ui-palette-accent) 75%, transparent);
+}
+.gintmr_ui-header--flat::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gintmr_ui-palette-accent) 70%, transparent), transparent);
+}
+
+/* ── 观感 B：胶囊壳 ─────────────────────────────────────────────────────── */
+.gintmr_ui-header--pill { border-bottom: 0; }
+.gintmr_ui-header--pill .gintmr_ui-nav-container { padding-top: .75rem; padding-bottom: .25rem; }
+.gintmr_ui-header--pill .gintmr_ui-header-shell {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 58%, transparent);
+  border-radius: 1.3rem;
+  background: var(--gintmr_ui-surface-bg-strong);
+  box-shadow: 0 16px 34px -30px rgb(0 0 0 / 90%);
+  backdrop-filter: blur(20px);
+}
+/* 左上角径向高光，让胶囊壳不至于是一块死平的色板 */
+.gintmr_ui-header--pill .gintmr_ui-header-shell::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: .95;
+  background:
+    radial-gradient(48% 120% at 0% 0%, var(--gintmr_ui-accent-08) 0%, transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, #fff 3%, transparent) 0%, transparent 100%);
+}
+
+/* ── 观感 C：聚合居中 ───────────────────────────────────────────────────── */
+/* 品牌、导航、工具按钮挨成一个整体居中，而不是被 auto 外边距推到两端。
+   图标同时收小到与 0.95rem 的导航文字同一视觉重量。 */
+.gintmr_ui-header--cluster .gintmr_ui-header-shell {
+  justify-content: center;
+  gap: 1.1rem;
+}
+.gintmr_ui-header--cluster .gintmr_ui-brand { margin-right: .3rem; gap: .6rem; font-size: 1.02rem; }
+.gintmr_ui-header--cluster .gintmr_ui-brand-mark { width: 32px; height: 32px; }
+.gintmr_ui-header--cluster .gintmr_ui-nav,
+.gintmr_ui-header--cluster .gintmr_ui-controls { margin-left: 0; }
+.gintmr_ui-header--cluster .gintmr_ui-nav { padding: 3px; }
+.gintmr_ui-header--cluster .gintmr_ui-controls > button,
+.gintmr_ui-header--cluster .gintmr_ui-controls > a { width: 36px; height: 36px; }
+.gintmr_ui-header--cluster .gintmr_ui-controls .gintmr_ui-icon { width: 17px; height: 17px; }
+
+/* ── 观感 D：悬浮玻璃面板 ───────────────────────────────────────────────── */
+/* 外层顶栏只负责吸顶、不再铺满整宽，内层面板收成内容宽并居中：
+   于是顶栏变成一枚悬在页面顶部的圆角玻璃板，而不是一条通栏。
+   内容从面板下方经过时依然会被模糊，但不再有整条底色带来的黑边。 */
+.gintmr_ui-header--floating {
+  background: none;
+  backdrop-filter: none;
+}
+.gintmr_ui-header--floating .gintmr_ui-nav-container {
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+  margin-inline: auto;
+  padding: .85rem 1rem 0;
+}
+.gintmr_ui-header--floating .gintmr_ui-header-shell {
+  min-height: 0;
+  padding: .5rem .65rem;
+  border: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 52%, transparent);
+  border-radius: 1.15rem;
+  background: color-mix(in srgb, var(--gintmr_ui-bg) 60%, transparent);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 26%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #fff 6%, transparent),
+    0 12px 34px -20px color-mix(in srgb, var(--gintmr_ui-palette-ink) 55%, transparent);
+}
+.gintmr_ui-header--floating .gintmr_ui-header-shell::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, #fff 10%, transparent) 0%,
+    transparent 42%);
+}
+
+/* ── 品牌区 ────────────────────────────────────────────────────────────── */
+.gintmr_ui-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  flex-shrink: 0;
+  color: var(--gintmr_ui-fg);
+  font-size: 1.08rem;
+  font-weight: 650;
+  letter-spacing: .01em;
+}
+.gintmr_ui-brand:hover { text-decoration: none; }
+.gintmr_ui-brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: .65rem;
+  object-fit: cover;
+}
+.gintmr_ui-header--pill .gintmr_ui-brand { margin-right: 1.5rem; }
+.gintmr_ui-header--pill .gintmr_ui-brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: .75rem;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gintmr_ui-line) 58%, transparent);
+}
+
+/* ── 主导航 ────────────────────────────────────────────────────────────── */
+.gintmr_ui-nav { display: flex; align-items: center; margin-left: auto; padding: 4px; }
+.gintmr_ui-nav a {
+  position: relative;
+  display: block;
+  padding: .4rem .85rem;
+  border-radius: var(--gintmr_ui-radius-md);
+  color: var(--gintmr_ui-fg);
+  font-size: .95rem;
+  font-weight: 550;
+  transition: background var(--gintmr_ui-duration-fast) ease, color var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-nav a:hover { text-decoration: none; background: var(--gintmr_ui-accent-08); }
+.gintmr_ui-nav a[aria-current] { color: var(--gintmr_ui-link); }
+
+/* 胶囊壳里的导航自带一层容器与内高光 */
+.gintmr_ui-header--pill .gintmr_ui-nav {
+  gap: .25rem;
+  margin-left: 0;
+  padding: .25rem .5rem;
+  border: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 46%, transparent);
+  border-radius: var(--gintmr_ui-radius-pill);
+  background: color-mix(in srgb, var(--gintmr_ui-surface-bg) 16%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+}
+.gintmr_ui-header--pill .gintmr_ui-nav a { padding: .5rem .75rem; border-radius: var(--gintmr_ui-radius-md); }
+.gintmr_ui-header--pill .gintmr_ui-nav a:hover { background: transparent; color: var(--gintmr_ui-link); }
+
+/* 当前页高亮：一个可跨页面形变的滑块。
+   View Transitions 可用时浏览器会把同一 view-transition-name 的元素补间，
+   不可用时它就是一块静态底色。 */
+.gintmr_ui-active-nav { position: relative; }
+.gintmr_ui-active-nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--gintmr_ui-radius-md);
+  background: var(--gintmr_ui-accent-08);
+  view-transition-name: gintmr_ui-nav-slider;
+}
+.gintmr_ui-header--flat .gintmr_ui-nav a[aria-current] { background: var(--gintmr_ui-accent-08); }
+
+/* ── 工具按钮组 ────────────────────────────────────────────────────────── */
+.gintmr_ui-controls { display: none; padding: 3px; }
+html[data-gintmr_ui-js] .gintmr_ui-controls { display: flex; }
+.gintmr_ui-header--pill .gintmr_ui-controls {
+  gap: .25rem;
+  margin-left: auto;
+  padding: .25rem;
+  border: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 46%, transparent);
+  border-radius: var(--gintmr_ui-radius-pill);
+  background: color-mix(in srgb, var(--gintmr_ui-surface-bg) 16%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+}
+/* 工具组的子元素可以是按钮也可以是链接，两者共用同一套外观 */
+.gintmr_ui-controls > button,
+.gintmr_ui-controls > a {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+  color: inherit;
+}
+.gintmr_ui-controls > button:hover,
+.gintmr_ui-controls > a:hover {
+  background: color-mix(in srgb, var(--gintmr_ui-palette-accent) 10%, transparent);
+  color: var(--gintmr_ui-link);
+  text-decoration: none;
+}
+/* 菜单按钮只在移动端出现：选择器要比 .gintmr_ui-controls button 更具体才压得住 */
+.gintmr_ui-controls .gintmr_ui-menu-toggle { display: none; }
+.gintmr_ui-icon-close { display: none; }
+html[data-gintmr_ui-theme='dark'] .gintmr_ui-icon-moon,
+html[data-gintmr_ui-theme='light'] .gintmr_ui-icon-sun { display: none; }
+
+/* ── 移动端：菜单变成下拉面板，逻辑由 nav.js 维护 ──────────────────────── */
+@supports (view-transition-name: root) {
+  ::view-transition-old(gintmr-ui-header),
+  ::view-transition-new(gintmr-ui-header) { animation: none; }
+}
+
+@media (max-width: 720px) {
+  .gintmr_ui-header-shell { flex-wrap: wrap; gap: .7rem; min-height: 4rem; padding: .55rem .65rem; }
+  .gintmr_ui-header--pill .gintmr_ui-header-shell { border-radius: 1.2rem; }
+  /* 窄屏面板放宽到近整宽，否则展开的菜单没有容身之处 */
+  .gintmr_ui-header--floating .gintmr_ui-nav-container {
+    width: 100%;
+    max-width: calc(100% - 1.25rem);
+    padding: .6rem .625rem 0;
+  }
+  .gintmr_ui-header--floating .gintmr_ui-header-shell { border-radius: 1.1rem; }
+  /* 展开的菜单沿用同一套玻璃语言，而不是一块实色深底 */
+  .gintmr_ui-header--floating .gintmr_ui-nav {
+    border: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 52%, transparent);
+    border-radius: 1.1rem;
+    /* 菜单盖住的是别的界面元素，可读性优先，这里用实底 */
+    background: var(--gintmr_ui-bg);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+      0 14px 34px -22px color-mix(in srgb, var(--gintmr_ui-palette-ink) 55%, transparent);
+  }
+  .gintmr_ui-brand { font-size: 1rem; gap: .55rem; }
+  .gintmr_ui-brand-mark { width: 34px; height: 34px; }
+  .gintmr_ui-header--pill .gintmr_ui-brand { margin-right: 0; }
+  .gintmr_ui-controls { margin-left: auto; }
+  .gintmr_ui-controls .gintmr_ui-menu-toggle { display: grid; }
+  .gintmr_ui-controls button { width: 36px; height: 36px; }
+
+  .gintmr_ui-nav {
+    flex-basis: 100%;
+    margin: 0;
+    justify-content: center;
+    padding: .65rem;
+    border-radius: var(--gintmr_ui-radius-lg);
+    background: var(--gintmr_ui-bg);
+    box-shadow: 0 12px 25px rgb(0 0 0 / 12%);
+  }
+  .gintmr_ui-header--pill .gintmr_ui-nav {
+    padding: .65rem;
+    border-radius: var(--gintmr_ui-radius-lg);
+    background: var(--gintmr_ui-bg);
+    box-shadow: 0 12px 25px rgb(0 0 0 / 12%);
+  }
+  html[data-gintmr_ui-js] .gintmr_ui-nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + .5rem);
+    left: 0;
+    right: 0;
+  }
+  html[data-gintmr_ui-js] .gintmr_ui-nav[data-gintmr_ui-open='true'] { display: flex; }
+  /* 项目多于四个时折成两行，而不是把每个挤扁 */
+  .gintmr_ui-nav { flex-wrap: wrap; }
+  .gintmr_ui-nav a { flex: 1 1 auto; min-width: 5rem; text-align: center; padding: .55rem; }
+  .gintmr_ui-menu-toggle[aria-expanded='true'] .gintmr_ui-icon-menu { display: none; }
+  .gintmr_ui-menu-toggle[aria-expanded='true'] .gintmr_ui-icon-close { display: block; }
+}
+
+
+/* ── primitives/outline.css ──────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 目录大纲
+   一个组件两种形态，由 outline.js 按可用留白实时切换：
+     inline  窄屏/留白不足：贴在内容上方的可折叠面板
+     sidebar 宽屏留白足够：固定在内容右侧的常驻轨道
+   侧栏只占用左右留白，永远不压缩 --gintmr_ui-max-width。
+   轨道用 SVG 绘制：rail 是带圆角转弯的路径，segment 是当前项竖线，dot 是当前项圆点。
+   ========================================================================= */
+
+.gintmr_ui-outline {
+  position: sticky;
+  top: var(--gintmr_ui-header-height);
+  z-index: 40;
+  column-gap: var(--gintmr_ui-outline-gap);
+  background: color-mix(in srgb, var(--gintmr_ui-bg) 94%, transparent);
+  border-bottom: 1px solid var(--gintmr_ui-line);
+  backdrop-filter: blur(16px);
+}
+.gintmr_ui-outline-shell {
+  position: relative;
+  max-width: var(--gintmr_ui-max-width);
+  margin-inline: auto;
+  padding-inline: var(--gintmr_ui-inline-padding);
+}
+
+.gintmr_ui-outline-toggle {
+  display: none;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: .8rem;
+}
+html[data-gintmr_ui-js] .gintmr_ui-outline-toggle { display: flex; }
+.gintmr_ui-outline-toggle .gintmr_ui-icon,
+.gintmr_ui-outline-heading .gintmr_ui-icon { width: 16px; height: 16px; }
+.gintmr_ui-outline-toggle .gintmr_ui-icon-chevron { margin-left: auto; transition: transform var(--gintmr_ui-duration-fast) ease; }
+.gintmr_ui-outline-toggle[aria-expanded='true'] .gintmr_ui-icon-chevron { transform: rotate(180deg); }
+.gintmr_ui-outline-current {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--gintmr_ui-secondary);
+  margin-left: .5rem;
+}
+
+.gintmr_ui-outline-panel { width: min(var(--gintmr_ui-outline-width), calc(100vw - 2rem)); padding-block: 1rem; }
+html[data-gintmr_ui-js] .gintmr_ui-outline-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + .5rem);
+  right: var(--gintmr_ui-inline-padding);
+  padding: 1rem;
+  border: 1px solid var(--gintmr_ui-line);
+  border-radius: var(--gintmr_ui-radius-xl);
+  background: var(--gintmr_ui-bg);
+  box-shadow: 0 14px 35px rgb(0 0 0 / 9%);
+}
+html[data-gintmr_ui-js] .gintmr_ui-outline-panel[data-gintmr_ui-open='true'] { display: block; }
+
+.gintmr_ui-outline-heading { display: flex; align-items: center; gap: .5rem; margin-bottom: .9rem; font-size: .85rem; font-weight: 650; }
+.gintmr_ui-outline-scroll {
+  max-height: min(50svh, 36rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gintmr_ui-line) transparent;
+}
+.gintmr_ui-outline-items { position: relative; }
+.gintmr_ui-outline-list { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--gintmr_ui-line); }
+html[data-gintmr_ui-js] .gintmr_ui-outline-list { border: 0; }
+.gintmr_ui-outline-list a {
+  display: block;
+  position: relative;
+  padding: 6px 4px 6px 24px;
+  color: var(--gintmr_ui-secondary);
+  font-size: .85rem;
+  line-height: 1.6;
+  transition: color var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-outline-list [data-depth='1'] a { padding-left: 32px; font-size: .8rem; }
+.gintmr_ui-outline-list a:hover { color: var(--gintmr_ui-fg); text-decoration: none; }
+.gintmr_ui-outline-list a[aria-current='location'] { color: var(--gintmr_ui-link); font-weight: 650; }
+.gintmr_ui-outline-list a:focus-visible { outline-offset: -2px; }
+
+.gintmr_ui-outline-track { display: none; position: absolute; left: 0; top: 0; height: 100%; overflow: visible; fill: none; pointer-events: none; }
+html[data-gintmr_ui-js] .gintmr_ui-outline-track { display: block; }
+.gintmr_ui-outline-rail { stroke: var(--gintmr_ui-line); stroke-width: 1; }
+.gintmr_ui-outline-segment { stroke: var(--gintmr_ui-link); stroke-width: 1.5; stroke-linecap: round; }
+.gintmr_ui-outline-dot { fill: var(--gintmr_ui-link); transition: cx var(--gintmr_ui-duration-fast) ease, cy var(--gintmr_ui-duration-fast) ease; }
+
+/* sidebar 形态：脱离文档流，落在右侧留白里 */
+.gintmr_ui-outline[data-gintmr_ui-form='sidebar'] {
+  position: fixed;
+  /* 贴着内容列右侧：锚点由 outline.js 按实际内容列宽度写入 */
+  left: calc(50% + var(--gintmr_ui-outline-anchor, var(--gintmr_ui-max-width)) / 2 + var(--gintmr_ui-outline-gap));
+  top: calc(var(--gintmr_ui-header-height) + 2.5rem);
+  width: var(--gintmr_ui-outline-width);
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+.gintmr_ui-outline[data-gintmr_ui-form='sidebar'] .gintmr_ui-outline-shell { padding: 0; }
+.gintmr_ui-outline[data-gintmr_ui-form='sidebar'] .gintmr_ui-outline-toggle { display: none; }
+html[data-gintmr_ui-js] .gintmr_ui-outline[data-gintmr_ui-form='sidebar'] .gintmr_ui-outline-panel {
+  display: block;
+  position: static;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.gintmr_ui-outline[data-gintmr_ui-form='sidebar'] .gintmr_ui-outline-scroll { max-height: calc(100svh - var(--gintmr_ui-header-height) - 7rem); }
+
+/* ── 左侧镜像：轨道贴到内容列这一侧，文字靠右对齐 ───────────────────────── */
+/* 同一页可以同时挂左侧与右侧两条（例如左边月份时间轴、右边本页目录）。 */
+.gintmr_ui-outline[data-gintmr_ui-side='left'][data-gintmr_ui-form='sidebar'] {
+  left: auto;
+  right: calc(50% + var(--gintmr_ui-outline-anchor, var(--gintmr_ui-max-width)) / 2 + var(--gintmr_ui-outline-gap));
+}
+.gintmr_ui-outline[data-gintmr_ui-side='left'] .gintmr_ui-outline-list a {
+  padding: 6px 24px 6px 4px;
+  text-align: right;
+}
+.gintmr_ui-outline[data-gintmr_ui-side='left'] .gintmr_ui-outline-list [data-depth='1'] a { padding-left: 4px; padding-right: 32px; }
+.gintmr_ui-outline[data-gintmr_ui-side='left'] .gintmr_ui-outline-track { left: auto; right: 0; transform: scaleX(-1); }
+/* 左侧是次要索引（如月份时间轴）：放不下时整条收起来，而不是和主目录挤两条折叠栏 */
+.gintmr_ui-outline[data-gintmr_ui-side='left'][data-gintmr_ui-form='inline'] { display: none; }
+.gintmr_ui-outline[data-gintmr_ui-side='left'] .gintmr_ui-outline-heading { flex-direction: row-reverse; }
+
+/* ── 目录下方的本页信息（字数 / 阅读时长 / 最后更新） ──────────────────── */
+.gintmr_ui-outline-meta {
+  margin: 1.1rem 0 0;
+  padding-top: .9rem;
+  border-top: 1px solid var(--gintmr_ui-line-faint);
+  display: grid;
+  gap: .35rem;
+  font-size: .76rem;
+  color: var(--gintmr_ui-secondary);
+}
+.gintmr_ui-outline-meta div { display: flex; justify-content: space-between; gap: .75rem; }
+.gintmr_ui-outline-meta dt { color: color-mix(in srgb, var(--gintmr_ui-secondary) 82%, transparent); }
+.gintmr_ui-outline-meta dd { margin: 0; font-variant-numeric: tabular-nums; color: var(--gintmr_ui-fg); }
+html[data-gintmr_ui-js] .gintmr_ui-outline[data-gintmr_ui-form='inline'] .gintmr_ui-outline-meta { display: none; }
+
+
+/* ── primitives/effects.css ──────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 特效原语
+   环境星点 + 点击粒子。装饰性动效一律留在内容层之后，或让指针事件穿透。
+   总开关：<html data-gintmr_ui-effects="on">
+   ========================================================================= */
+
+.gintmr_ui-ambient,
+.gintmr_ui-click-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.gintmr_ui-ambient { z-index: -1; display: none; }
+.gintmr_ui-click-layer { z-index: 60; }
+html[data-gintmr_ui-effects='on'] .gintmr_ui-ambient { display: block; }
+
+/* ── 环境星点：贴着版心外的留白处呼吸，不进正文列 ───────────────────────── */
+.gintmr_ui-sparkle {
+  position: absolute;
+  left: var(--gintmr_ui-sparkle-x);
+  top: var(--gintmr_ui-sparkle-y);
+  width: var(--gintmr_ui-sparkle-size, 3px);
+  height: var(--gintmr_ui-sparkle-size, 3px);
+  border-radius: 50%;
+  background: var(--gintmr_ui-sparkle);
+  box-shadow: 0 0 8px 1px var(--gintmr_ui-accent-24);
+  opacity: 0;
+  animation: gintmr_ui-twinkle var(--gintmr_ui-sparkle-duration, 7s) ease-in-out var(--gintmr_ui-sparkle-delay, 0s) infinite;
+}
+@keyframes gintmr_ui-twinkle {
+  0%, 100% { opacity: .05; transform: translateY(0) scale(.75); }
+  50% { opacity: .65; transform: translateY(-5px) scale(1); }
+}
+
+/* ── 点击粒子：6 颗 45° 扇形散开，由 Element.animate 驱动 ────────────────── */
+.gintmr_ui-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gintmr_ui-particle);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--gintmr_ui-palette-accent) 55%, transparent);
+}
+
+/* ── 极光：顶部的锥形光晕 ────────────────────────────────────────────────
+   整层只有两个柔和的形状，没有任何硬边：
+     锥形光晕 圆心放在视口上方（top 为负），只有外圈落到页面里；再用径向遮罩
+              把色轮化成一圈光晕，缓慢旋转，所以颜色会自己流淌；
+     天光     更大更淡的一团，压在上面给层次。
+   脚本把内容列宽度写进 --gintmr_ui-content-width，图层用 mask 把中间挖空，
+   所以光晕只落在正文两侧的留白里，物理上不可能盖住文字；留白不足 90px 时整层收起。 */
+.gintmr_ui-aurora {
+  --gintmr_ui-aurora-gutter: clamp(0px, calc((100vw - var(--gintmr_ui-content-width, 48rem)) / 2 - 1.25rem), 100vw);
+  position: fixed;
+  inset: -6% 0;
+  z-index: -1;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg,
+    #000 0, #000 var(--gintmr_ui-aurora-gutter),
+    transparent calc(var(--gintmr_ui-aurora-gutter) + 6rem),
+    transparent calc(100% - var(--gintmr_ui-aurora-gutter) - 6rem),
+    #000 calc(100% - var(--gintmr_ui-aurora-gutter)), #000 100%);
+  mask-image: linear-gradient(90deg,
+    #000 0, #000 var(--gintmr_ui-aurora-gutter),
+    transparent calc(var(--gintmr_ui-aurora-gutter) + 6rem),
+    transparent calc(100% - var(--gintmr_ui-aurora-gutter) - 6rem),
+    #000 calc(100% - var(--gintmr_ui-aurora-gutter)), #000 100%);
+}
+html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
+.gintmr_ui-aurora[hidden] { display: none !important; }
+
+.gintmr_ui-aurora i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  opacity: var(--gintmr_ui-aurora-alpha);
+  will-change: transform;
+}
+
+/* 锥形光晕：圆心在视口上方，只有外圈落进来 */
+.gintmr_ui-aurora i:nth-child(1) {
+  width: 172%;
+  height: 172%;
+  left: -36%;
+  top: -134%;
+  background: conic-gradient(from 0deg,
+    var(--gintmr_ui-aurora-1), var(--gintmr_ui-aurora-2),
+    var(--gintmr_ui-aurora-4), var(--gintmr_ui-aurora-3),
+    var(--gintmr_ui-aurora-1));
+  -webkit-mask-image: radial-gradient(closest-side, #000 32%, transparent 68%);
+  mask-image: radial-gradient(closest-side, #000 32%, transparent 68%);
+  filter: blur(var(--gintmr_ui-aurora-blur));
+  animation: gintmr_ui-aurora-spin calc(var(--gintmr_ui-aurora-duration) * 5) linear infinite;
+}
+
+/* 天光：更大更淡，压在上面给层次 */
+.gintmr_ui-aurora i:nth-child(2) {
+  width: 132%;
+  height: 88%;
+  left: -16%;
+  top: -44%;
+  background: radial-gradient(closest-side, var(--gintmr_ui-aurora-4), transparent 74%);
+  filter: blur(calc(var(--gintmr_ui-aurora-blur) * 1.7));
+  opacity: calc(var(--gintmr_ui-aurora-alpha) * .72);
+  animation: gintmr_ui-aurora-haze calc(var(--gintmr_ui-aurora-duration) * 1.7) ease-in-out infinite;
+}
+
+@keyframes gintmr_ui-aurora-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes gintmr_ui-aurora-haze {
+  0%, 100% { transform: translate3d(0, 1%, 0) scale(1); }
+  50% { transform: translate3d(-1%, -2%, 0) scale(1.06); }
+}
+
+@media (max-width: 720px) {
+  .gintmr_ui-sparkle:nth-child(n + 5) { display: none; }
+  .gintmr_ui-aurora { --gintmr_ui-aurora-blur: 34px; --gintmr_ui-aurora-alpha: .26; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-gintmr_ui-effects='on'] body::before { animation: none; }
+  .gintmr_ui-ambient,
+  .gintmr_ui-aurora,
+  .gintmr_ui-click-layer { display: none !important; }
+}
+
+
+/* ── components/content.css ──────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 内容区块
+   首页档案、经历列表、论文卡、项目卡（含 iframe 实时预览）、CV 内嵌。
+   只有「被框起来的卡片」才软化背后的田字格与水印 —— 无框内容是透的。
+   ========================================================================= */
+
+/* ── 首页档案 ──────────────────────────────────────────────────────────── */
+.gintmr_ui-profile { display: grid; grid-template-columns: minmax(0, 1fr) 142px; column-gap: 1.6rem; align-items: start; }
+.gintmr_ui-profile h1 { margin-bottom: 1.2rem; }
+.gintmr_ui-profile h1 span {
+  display: inline-block;
+  margin-left: .45rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+  color: var(--gintmr_ui-secondary);
+}
+.gintmr_ui-profile p { margin-top: .85rem; }
+.gintmr_ui-portrait {
+  width: 142px;
+  height: 160px;
+  margin-top: .25rem;
+  object-fit: cover;
+  object-position: 52% 50%;
+  border: 1px solid var(--gintmr_ui-line);
+  border-radius: var(--gintmr_ui-radius-lg);
+}
+.gintmr_ui-profile-links {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.4rem;
+  margin-top: 1.25rem;
+  font-weight: 550;
+}
+.gintmr_ui-profile-links a { padding-block: .15rem; }
+
+/* ── 通用节与卡片 ──────────────────────────────────────────────────────── */
+.gintmr_ui-section { margin-top: 2.6rem; }
+.gintmr_ui-section-title { position: relative; margin-bottom: 1.2rem; }
+.gintmr_ui-entry {
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-lg);
+  background: var(--gintmr_ui-surface-bg);
+  padding: 1rem;
+}
+.gintmr_ui-entry-list { display: grid; gap: .8rem; }
+.gintmr_ui-entry-heading { display: flex; justify-content: space-between; gap: .3rem 1rem; flex-wrap: wrap; }
+.gintmr_ui-entry-heading h3 { flex: 1 1 20rem; }
+
+/* ── 经历 / 教育：左侧机构 logo，右侧标题与日期同行 ────────────────────── */
+.gintmr_ui-education-entry,
+.gintmr_ui-experience-entry { display: grid; grid-template-columns: 80px minmax(0, 1fr); column-gap: 1rem; align-items: start; }
+.gintmr_ui-institution-logo {
+  width: 80px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  padding: 8px;
+  border-radius: var(--gintmr_ui-radius-sm);
+}
+.gintmr_ui-institution-logo img { width: 64px; height: 48px; object-fit: contain; }
+.gintmr_ui-education-entry p { margin-top: .2rem; }
+.gintmr_ui-institution-badge {
+  display: inline-block;
+  margin-inline-start: .45rem;
+  padding: .08rem .45rem;
+  border: 1px solid var(--gintmr_ui-accent-40);
+  border-radius: var(--gintmr_ui-radius-pill);
+  background: var(--gintmr_ui-accent-08);
+  color: var(--gintmr_ui-link);
+  font-size: .73rem;
+  font-weight: 550;
+  line-height: 1.5;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.gintmr_ui-role { margin-top: .15rem; font-size: .9rem; }
+.gintmr_ui-advisors { font-size: .85rem; margin-top: .2rem; }
+.gintmr_ui-experience-description { margin-top: .6rem; font-size: .9rem; }
+.gintmr_ui-interest-list { margin: 0; padding-left: 1.15rem; }
+.gintmr_ui-interest-list li { margin: .45rem 0; padding-left: .2rem; }
+.gintmr_ui-interest-list li::marker { color: var(--gintmr_ui-link); font-size: .75rem; }
+
+/* ── 奖项：年份列 + 细分隔线 ──────────────────────────────────────────── */
+.gintmr_ui-awards-list { margin: 0; padding: 0; list-style: none; }
+.gintmr_ui-awards-list li {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  column-gap: .8rem;
+  padding-block: .75rem;
+  border-bottom: 1px solid var(--gintmr_ui-line-faint);
+  font-size: .9rem;
+}
+.gintmr_ui-awards-list .gintmr_ui-date { padding-top: .05rem; }
+.gintmr_ui-awards-list p { margin-top: .15rem; }
+
+/* ── 页脚 ──────────────────────────────────────────────────────────────── */
+.gintmr_ui-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .5rem 1rem;
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
+  border-top: 1px solid var(--gintmr_ui-surface-border);
+  color: var(--gintmr_ui-secondary);
+  font-size: .78rem;
+}
+
+/* ── 论文页 ────────────────────────────────────────────────────────────── */
+.gintmr_ui-page-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1rem; }
+.gintmr_ui-page-heading h1 { position: relative; }
+.gintmr_ui-heading-link { font-size: .9rem; }
+.gintmr_ui-publication-note { color: var(--gintmr_ui-secondary); font-size: .8rem; }
+.gintmr_ui-publication-section { margin-top: 2.1rem; }
+.gintmr_ui-count { font-size: .65em; font-weight: 450; margin-left: .2rem; color: var(--gintmr_ui-secondary); }
+.gintmr_ui-publication-list { display: grid; gap: .8rem; }
+.gintmr_ui-paper { padding: 1.05rem 1.2rem; }
+.gintmr_ui-paper h3 { font-size: 1.05rem; line-height: 1.6; }
+.gintmr_ui-authors { font-size: .88rem; color: var(--gintmr_ui-secondary); margin-top: .45rem; line-height: 1.7; }
+.gintmr_ui-authors strong { color: var(--gintmr_ui-fg); }
+.gintmr_ui-authors sup { font-size: .7em; }
+.gintmr_ui-paper-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem 1rem; margin-top: .5rem; font-size: .85rem; }
+.gintmr_ui-venue { font-style: italic; }
+.gintmr_ui-paper-links { display: flex; flex-wrap: wrap; gap: .35rem 1rem; font-size: .83rem; margin-top: .4rem; }
+.gintmr_ui-paper-links a { white-space: nowrap; }
+
+/* ── 项目卡：假浏览器标题栏 + 等比缩放的 iframe ─────────────────────────── */
+.gintmr_ui-projects { display: grid; gap: 2rem; margin-top: 1.8rem; }
+.gintmr_ui-project-panel {
+  overflow: hidden;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-xl);
+  background: var(--gintmr_ui-surface-bg);
+}
+.gintmr_ui-project-copy { padding: 1.25rem; }
+.gintmr_ui-project-copy p { margin-top: .7rem; font-size: .94rem; }
+.gintmr_ui-project-links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: .85rem; font-size: .88rem; font-weight: 550; }
+.gintmr_ui-project-preview {
+  margin: 0 1rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 65%, transparent);
+  border-radius: var(--gintmr_ui-radius-md);
+  overflow: hidden;
+  background: var(--gintmr_ui-bg);
+}
+.gintmr_ui-preview-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  border-bottom: 1px solid var(--gintmr_ui-line);
+  color: var(--gintmr_ui-secondary);
+  font-size: .75rem;
+}
+.gintmr_ui-preview-viewport { position: relative; width: 100%; aspect-ratio: 1280 / 800; overflow: hidden; background: #f8fafc; }
+.gintmr_ui-preview-viewport iframe {
+  position: absolute;
+  inset: 0;
+  width: 1280px;
+  height: 800px;
+  border: 0;
+  transform: scale(var(--gintmr_ui-preview-scale, .57));
+  transform-origin: top left;
+  background: #fff;
+}
+
+/* ── CV ────────────────────────────────────────────────────────────────── */
+.gintmr_ui-cv-heading { flex-wrap: wrap; }
+.gintmr_ui-cv-actions { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; font-size: .85rem; }
+.gintmr_ui-cv-document {
+  display: block;
+  width: 100%;
+  height: 82vh;
+  min-height: 640px;
+  margin-top: 1.8rem;
+  border: 1px solid var(--gintmr_ui-line);
+  border-radius: var(--gintmr_ui-radius-md);
+  background: #fff;
+  color: #2f2638;
+}
+.gintmr_ui-cv-document > p { padding: 1.5rem; }
+
+@media (max-width: 720px) {
+  .gintmr_ui-profile { grid-template-columns: minmax(0, 1fr) 96px; column-gap: 1rem; }
+  .gintmr_ui-profile h1 { font-size: 1.7rem; margin-bottom: .9rem; }
+  .gintmr_ui-profile h1 span { display: block; margin: .3rem 0 0; font-size: 1rem; }
+  .gintmr_ui-profile-copy { display: contents; }
+  .gintmr_ui-profile-copy h1 { grid-column: 1; grid-row: 1; align-self: center; }
+  .gintmr_ui-portrait { grid-column: 2; grid-row: 1; width: 96px; height: 106px; margin: 0; }
+  .gintmr_ui-profile-copy p { grid-column: 1 / -1; }
+  .gintmr_ui-profile-links { gap: .4rem 1.1rem; margin-top: 1rem; font-size: .85rem; }
+  .gintmr_ui-section { margin-top: 2.1rem; }
+  .gintmr_ui-education-entry,
+  .gintmr_ui-experience-entry { grid-template-columns: 56px minmax(0, 1fr); column-gap: .75rem; padding: .85rem; }
+  .gintmr_ui-institution-logo { width: 56px; height: 50px; padding: 6px; }
+  .gintmr_ui-institution-logo img { width: 44px; height: 38px; }
+  .gintmr_ui-entry-heading { row-gap: .1rem; }
+  .gintmr_ui-entry-heading h3 { flex-basis: 100%; }
+  .gintmr_ui-entry h3 { font-size: .94rem; }
+  .gintmr_ui-experience-description { font-size: .86rem; }
+  .gintmr_ui-date, .gintmr_ui-advisors, .gintmr_ui-meta { font-size: .79rem; }
+  .gintmr_ui-role { font-size: .86rem; }
+  .gintmr_ui-paper { padding: .95rem; }
+  .gintmr_ui-paper h3 { font-size: 1rem; }
+  .gintmr_ui-authors { font-size: .83rem; }
+  .gintmr_ui-page-heading { gap: .7rem; }
+  .gintmr_ui-heading-link { font-size: .8rem; }
+  .gintmr_ui-project-copy { padding: 1rem; }
+  .gintmr_ui-project-copy p { font-size: .88rem; }
+  .gintmr_ui-project-links { font-size: .82rem; }
+  .gintmr_ui-project-preview { margin: 0 .75rem .75rem; }
+  .gintmr_ui-preview-bar { font-size: .66rem; padding: .45rem .6rem; }
+  .gintmr_ui-cv-document { height: 76svh; min-height: 480px; margin-top: 1.3rem; }
+}
+
+
+/* ── primitives/sidenav.css ──────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 页边导航
+   内容列左侧的常驻导航（归档、标签之类）。定位逻辑与目录原语的左侧镜像一致：
+   贴着内容列左边、跟着吸顶栏下沿，放不下时整条隐藏。
+   ========================================================================= */
+
+.gintmr_ui-sidenav {
+  position: fixed;
+  top: calc(var(--gintmr_ui-header-height) + 2.5rem);
+  right: calc(50% + var(--gintmr_ui-outline-anchor, var(--gintmr_ui-max-width)) / 2 + var(--gintmr_ui-outline-gap));
+  width: var(--gintmr_ui-outline-width);
+  display: grid;
+  gap: 1.4rem;
+  max-height: calc(100svh - var(--gintmr_ui-header-height) - 6rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gintmr_ui-line) transparent;
+  font-size: .82rem;
+}
+.gintmr_ui-sidenav[hidden] { display: none; }
+
+.gintmr_ui-sidenav__title {
+  margin: 0 0 .5rem;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--gintmr_ui-secondary) 86%, transparent);
+}
+.gintmr_ui-sidenav__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .16rem; }
+.gintmr_ui-sidenav__list a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .16rem 0;
+  color: var(--gintmr_ui-secondary);
+  transition: color var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-sidenav__list a:hover { color: var(--gintmr_ui-fg); text-decoration: none; }
+.gintmr_ui-sidenav__list a[aria-current='page'] { color: var(--gintmr_ui-link); font-weight: 650; }
+.gintmr_ui-sidenav__list [data-depth='1'] a { padding-left: .85rem; font-size: .78rem; }
+.gintmr_ui-sidenav__count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--gintmr_ui-secondary) 60%, transparent);
+}
+.gintmr_ui-sidenav__list a[aria-current='page'] .gintmr_ui-sidenav__count { color: inherit; }
+
+
+/* ── components/media.css ────────────────────────────────── */
+/* 宿主正文常给 img 设了上下外边距；组件内部的图不接受这类影响，
+   否则即使绝对定位也会被外边距推离原位。 */
+.gintmr_ui-figure img,
+.gintmr_ui-gallery img,
+.gintmr_ui-track img,
+.gintmr_ui-media-card img,
+.gintmr_ui-link-card img,
+.gintmr_ui-live img,
+.gintmr_ui-video video { margin: 0; }
+
+/* ============================================================================
+   gintmr-ui · 媒体组件
+   图片 · 视频 · 音乐卡 · 链接卡 · 媒体卡 · 好词佳句
+   一条原则：每张卡只用一条描边、一层表面色，颜色全部来自语义令牌，
+   不再出现硬编码的深蓝/纯黑、嵌套边框、模糊背板与叠加遮罩。
+   ========================================================================= */
+
+/* ── 图片：单图居中限高，多图并排 ───────────────────────────────────────── */
+.gintmr_ui-figure { margin: 1.5rem 0; }
+.gintmr_ui-figure img { display: block; max-width: 100%; height: auto; border-radius: var(--gintmr_ui-radius-md); }
+.gintmr_ui-figure figcaption { margin-top: .5rem; color: var(--gintmr_ui-secondary); font-size: .8rem; text-align: center; }
+/* 独立成段的单图：居中、限宽、限高，避免竖图把正文拉成一条窄缝 */
+.gintmr_ui-figure--standalone {
+  width: fit-content;
+  max-width: min(100%, 30rem);
+  margin-inline: auto;
+}
+.gintmr_ui-figure--standalone img { max-height: 70vh; width: auto; object-fit: contain; }
+.gintmr_ui-figure--full { max-width: none; }
+.gintmr_ui-figure--full img { width: 100%; }
+
+/* ── 视频：竖屏不再撑满一屏，播放按钮改为低调的玻璃圆 ───────────────────── */
+.gintmr_ui-video { position: relative; width: fit-content; max-width: 100%; margin: 1.5rem auto; }
+.gintmr_ui-video video {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 70vh;
+  height: auto;
+  border-radius: var(--gintmr_ui-radius-lg);
+  background: color-mix(in srgb, var(--gintmr_ui-fg) 92%, transparent);
+}
+.gintmr_ui-video--wide video { width: 100%; }
+.gintmr_ui-video__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, #fff 30%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, #000 38%, transparent);
+  backdrop-filter: blur(6px);
+  transition: background var(--gintmr_ui-duration-fast) ease, transform var(--gintmr_ui-duration-fast) var(--gintmr_ui-ease);
+}
+.gintmr_ui-video__play::before {
+  content: '';
+  width: 0;
+  height: 0;
+  margin-left: 3px;
+  border-left: 15px solid #fff;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+}
+.gintmr_ui-video__play:hover { background: color-mix(in srgb, var(--gintmr_ui-palette-accent) 78%, transparent); transform: translate(-50%, -50%) scale(1.06); }
+.gintmr_ui-video__play[data-gintmr_ui-state='hidden'] { opacity: 0; pointer-events: none; }
+/* iOS 自带播放控件，重复的播放按钮只会碍事 */
+@supports (-webkit-touch-callout: none) and (not (pointer: fine)) {
+  .gintmr_ui-video__play { display: none !important; }
+}
+
+/* Live Photo：静默循环，悬停播放 */
+.gintmr_ui-live { width: fit-content; max-width: 100%; margin: 1.5rem auto; }
+.gintmr_ui-live video { display: block; width: auto; max-width: 100%; max-height: 70vh; height: auto; border-radius: var(--gintmr_ui-radius-lg); object-fit: contain; }
+.gintmr_ui-live__hint { display: block; margin-top: .45rem; color: var(--gintmr_ui-secondary); font-size: .74rem; text-align: center; }
+
+/* ── 音乐卡：一张卡、一条描边、自绘播放条，歌词不再是卡中卡 ─────────────── */
+.gintmr_ui-track {
+  margin: 1.5rem auto;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-lg);
+  background: var(--gintmr_ui-surface-bg);
+}
+.gintmr_ui-track__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: .85rem; }
+/* 封面用 contain：专辑图不一定是正方形，宁可留一点底色也不裁掉内容 */
+.gintmr_ui-track__cover {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-sm);
+  background: var(--gintmr_ui-accent-08);
+}
+.gintmr_ui-track__cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.gintmr_ui-track__cover--empty { display: grid; place-items: center; color: var(--gintmr_ui-link); font-size: 1.3rem; }
+.gintmr_ui-track__meta { min-width: 0; }
+.gintmr_ui-track__title { font-size: .98rem; font-weight: 650; line-height: 1.35; }
+.gintmr_ui-track__artist { margin-top: .1rem; font-size: .84rem; color: var(--gintmr_ui-secondary); }
+.gintmr_ui-track__album { margin-top: .05rem; font-size: .76rem; color: color-mix(in srgb, var(--gintmr_ui-secondary) 76%, transparent); }
+
+.gintmr_ui-track__play {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gintmr_ui-link);
+  transition: background var(--gintmr_ui-duration-fast) ease, border-color var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-track__play:hover { background: var(--gintmr_ui-accent-16); border-color: var(--gintmr_ui-accent-40); }
+.gintmr_ui-track__play svg { width: 14px; height: 14px; }
+.gintmr_ui-track__time { font-family: var(--gintmr_ui-font-mono); font-size: .76rem; font-variant-numeric: tabular-nums; color: var(--gintmr_ui-secondary); white-space: nowrap; }
+
+.gintmr_ui-progress {
+  position: relative;
+  height: 2px;
+  margin-top: .9rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--gintmr_ui-line) 86%, transparent);
+}
+/* 视觉上只有 2px，命中区域靠透明伪元素撑到 14px */
+.gintmr_ui-progress::before { content: ''; position: absolute; inset: -6px -2px; cursor: pointer; }
+.gintmr_ui-progress__fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 2px; background: var(--gintmr_ui-link); }
+.gintmr_ui-progress__thumb {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: .55rem;
+  height: .55rem;
+  margin: -.275rem 0 0 -.275rem;
+  border-radius: 50%;
+  background: var(--gintmr_ui-link);
+  opacity: 0;
+  transition: opacity var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-progress:hover .gintmr_ui-progress__thumb,
+.gintmr_ui-track[data-gintmr_ui-playing='true'] .gintmr_ui-progress__thumb { opacity: 1; }
+.gintmr_ui-progress:focus-visible { outline: 2px solid var(--gintmr_ui-link); outline-offset: 4px; }
+
+/* 歌词：没有自己的边框与背板，用上下渐隐代替硬切 */
+.gintmr_ui-track__lyrics {
+  margin-top: .9rem;
+  padding-top: .8rem;
+  border-top: 1px solid var(--gintmr_ui-line-faint);
+  max-height: 7.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gintmr_ui-line) transparent;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 6%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 6%, #000 88%, transparent 100%);
+}
+.gintmr_ui-track__lyric {
+  display: block;
+  width: 100%;
+  padding: .14rem 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: .82rem;
+  line-height: 1.6;
+  color: var(--gintmr_ui-secondary);
+  transition: color var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-track__lyric:hover { color: var(--gintmr_ui-fg); }
+.gintmr_ui-track__lyric[data-gintmr_ui-active='true'] { color: var(--gintmr_ui-link); font-weight: 600; }
+.gintmr_ui-track__note { margin: 0; padding-top: .8rem; color: var(--gintmr_ui-secondary); font-size: .78rem; }
+
+/* ── 链接卡：横向一行，缩略图 + 标题 + 说明 + 站点 ──────────────────────── */
+.gintmr_ui-link-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .9rem;
+  margin: 1.2rem 0;
+  padding: .8rem .95rem;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-lg);
+  background: var(--gintmr_ui-surface-bg);
+  color: inherit;
+  transition: border-color var(--gintmr_ui-duration-fast) ease, background var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-link-card:hover { text-decoration: none; border-color: var(--gintmr_ui-accent-40); background: var(--gintmr_ui-accent-08); }
+.gintmr_ui-link-card__thumb {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  overflow: hidden;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-sm);
+  background: var(--gintmr_ui-accent-08);
+}
+.gintmr_ui-link-card__thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.gintmr_ui-link-card__thumb--empty { display: grid; place-items: center; color: var(--gintmr_ui-link); font-weight: 650; }
+.gintmr_ui-link-card__body { min-width: 0; }
+.gintmr_ui-link-card__title { font-size: .95rem; font-weight: 650; line-height: 1.4; }
+.gintmr_ui-link-card__desc {
+  margin-top: .15rem;
+  color: var(--gintmr_ui-secondary);
+  font-size: .82rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.gintmr_ui-link-card__host { margin-top: .25rem; color: color-mix(in srgb, var(--gintmr_ui-secondary) 76%, transparent); font-size: .74rem; }
+.gintmr_ui-link-card__arrow { color: var(--gintmr_ui-secondary); transition: color var(--gintmr_ui-duration-fast) ease, transform var(--gintmr_ui-duration-fast) var(--gintmr_ui-ease); }
+.gintmr_ui-link-card:hover .gintmr_ui-link-card__arrow { color: var(--gintmr_ui-link); transform: translate(2px, -2px); }
+
+/* ── 媒体卡：电影/剧集/书/专辑，竖版封面 + 元信息 ────────────────────────── */
+.gintmr_ui-media-card {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 1rem;
+  max-width: 44rem;
+  margin: 1.4rem auto;
+  padding: .9rem;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-lg);
+  background: var(--gintmr_ui-surface-bg);
+}
+.gintmr_ui-media-card__cover {
+  position: relative;
+  width: 5.5rem;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border: 1px solid var(--gintmr_ui-surface-border);
+  border-radius: var(--gintmr_ui-radius-sm);
+  background: var(--gintmr_ui-accent-08);
+}
+.gintmr_ui-media-card__cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.gintmr_ui-media-card__body { min-width: 0; }
+.gintmr_ui-media-card__kind {
+  display: inline-block;
+  margin-bottom: .35rem;
+  padding: .1rem .45rem;
+  border: 1px solid var(--gintmr_ui-accent-40);
+  border-radius: var(--gintmr_ui-radius-pill);
+  background: var(--gintmr_ui-accent-08);
+  color: var(--gintmr_ui-link);
+  font-size: .7rem;
+  font-weight: 550;
+  letter-spacing: .04em;
+}
+.gintmr_ui-media-card__title { font-size: 1rem; font-weight: 650; line-height: 1.4; }
+.gintmr_ui-media-card__meta { margin-top: .2rem; color: var(--gintmr_ui-secondary); font-size: .8rem; }
+.gintmr_ui-media-card__desc { margin-top: .5rem; font-size: .88rem; line-height: 1.7; }
+.gintmr_ui-media-card__tags { display: flex; flex-wrap: wrap; gap: .3rem .5rem; margin-top: .6rem; }
+.gintmr_ui-media-card__tag { color: var(--gintmr_ui-secondary); font-size: .74rem; }
+.gintmr_ui-media-card__tag::before { content: '#'; color: var(--gintmr_ui-accent-40); }
+
+/* ── 好词佳句：去掉光晕与胶囊，只留一条强调竖线和引文本身 ──────────────── */
+.gintmr_ui-quote {
+  position: relative;
+  margin: 2rem 0;
+  padding: .15rem 0 .15rem 1.15rem;
+  border-left: 2px solid var(--gintmr_ui-accent-40);
+}
+.gintmr_ui-quote__text {
+  font-family: var(--gintmr_ui-font-serif);
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.75;
+  letter-spacing: .01em;
+}
+.gintmr_ui-quote__source { margin-top: .55rem; color: var(--gintmr_ui-secondary); font-size: .82rem; }
+.gintmr_ui-quote__source::before { content: '—— '; }
+.gintmr_ui-quote__shuffle {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-top: .7rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--gintmr_ui-secondary);
+  font-size: .78rem;
+  transition: color var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-quote__shuffle:hover { color: var(--gintmr_ui-link); }
+
+@media (max-width: 720px) {
+  .gintmr_ui-track { padding: .85rem; }
+  .gintmr_ui-track__row { grid-template-columns: auto minmax(0, 1fr) auto; gap: .7rem; }
+  .gintmr_ui-track__cover { width: 3.75rem; height: 3.75rem; }
+  .gintmr_ui-track__album { display: none; }
+  .gintmr_ui-track__title { font-size: .92rem; }
+  .gintmr_ui-track__time { display: none; }
+  .gintmr_ui-track__lyrics { max-height: 6rem; }
+  .gintmr_ui-media-card { grid-template-columns: 4.5rem minmax(0, 1fr); gap: .8rem; padding: .8rem; }
+  .gintmr_ui-media-card__cover { width: 4.5rem; }
+  .gintmr_ui-quote { padding-left: .95rem; }
+  .gintmr_ui-quote__text { font-size: 1.04rem; }
+}
+
+
+/* ── components/gallery.css ──────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 图集
+   一组图片按各自真实比例排成整行：行内每张图高度一致、宽度按比例分配，
+   所以既不裁切也不留空洞，行数随容器宽度自动变化。
+   比例由 gallery.js 从图片原始尺寸算出来写在 --gintmr_ui-aspect 上；
+   未测量到之前退化成正方形排布，测量后自动重排。
+   ========================================================================= */
+
+.gintmr_ui-gallery {
+  --gintmr_ui-gallery-row: 13rem;
+  --gintmr_ui-gallery-gap: .5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gintmr_ui-gallery-gap);
+  margin: 1.5rem 0;
+}
+.gintmr_ui-gallery > * {
+  flex: var(--gintmr_ui-aspect, 1) 1 calc(var(--gintmr_ui-gallery-row) * var(--gintmr_ui-aspect, 1));
+  min-width: 0;
+  margin: 0;
+}
+.gintmr_ui-gallery img { width: 100%; height: auto; display: block; border-radius: var(--gintmr_ui-radius-sm); }
+.gintmr_ui-gallery figcaption { margin-top: .3rem; color: var(--gintmr_ui-secondary); font-size: .76rem; line-height: 1.5; }
+
+@media (max-width: 720px) {
+  .gintmr_ui-gallery { --gintmr_ui-gallery-row: 8.5rem; --gintmr_ui-gallery-gap: .35rem; }
+  .gintmr_ui-gallery figcaption { font-size: .72rem; }
+}
+
+
+/* ── components/viewer.css ───────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 图片查看器
+   一个安静的浮层：黑底、无彩色背光、无胶囊计数器。
+   顶栏（计数 + 进度）与说明文字的宽度跟着图片走，尺寸由 viewer.js 按原始比例算。
+   浮层在明暗主题下都是深底，所以这里的文字颜色是固定的浅色，不跟主题令牌走；
+   只有强调色取自调色板。
+   ========================================================================= */
+
+.gintmr_ui-viewer {
+  --gintmr_ui-viewer-ink: #f4ecff;
+  --gintmr_ui-viewer-ink-soft: color-mix(in srgb, #f4ecff 58%, transparent);
+  --gintmr_ui-viewer-line: color-mix(in srgb, #f4ecff 16%, transparent);
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2.25rem 1rem 1.5rem;
+  background: color-mix(in srgb, #0a090d 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+.gintmr_ui-viewer[data-gintmr_ui-open='true'] { display: flex; }
+
+.gintmr_ui-viewer__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(94vw, var(--gintmr_ui-viewer-w, 94vw));
+}
+
+/* ── 顶栏：一行细字 + 一条 2px 进度 ─────────────────────────────────────── */
+.gintmr_ui-viewer__bar {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  width: 100%;
+  margin-bottom: .7rem;
+}
+.gintmr_ui-viewer__counter {
+  font-family: var(--gintmr_ui-font-mono);
+  font-size: .74rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+  color: var(--gintmr_ui-viewer-ink-soft);
+}
+.gintmr_ui-viewer__progress {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gintmr_ui-viewer-line);
+  overflow: hidden;
+}
+.gintmr_ui-viewer__progress-value {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: color-mix(in srgb, var(--gintmr_ui-palette-accent) 82%, transparent);
+  transition: width var(--gintmr_ui-duration-fast) ease;
+}
+
+/* ── 画布与图片：只按原图比例缩放，不放大小图 ───────────────────────────── */
+.gintmr_ui-viewer__canvas { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; }
+.gintmr_ui-viewer__img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 74vh;
+  border-radius: var(--gintmr_ui-radius-sm);
+  background: color-mix(in srgb, #fff 3%, transparent);
+}
+
+/* ── 翻页：只有箭头，没有圆底 ───────────────────────────────────────────── */
+.gintmr_ui-viewer__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gintmr_ui-viewer-ink-soft);
+  transition: color var(--gintmr_ui-duration-fast) ease, background var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-viewer__nav svg { width: 26px; height: 26px; }
+.gintmr_ui-viewer__nav:hover { color: var(--gintmr_ui-viewer-ink); background: color-mix(in srgb, #fff 8%, transparent); }
+.gintmr_ui-viewer__nav[disabled] { opacity: .25; cursor: default; }
+.gintmr_ui-viewer__nav[disabled]:hover { background: transparent; }
+.gintmr_ui-viewer__nav--prev { left: -3.25rem; }
+.gintmr_ui-viewer__nav--next { right: -3.25rem; }
+
+.gintmr_ui-viewer__close {
+  position: absolute;
+  top: .85rem;
+  right: .85rem;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gintmr_ui-viewer-ink-soft);
+  transition: color var(--gintmr_ui-duration-fast) ease, background var(--gintmr_ui-duration-fast) ease;
+}
+.gintmr_ui-viewer__close svg { width: 20px; height: 20px; }
+.gintmr_ui-viewer__close:hover { color: var(--gintmr_ui-viewer-ink); background: color-mix(in srgb, #fff 8%, transparent); }
+
+.gintmr_ui-viewer__caption {
+  margin: .8rem 0 0;
+  width: 100%;
+  color: var(--gintmr_ui-viewer-ink-soft);
+  font-size: .82rem;
+  line-height: 1.6;
+}
+.gintmr_ui-viewer__caption[hidden] { display: none; }
+
+@media (max-width: 720px) {
+  .gintmr_ui-viewer { padding: 1.25rem .75rem 1rem; }
+  .gintmr_ui-viewer__nav { width: 2.25rem; height: 2.25rem; }
+  .gintmr_ui-viewer__nav svg { width: 22px; height: 22px; }
+  .gintmr_ui-viewer__nav--prev { left: -2.5rem; }
+  .gintmr_ui-viewer__nav--next { right: -2.5rem; }
+  .gintmr_ui-viewer__img { max-height: 68vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gintmr_ui-viewer__progress-value { transition: none; }
+}
+

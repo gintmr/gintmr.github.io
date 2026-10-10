@@ -24,7 +24,7 @@ test('unlisted history page opts out of indexing and uses only its read-only ent
   for (const hook of ['activity-rows', 'previous', 'next', 'page-input', 'refresh']) {
     assert.match(html, new RegExp(`data-visitor-${hook}`));
   }
-  const nav = html.match(/<nav class="site-nav"[\s\S]*?<\/nav>/)?.[0];
+  const nav = html.match(/<nav class="gintmr_ui-nav"[\s\S]*?<\/nav>/)?.[0];
   assert.ok(nav);
   assert.doesNotMatch(nav, /visit-history/);
 });

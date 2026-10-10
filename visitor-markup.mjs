@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs';
 const worldMap = readFileSync(new URL('./assets/maps/world-countries.svg', import.meta.url), 'utf8').trim();
 
 export function visitorMarkup() {
-  return `<section id="visitors" class="section visitor-section" aria-labelledby="visitors-heading">
-  <h2 id="visitors-heading" class="section-title" tabindex="-1"><a class="heading-anchor" href="#visitors-heading">Visitors</a></h2>
-  <div class="entry visitor-card" data-visitor-card data-state="unconfigured">
+  return `<section id="visitors" class="gintmr_ui-section visitor-section" aria-labelledby="visitors-heading">
+  <h2 id="visitors-heading" class="gintmr_ui-section-title" tabindex="-1"><a class="gintmr_ui-heading-anchor" href="#visitors-heading">Visitors</a></h2>
+  <div class="gintmr_ui-entry visitor-card" data-visitor-card data-state="unconfigured">
     <div class="visitor-summary">
       <dl class="visitor-totals">
         <div><dt>Page views</dt><dd data-visitor-value="pageviews">—</dd></div>
@@ -46,12 +46,12 @@ export function visitorMarkup() {
 }
 
 export function visitorHistoryMarkup() {
-  return `<section class="section visitor-section visitor-history-section" data-visitor-history aria-labelledby="visitor-activity-heading">
-  <div class="page-heading visitor-history-heading">
-    <h1 id="visitor-activity-heading" tabindex="-1"><a class="heading-anchor" href="#visitor-activity-heading">Visit history</a></h1>
+  return `<section class="gintmr_ui-section visitor-section visitor-history-section" data-visitor-history aria-labelledby="visitor-activity-heading">
+  <div class="gintmr_ui-page-heading visitor-history-heading">
+    <h1 id="visitor-activity-heading" tabindex="-1"><a class="gintmr_ui-heading-anchor" href="#visitor-activity-heading">Visit history</a></h1>
     <button class="visitor-page-button" type="button" data-visitor-refresh disabled>Refresh</button>
   </div>
-  <div class="entry visitor-history-card">
+  <div class="gintmr_ui-entry visitor-history-card">
     <div class="visitor-history-meta">
       <p class="visitor-detail-note">Times shown in UTC · Locations estimated from IP addresses</p>
       <span class="visitor-demo-label" data-visitor-demo hidden>Design preview · sample data</span>
