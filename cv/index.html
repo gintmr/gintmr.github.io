@@ -45,13 +45,13 @@
   </script>
   <link rel="stylesheet" href="/assets/fonts/noto-serif-sc/index.css" />
   <link rel="stylesheet" href="/assets/fonts/noto-sans-sc/index.css" />
-  <link rel="stylesheet" href="/ui/gintmr-ui.css?v=a641397bf1bc" />
+  <link rel="stylesheet" href="/ui/gintmr-ui.css?v=a2d31af97e23" />
   <!-- visitors.js 必须排在库脚本之前：库的 boot() 会在 DOMContentLoaded 之前就初始化访客卡，
        那时取数函数还没定义，卡片会停在「尚未接入」。两者都是 defer，按文档顺序执行。
        只读的那个历史页不挂它，那里走自己的只读脚本。 -->
   <script src="/visitors.js?v=2dc94ab02244" type="module"></script>
   <script id="visitor-config" type="application/json">{"enabled":true,"endpoint":"https://gjofwuihpzjfqeaysuuy.supabase.co/functions/v1/visitor-analytics","allowedOrigins":["https://gintmr.github.io"]}</script>
-  <script src="/ui/gintmr-ui.js?v=c6426f89aa14" defer></script>
+  <script src="/ui/gintmr-ui.js?v=8461f4b43f7a" defer></script>
 
 
   <script>if (location.pathname === '/' && location.hash === '#publications') location.replace('/publication/');</script>

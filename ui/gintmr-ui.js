@@ -1113,40 +1113,6 @@ function initSidenav(doc = document) {
   });
 }
 
-/* ── components/gallery.js ── */
-/* ============================================================================
-   gintmr-ui · 图集原语
-   把每张图的真实宽高比写到它所在格子的 --gintmr_ui-aspect 上，
-   剩下的排版交给 gallery.css 的 flex 规则。
-   已经加载完成的图片立刻测量；还没加载的等 load 事件，避免整组图先按正方形跳一下。
-   ========================================================================= */
-
-function applyAspect(node, width, height) {
-  if (!width || !height) return;
-  node.style.setProperty('--gintmr_ui-aspect', (width / height).toFixed(4));
-}
-
-function measure(node, image) {
-  if (image.complete && image.naturalWidth) {
-    applyAspect(node, image.naturalWidth, image.naturalHeight);
-    return;
-  }
-  // 有 width/height 属性的先按属性排一次，避免等图片加载完才成形
-  const attrWidth = Number.parseInt(image.getAttribute('width') || '', 10);
-  const attrHeight = Number.parseInt(image.getAttribute('height') || '', 10);
-  if (attrWidth && attrHeight) applyAspect(node, attrWidth, attrHeight);
-  image.addEventListener('load', () => applyAspect(node, image.naturalWidth, image.naturalHeight), { once: true });
-}
-
-function initGalleries(doc = document) {
-  doc.querySelectorAll('.gintmr_ui-gallery').forEach(gallery => {
-    [...gallery.children].forEach(node => {
-      const image = node.matches('img') ? node : node.querySelector('img');
-      if (image) measure(node, image);
-    });
-  });
-}
-
 /* ── components/viewer.js ── */
 /* ============================================================================
    gintmr-ui · 图片查看器
@@ -1895,7 +1861,6 @@ const elementInits = [
   initAudioTracks,
   initVideos,
   initQuotes,
-  initGalleries,
   initSidenav,
   initVisitorCard,
 ];
@@ -1943,8 +1908,7 @@ if (typeof window !== 'undefined') {
     initAudioTracks,
     initVideos,
     initQuotes,
-    initGalleries,
-    initImageViewer,
+      initImageViewer,
     initSidenav,
     initVisitorCard,
     visitorCardMarkup,

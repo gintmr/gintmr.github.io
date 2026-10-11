@@ -68,7 +68,6 @@ html[data-gintmr_ui-theme='dark'] {
   --gintmr_ui-aurora-3: #ff9ad5;
   --gintmr_ui-aurora-4: #9d8bff;
   --gintmr_ui-aurora-alpha: .19;
-  --gintmr_ui-aurora-blur: 56px;
   --gintmr_ui-aurora-duration: 19s;
 
   /* 特效元素（星点、点击粒子） */
@@ -887,7 +886,11 @@ html[data-gintmr_ui-effects='on'] .gintmr_ui-ambient { display: block; }
               把色轮化成一圈光晕，缓慢旋转，所以颜色会自己流淌；
      天光     更大更淡的一团，压在上面给层次。
    脚本把内容列宽度写进 --gintmr_ui-content-width，图层用 mask 把中间挖空，
-   所以光晕只落在正文两侧的留白里，物理上不可能盖住文字；留白不足 90px 时整层收起。 */
+   所以光晕只落在正文两侧的留白里，物理上不可能盖住文字；留白不足 90px 时整层收起。
+
+   柔和度只靠渐变本身，不用 filter: blur()：这两层铺满整个视口，模糊滤镜会逼着
+   浏览器每帧重新栅格化整层，滚动时中位帧从 16.7ms 掉到 90ms（约 10 FPS）。
+   去掉滤镜后，动画只剩 transform，可以完全交给合成器，光带照样在流动。 */
 .gintmr_ui-aurora {
   --gintmr_ui-aurora-gutter: clamp(0px, calc((100vw - var(--gintmr_ui-content-width, 48rem)) / 2 - 1.25rem), 100vw);
   position: fixed;
@@ -928,9 +931,8 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
     var(--gintmr_ui-aurora-1), var(--gintmr_ui-aurora-2),
     var(--gintmr_ui-aurora-4), var(--gintmr_ui-aurora-3),
     var(--gintmr_ui-aurora-1));
-  -webkit-mask-image: radial-gradient(closest-side, #000 32%, transparent 68%);
-  mask-image: radial-gradient(closest-side, #000 32%, transparent 68%);
-  filter: blur(var(--gintmr_ui-aurora-blur));
+  -webkit-mask-image: radial-gradient(closest-side, #000 8%, transparent 62%);
+  mask-image: radial-gradient(closest-side, #000 8%, transparent 62%);
   animation: gintmr_ui-aurora-spin calc(var(--gintmr_ui-aurora-duration) * 5) linear infinite;
 }
 
@@ -941,7 +943,6 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
   left: -16%;
   top: -44%;
   background: radial-gradient(closest-side, var(--gintmr_ui-aurora-4), transparent 74%);
-  filter: blur(calc(var(--gintmr_ui-aurora-blur) * 1.7));
   opacity: calc(var(--gintmr_ui-aurora-alpha) * .72);
   animation: gintmr_ui-aurora-haze calc(var(--gintmr_ui-aurora-duration) * 1.7) ease-in-out infinite;
 }
@@ -957,7 +958,7 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 
 @media (max-width: 720px) {
   .gintmr_ui-sparkle:nth-child(n + 5) { display: none; }
-  .gintmr_ui-aurora { --gintmr_ui-aurora-blur: 34px; --gintmr_ui-aurora-alpha: .26; }
+  .gintmr_ui-aurora { --gintmr_ui-aurora-alpha: .26; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1261,10 +1262,12 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 .gintmr_ui-figure { margin: 1.5rem 0; }
 .gintmr_ui-figure img { display: block; max-width: 100%; height: auto; border-radius: var(--gintmr_ui-radius-md); }
 .gintmr_ui-figure figcaption { margin-top: .5rem; color: var(--gintmr_ui-secondary); font-size: .8rem; text-align: center; }
-/* 独立成段的单图：居中、限宽、限高，避免竖图把正文拉成一条窄缝 */
+/* 独立成段的单图：居中、限宽、限高，避免竖图把正文拉成一条窄缝。
+   限宽与站点旧版同一档（24rem）：正文里的图是缩略的引子，想看大图点开查看器，
+   所以单图不铺到正文满宽，也不会占掉小半屏。 */
 .gintmr_ui-figure--standalone {
   width: fit-content;
-  max-width: min(100%, 30rem);
+  max-width: min(100%, 24rem);
   margin-inline: auto;
 }
 .gintmr_ui-figure--standalone img { max-height: 70vh; width: auto; object-fit: contain; }
@@ -1550,30 +1553,55 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 /* ── components/gallery.css ──────────────────────────────── */
 /* ============================================================================
    gintmr-ui · 图集
-   一组图片按各自真实比例排成整行：行内每张图高度一致、宽度按比例分配，
-   所以既不裁切也不留空洞，行数随容器宽度自动变化。
-   比例由 gallery.js 从图片原始尺寸算出来写在 --gintmr_ui-aspect 上；
-   未测量到之前退化成正方形排布，测量后自动重排。
+   与站点旧版同一个几何：固定列数的网格，每格 4:3、图片 cover 裁进格子。
+   所以一组图的缩略图大小一致、行高恒定，不会因为某张是竖图就把整行撑高；
+   正文里的图只作引子，想看完整的那张点开查看器看大图。
+
+   列数：窄屏 2 列，640px 起 3 列，1024px 起 4 列。
    ========================================================================= */
 
 .gintmr_ui-gallery {
-  --gintmr_ui-gallery-row: 13rem;
-  --gintmr_ui-gallery-gap: .5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--gintmr_ui-gallery-gap);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
   margin: 1.5rem 0;
 }
 .gintmr_ui-gallery > * {
-  flex: var(--gintmr_ui-aspect, 1) 1 calc(var(--gintmr_ui-gallery-row) * var(--gintmr_ui-aspect, 1));
   min-width: 0;
   margin: 0;
 }
-.gintmr_ui-gallery img { width: 100%; height: auto; display: block; border-radius: var(--gintmr_ui-radius-sm); }
-.gintmr_ui-gallery figcaption { margin-top: .3rem; color: var(--gintmr_ui-secondary); font-size: .76rem; line-height: 1.5; }
+/* 图与说明一起放进格子里：说明占一格，图片在上面 */
+.gintmr_ui-gallery > figure,
+.gintmr_ui-gallery > a {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--gintmr_ui-radius-md);
+}
+.gintmr_ui-gallery img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--gintmr_ui-radius-md);
+  background: var(--gintmr_ui-accent-08);
+}
+.gintmr_ui-gallery figcaption {
+  margin-top: .35rem;
+  color: var(--gintmr_ui-secondary);
+  font-size: .76rem;
+  line-height: 1.5;
+}
 
+@media (min-width: 640px) {
+  .gintmr_ui-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .gintmr_ui-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 @media (max-width: 720px) {
-  .gintmr_ui-gallery { --gintmr_ui-gallery-row: 8.5rem; --gintmr_ui-gallery-gap: .35rem; }
+  .gintmr_ui-gallery { gap: .5rem; }
   .gintmr_ui-gallery figcaption { font-size: .72rem; }
 }
 
