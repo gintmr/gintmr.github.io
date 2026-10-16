@@ -1,6 +1,6 @@
 # Xinrui Wu · Academic Homepage
 
-Static academic website for [gintmr.github.io](https://gintmr.github.io/), with Home, Publications, Project, and CV pages. The interface reuses the personal site's Noto font families, violet grid, rounded navigation, translucent borders, and script watermark. Academic content is maintained separately from the layout.
+Static academic website for [gintmr.github.io](https://gintmr.github.io/), with Home, Publications, Projects, and CV pages. The interface reuses the personal site's Noto font families, violet grid, rounded navigation, translucent borders, and script watermark. Academic content is maintained separately from the layout.
 
 ## Preview
 

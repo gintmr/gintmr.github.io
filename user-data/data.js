@@ -132,7 +132,7 @@ export const publications = [
     role: "first",
     roleLabel: "Co-first author",
     topic: "vision",
-    links: [],
+    links: [{ label: "arXiv", url: "https://arxiv.org/abs/2606.28112" }],
   },
 ];
 

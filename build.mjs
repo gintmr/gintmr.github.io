@@ -51,7 +51,7 @@ const icon = (name) => {
   };
   return `<svg class="gintmr_ui-icon gintmr_ui-icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 };
-const pages = [{ id: 'home', label: 'Home', path: '/' }, { id: 'publication', label: 'Publications', path: '/publication/' }, { id: 'project', label: 'Project', path: '/project/' }, { id: 'cv', label: 'CV', path: profile.cvUrl }];
+const pages = [{ id: 'home', label: 'Home', path: '/' }, { id: 'publication', label: 'Publications', path: '/publication/' }, { id: 'project', label: 'Projects', path: '/project/' }, { id: 'cv', label: 'CV', path: profile.cvUrl }];
 // This page is deliberately absent from the public navigation and page outlines.
 const historyPage = { id: 'visit-history', label: 'Visit history', path: '/visit-history/' };
 const linkedHeading = (tag, id, title, className = '') => `<${tag} class="${className}" id="${id}" tabindex="-1"><a class="gintmr_ui-heading-anchor" href="#${id}">${title}</a></${tag}>`;
@@ -144,7 +144,7 @@ function publicationPage() {
 }
 
 function projectPage() {
-  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', 'Project')}</div>
+  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', 'Projects')}</div>
     <div class="gintmr_ui-projects">${projects.map(project => `<article class="gintmr_ui-project-panel" id="${project.id}" aria-labelledby="${project.id}-heading">
       <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, escape(project.name))}<p>${escape(project.description)}</p>
         <div class="gintmr_ui-project-links">${external(project.previewUrl, 'Open preview')}${external(project.repositoryUrl, 'GitHub repository')}</div>
@@ -236,4 +236,4 @@ for (const page of [...pages, historyPage]) {
   const html = layout(page, { home, publication: publicationPage, project: projectPage, cv: cvPage, 'visit-history': visitorHistoryMarkup }[page.id]());
   await writeFile(`${directory}index.html`, html.replace(/[\t ]+$/gm, ''));
 }
-console.log('Generated Home, Publications, Project, CV, and unlisted visit-history pages.');
+console.log('Generated Home, Publications, Projects, CV, and unlisted visit-history pages.');
