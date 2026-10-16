@@ -66,7 +66,7 @@ async function requestActivity(url, parentSignal) {
   }
 }
 
-const pageNames = { '/': 'Home', '/publication/': 'Publication', '/project/': 'Project', '/cv/': 'CV' };
+const pageNames = { '/': 'Home', '/publication/': 'Publications', '/project/': 'Project', '/cv/': 'CV' };
 
 function createActivityRow(record) {
   const row = document.createElement('tr');

@@ -51,14 +51,9 @@ const icon = (name) => {
   };
   return `<svg class="gintmr_ui-icon gintmr_ui-icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 };
-const pages = [{ id: 'home', label: 'Home', path: '/' }, { id: 'publication', label: 'Publication', path: '/publication/' }, { id: 'project', label: 'Project', path: '/project/' }, { id: 'cv', label: 'CV', path: profile.cvUrl }];
+const pages = [{ id: 'home', label: 'Home', path: '/' }, { id: 'publication', label: 'Publications', path: '/publication/' }, { id: 'project', label: 'Project', path: '/project/' }, { id: 'cv', label: 'CV', path: profile.cvUrl }];
 // This page is deliberately absent from the public navigation and page outlines.
 const historyPage = { id: 'visit-history', label: 'Visit history', path: '/visit-history/' };
-const isCoreAuthor = paper => paper.authorGroup === 'core' || paper.role === 'first';
-const publicationGroups = [
-  { id: 'core-author', label: 'Core Author', papers: publications.filter(isCoreAuthor) },
-  { id: 'contributing-author', label: 'Contributing Author', papers: publications.filter(paper => !isCoreAuthor(paper)) },
-];
 const linkedHeading = (tag, id, title, className = '') => `<${tag} class="${className}" id="${id}" tabindex="-1"><a class="gintmr_ui-heading-anchor" href="#${id}">${title}</a></${tag}>`;
 const heading = (id, title) => linkedHeading('h2', `${id}-heading`, title, 'gintmr_ui-section-title');
 const logo = (url, name) => `<div class="gintmr_ui-institution-logo"><img src="${url}" alt="${escape(name)} logo" width="80" height="64" loading="lazy" /></div>`;
@@ -69,15 +64,12 @@ function pageOutline(page) {
       { id: 'about', label: 'About' },
       { id: 'education', label: 'Education' },
       { id: 'research', label: 'Research Interests' },
-      { id: 'experience', label: 'Research & Internships' },
+      { id: 'experience', label: 'Research Experience' },
       ...experience.map(item => ({ id: item.id, label: item.shortName, depth: 1 })),
       { id: 'awards', label: 'Honors & Awards' },
       { id: 'visitors', label: 'Visitors' },
     ],
-    publication: publicationGroups.flatMap(group => [
-      { id: group.id, label: group.label },
-      ...group.papers.map(item => ({ id: item.id, label: item.shortName, depth: 1 })),
-    ]),
+    publication: publications.map(item => ({ id: item.id, label: item.shortName })),
     project: projects.map(item => ({ id: item.id, label: item.name })),
     cv: [{ id: 'cv-heading', label: 'Curriculum Vitae' }],
     'visit-history': [{ id: 'visitor-activity-heading', label: 'Visit history' }],
@@ -123,12 +115,12 @@ function home() {
     <ul class="gintmr_ui-interest-list">${researchAreas.map(area => `<li><strong>${escape(area.title)}:</strong> ${escape(area.description)}</li>`).join('')}</ul>
   </section>
   <section class="gintmr_ui-section" id="experience" aria-labelledby="experience-heading">
-    ${heading('experience', 'Research &amp; Internship Experience')}
+    ${heading('experience', 'Research Experience')}
     <div class="gintmr_ui-entry-list">${experience.map(item => `<article class="gintmr_ui-entry gintmr_ui-experience-entry" id="${item.id}">
       ${logo(item.logo, item.shortName)}<div class="gintmr_ui-entry-content">
         <div class="gintmr_ui-entry-heading">${linkedHeading('h3', `${item.id}-heading`, escape(item.organization))}<span class="gintmr_ui-date">${escape(item.period)}</span></div>
         <p class="gintmr_ui-role">${escape(item.role)} <span class="gintmr_ui-separator">·</span> <span class="gintmr_ui-meta">${escape(item.location)}</span></p>
-        <p class="gintmr_ui-advisors">${item.id === 'megvii' ? 'Mentor' : item.advisors.length > 1 ? 'Advisors' : 'Advisor'}: ${item.advisors.map(person => person.url ? external(person.url, escape(person.name)) : escape(person.name)).join(', ')}</p>
+        <p class="gintmr_ui-advisors">${item.advisors.length > 1 ? 'Advisors' : 'Advisor'}: ${item.advisors.map(person => person.url ? external(person.url, escape(person.name)) : escape(person.name)).join(', ')}</p>
         <p class="gintmr_ui-experience-description">${escape(item.description)}</p>
       </div></article>`).join('')}</div>
   </section>
@@ -141,17 +133,14 @@ function home() {
 
 function publicationPage() {
   const authors = (paper) => escape(paper.authors).replace('Xinrui Wu', '<strong>Xinrui Wu</strong>').replaceAll('*', '<sup>*</sup>').replaceAll('Ma+', 'Ma<sup>+</sup>');
-  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'publication-heading', 'Publication')}${external(profile.scholarUrl, 'Google Scholar', 'gintmr_ui-heading-link')}</div>
+  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'publication-heading', 'Publications')}${external(profile.scholarUrl, 'Google Scholar', 'gintmr_ui-heading-link')}</div>
     <p class="gintmr_ui-publication-note">* Equal contribution.</p>
-    ${publicationGroups.map(group => `<section class="gintmr_ui-section gintmr_ui-publication-section" id="${group.id}" aria-labelledby="${group.id}-heading">
-      ${heading(group.id, `${group.label} <sup class="gintmr_ui-count">${group.papers.length}</sup>`)}
-      <div class="gintmr_ui-publication-list">${group.papers.map(paper => `<article class="gintmr_ui-paper gintmr_ui-entry" id="${paper.id}">
+    <div class="gintmr_ui-publication-list">${publications.map(paper => `<article class="gintmr_ui-paper gintmr_ui-entry" id="${paper.id}">
         ${linkedHeading('h3', `${paper.id}-heading`, escape(paper.title))}
         <p class="gintmr_ui-authors">${authors(paper)}</p>
         <div class="gintmr_ui-paper-meta"><span class="gintmr_ui-venue">${paper.status === 'submitted' ? 'Submitted to ' : ''}${escape(paper.venue)}${/\b20\d{2}\b/.test(paper.venue) ? '' : ` · ${paper.year}`}</span><span class="gintmr_ui-meta">${escape(paper.roleLabel)}</span></div>
         ${paper.links.length ? `<div class="gintmr_ui-paper-links">${paper.links.map(link => external(link.url, escape(link.label))).join('')}</div>` : ''}
-      </article>`).join('')}</div>
-    </section>`).join('')}`;
+      </article>`).join('')}</div>`;
 }
 
 function projectPage() {
@@ -178,7 +167,7 @@ function cvPage() {
 function layout(page, content) {
   const description = {
     home: 'Xinrui Wu (吴欣锐), undergraduate at UESTC, visiting student at MBZUAI, and research intern at Tsinghua AIR. Research interests, education, academic experience, and awards.',
-    publication: 'Research publications by Xinrui Wu, grouped by core and contributing authorship, in clinical AI, world models, efficient reasoning, and computer vision.',
+    publication: 'Publications by Xinrui Wu in efficient reasoning, computer vision, clinical AI, and world models.',
     project: 'Papertone, Research OS, FinGraph, and UESTC SISE Embedded Studio: project websites, interactive previews, and source repositories.',
     cv: 'Curriculum vitae of Xinrui Wu. View or download the PDF, including education, research experience, publications, and awards.',
     'visit-history': 'Visit history for the academic homepage.',
@@ -247,4 +236,4 @@ for (const page of [...pages, historyPage]) {
   const html = layout(page, { home, publication: publicationPage, project: projectPage, cv: cvPage, 'visit-history': visitorHistoryMarkup }[page.id]());
   await writeFile(`${directory}index.html`, html.replace(/[\t ]+$/gm, ''));
 }
-console.log('Generated Home, Publication, Project, CV, and unlisted visit-history pages.');
+console.log('Generated Home, Publications, Project, CV, and unlisted visit-history pages.');

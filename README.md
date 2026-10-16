@@ -1,6 +1,6 @@
 # Xinrui Wu · Academic Homepage
 
-Static academic website for [gintmr.github.io](https://gintmr.github.io/), with Home, Publication, Project, and CV pages. The interface reuses the personal site's Noto font families, violet grid, rounded navigation, translucent borders, and script watermark. Academic content is maintained separately from the layout.
+Static academic website for [gintmr.github.io](https://gintmr.github.io/), with Home, Publications, Project, and CV pages. The interface reuses the personal site's Noto font families, violet grid, rounded navigation, translucent borders, and script watermark. Academic content is maintained separately from the layout.
 
 ## Preview
 
@@ -45,15 +45,11 @@ All four pages share the decorative effects owned by the library: a slow backgro
 
 ## Content sources
 
-The accompanying CV's `main.tex`, `subfolders/Interests.tex`, and `subfolders/Scholarships-Prizes.tex` supply the September 2026 academic content. Institution logos are copied from that CV directory. Neither the CV nor personal-site source is modified by the build.
+The supplied `XinruiWu-27fall-CV.pdf` is the current source for CV content and section names. It is copied to `assets/cv/Xinrui-Wu-CV.pdf`; the site build embeds that file and does not modify it.
 
-Publication content follows the author's latest updates where they differ from the accompanying CV. **Core Author** contains the four first-author/co-first-author papers. **Contributing Author** contains ParaThinker and SeaTree. Each paper retains its own acceptance or submission status.
+The **Publications** page follows the five papers listed in the CV: BudgetThinker, MaskGuide, ImageTime, Hierarchical Relational Trajectory Modeling for Longitudinal Clinical Prognosis, and BiDeMem. The page uses a single list, matching the CV's author order, titles, equal-contribution marks, and statuses.
 
-BudgetThinker and ParaThinker are accepted by EMNLP 2026, and MaskGuide is accepted by IEEE Robotics and Automation Letters. ImageTime is **accepted by WACV 2027**. HiReT is submitted to ICLR 2027 and replaces the previous HiCausal entry. The removed OCG and action-aware clinical world-model manuscripts are not listed. The author supplied complete author lists for BudgetThinker and ParaThinker, and the updated ParaThinker title. BudgetThinker marks Hao Wen and Xinrui Wu as equal contributors.
-
-SeaTree: Tracing Marine Creatures through Taxonomic Tree is **Submitted to AAAI 2027** and retains its contributing-author role. Its author list is Yiwei Chen, Zheng Ziqiang, Xinrui Wu, Sai-Kit Yeung. All publication author lists render without hyperlinks, preserving name order, Xinrui Wu's bold emphasis, and any supplied contribution markers. No equal-contribution markers or paper URL are inferred for SeaTree.
-
-HKUST dates follow the CV (July–August 2025). The CV button and navigation open `/cv/`. This page embeds `assets/cv/Xinrui-Wu-CV.pdf`, copied from the accompanying CV project’s `Output/main.pdf`, and offers direct open/download links. The current CV selects four papers from the Publication page: BudgetThinker, MaskGuide, ImageTime, and HiReT. It uses a single Publication section without Core Author or Contributing Author subgroups and follows the website's latest titles, author lists, and statuses.
+The home page's matching section headings are Education, Research Interests, Research Experience, and Honors & Awards. The research-interest entries follow the CV's order, with Clinical AI last. The CV button and navigation open `/cv/`; that page embeds the PDF and offers direct open/download links.
 
 To update the document, replace this repository’s PDF with the newly compiled CV, then run `node build.mjs`; the build does not access the separate CV project. It hashes the PDF's content and applies one shared `?v=` version to the embedded document, Open PDF link, download links, and fallback links. Updating the PDF therefore gives the browser a new URL while all CV entrypoints refer to the same document version.
 
