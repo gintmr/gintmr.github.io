@@ -2,16 +2,16 @@
   position: relative;
   isolation: isolate;
   margin: 1rem 0 0 !important;
-  font-size: clamp(1rem, 1.25vw, 1.12rem);
-  font-weight: 700;
-  line-height: 1.55;
+  font-size: clamp(1.18rem, 1.65vw, 1.42rem);
+  font-weight: 750;
+  line-height: 1.5;
   letter-spacing: -.012em;
-  color: #7444a5;
-  background-image: linear-gradient(100deg, #7141a7 0%, #b44982 52%, #7650b4 100%);
+  color: #aa4d0a;
+  background-image: linear-gradient(100deg, #a63b12 0%, #cf6b08 52%, #a83d19 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 14px color-mix(in srgb, var(--gintmr_ui-palette-accent) 22%, transparent);
+  text-shadow: 0 0 16px rgb(229 126 31 / 24%);
 }
 
 .gintmr_ui-opportunity-line::before {
@@ -20,30 +20,31 @@
   inset: -.25rem -.45rem;
   content: "";
   pointer-events: none;
-  background: radial-gradient(ellipse at 40% 50%, color-mix(in srgb, var(--gintmr_ui-palette-accent) 20%, transparent), transparent 72%);
+  background: radial-gradient(ellipse at 40% 50%, rgb(255 181 70 / 24%), transparent 72%);
   filter: blur(10px);
   opacity: .75;
 }
 
 .gintmr_ui-opportunity-line a {
-  color: #62418f;
+  color: #82380f;
   font-weight: 800;
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
   text-underline-offset: .14em;
-  -webkit-text-fill-color: #62418f;
+  -webkit-text-fill-color: #82380f;
 }
 
 html[data-gintmr_ui-theme='dark'] .gintmr_ui-opportunity-line {
-  background-image: linear-gradient(100deg, #d8b5ff 0%, #ffabd0 52%, #c2b1ff 100%);
+  background-image: linear-gradient(100deg, #ffd084 0%, #ff9d54 52%, #ffd66f 100%);
+  text-shadow: 0 0 18px rgb(255 160 67 / 30%);
 }
 
 html[data-gintmr_ui-theme='dark'] .gintmr_ui-opportunity-line a {
-  color: #ffe19c;
-  -webkit-text-fill-color: #ffe19c;
+  color: #ffe2ae;
+  -webkit-text-fill-color: #ffe2ae;
 }
 
 @media (max-width: 720px) {
-  .gintmr_ui-opportunity-line { font-size: 1rem; }
+  .gintmr_ui-opportunity-line { font-size: 1.12rem; }
 }
 
 @media (forced-colors: active) {
