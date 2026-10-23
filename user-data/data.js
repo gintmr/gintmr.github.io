@@ -6,7 +6,7 @@ export const profile = {
   affiliation: "UESTC · Visiting Student at MBZUAI · Research Intern at Tsinghua AIR",
   educationSummary: "B.S. in Software Engineering (Embedded System), UESTC",
   email: "xinruiwu.wxr@gmail.com",
-  opportunities: "I am currently seeking PhD positions for Fall 2027 and am open to job opportunities.",
+  opportunities: "I am actively seeking PhD positions for Fall 2027 or job opportunities.",
   scholarUrl: "https://scholar.google.com/citations?user=pJzltu8AAAAJ&hl=en",
   alphaXivUrl: "https://www.alphaxiv.org/@xinrui-wu",
   githubUrl: "https://github.com/gintmr",

@@ -31,7 +31,7 @@ for (const file of ['gintmr-ui.css', 'gintmr-ui.js', 'theme-preload.js']) {
 
 // All generated pages reference the same asset versions, so layout edits cannot
 // leave individual subpages using a previously cached stylesheet, script, logo, or CV.
-const [libraryStyleUrl, libraryScriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl, historyScriptUrl, cvPdfUrl] = await Promise.all(['/ui/gintmr-ui.css', '/ui/gintmr-ui.js', profile.logo, '/css/visitors.css', '/visitors.js', '/visit-history.js', profile.cvPdfUrl].map(async path => {
+const [libraryStyleUrl, opportunityStyleUrl, libraryScriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl, historyScriptUrl, cvPdfUrl] = await Promise.all(['/ui/gintmr-ui.css', '/css/home-opportunity.css', '/ui/gintmr-ui.js', profile.logo, '/css/visitors.css', '/visitors.js', '/visit-history.js', profile.cvPdfUrl].map(async path => {
   const version = createHash('sha256').update(await readFile(`${root}${path.slice(1)}`)).digest('hex').slice(0, 12);
   return `${path}?v=${version}`;
 }));
@@ -101,9 +101,16 @@ function home() {
       ${linkedHeading('h1', 'name-heading', `${escape(profile.name)} <span lang="zh-CN">${escape(profile.chineseName)}</span>`)}
       <p>${introduction}</p>
       <p>${escape(profile.intro[1])}</p>
-      <p>${escape(profile.opportunities)} Please contact me at <a href="mailto:${escape(profile.email)}">${escape(profile.email)}</a>.</p>
     </div>
     <img class="gintmr_ui-portrait" src="${profile.portrait}" width="1286" height="1223" alt="Xinrui Wu" fetchpriority="high" />
+    <aside class="gintmr_ui-opportunity" aria-labelledby="opportunity-title">
+      <span class="gintmr_ui-opportunity-icon" aria-hidden="true">📣</span>
+      <div class="gintmr_ui-opportunity-copy">
+        <p class="gintmr_ui-opportunity-eyebrow">Actively seeking · Fall 2027</p>
+        <h2 id="opportunity-title">${escape(profile.opportunities)}</h2>
+        <a class="gintmr_ui-opportunity-contact" href="mailto:${escape(profile.email)}">Get in touch <span>${escape(profile.email)} ↗</span></a>
+      </div>
+    </aside>
     <div class="gintmr_ui-profile-links"><a href="${profile.cvUrl}">Curriculum Vitae</a>${external(profile.scholarUrl, 'Google Scholar')}${external(profile.alphaXivUrl, 'alphaXiv')}${external(profile.githubUrl, 'GitHub')}<a href="mailto:${escape(profile.email)}">Email ${arrow}</a></div>
   </section>
   <section class="gintmr_ui-section" id="education" aria-labelledby="education-heading">
@@ -198,7 +205,8 @@ function layout(page, content) {
   </script>
   <link rel="stylesheet" href="/assets/fonts/noto-serif-sc/index.css" />
   <link rel="stylesheet" href="/assets/fonts/noto-sans-sc/index.css" />
-  <link rel="stylesheet" href="${libraryStyleUrl}" />
+  <link rel="stylesheet" href="${libraryStyleUrl}" />${page.id === 'home' ? `
+  <link rel="stylesheet" href="${opportunityStyleUrl}" />` : ''}
   <!-- visitors.js 必须排在库脚本之前：库的 boot() 会在 DOMContentLoaded 之前就初始化访客卡，
        那时取数函数还没定义，卡片会停在「尚未接入」。两者都是 defer，按文档顺序执行。
        只读的那个历史页不挂它，那里走自己的只读脚本。 -->
