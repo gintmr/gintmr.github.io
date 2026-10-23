@@ -101,16 +101,9 @@ function home() {
       ${linkedHeading('h1', 'name-heading', `${escape(profile.name)} <span lang="zh-CN">${escape(profile.chineseName)}</span>`)}
       <p>${introduction}</p>
       <p>${escape(profile.intro[1])}</p>
+      <p class="gintmr_ui-opportunity-line">${escape(profile.opportunities)} <a href="mailto:${escape(profile.email)}">${escape(profile.email)}</a>.</p>
     </div>
     <img class="gintmr_ui-portrait" src="${profile.portrait}" width="1286" height="1223" alt="Xinrui Wu" fetchpriority="high" />
-    <aside class="gintmr_ui-opportunity" aria-labelledby="opportunity-title">
-      <span class="gintmr_ui-opportunity-icon" aria-hidden="true">📣</span>
-      <div class="gintmr_ui-opportunity-copy">
-        <p class="gintmr_ui-opportunity-eyebrow">Actively seeking · Fall 2027</p>
-        <h2 id="opportunity-title">${escape(profile.opportunities)}</h2>
-        <a class="gintmr_ui-opportunity-contact" href="mailto:${escape(profile.email)}">Get in touch <span>${escape(profile.email)} ↗</span></a>
-      </div>
-    </aside>
     <div class="gintmr_ui-profile-links"><a href="${profile.cvUrl}">Curriculum Vitae</a>${external(profile.scholarUrl, 'Google Scholar')}${external(profile.alphaXivUrl, 'alphaXiv')}${external(profile.githubUrl, 'GitHub')}<a href="mailto:${escape(profile.email)}">Email ${arrow}</a></div>
   </section>
   <section class="gintmr_ui-section" id="education" aria-labelledby="education-heading">
