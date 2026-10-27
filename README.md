@@ -12,7 +12,7 @@ Open `http://127.0.0.1:4173/`. The generated HTML files can be served directly b
 
 ## LaTeX CV template
 
-The [`cv-template/`](cv-template/) folder contains a privacy-clean, single-file LaTeX CV template with prompts for each section and instructions for editing and compiling it.
+This repository includes a reusable [LaTeX CV template](cv-template/main.tex) and a [PDF preview](cv-template/cv-template-preview.pdf).
 
 ## Update content
 

@@ -2,6 +2,8 @@
 
 A privacy-clean, single-file LaTeX CV template based on the layout of the academic CV on this site. It contains no personal information, institution names, advisor names, paper titles, logos, or external assets.
 
+[View the PDF preview](cv-template-preview.pdf).
+
 ## Use
 
 1. Download `main.tex` or clone this repository.
