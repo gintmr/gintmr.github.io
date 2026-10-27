@@ -10,6 +10,10 @@ python3 -m http.server 4173 --bind 127.0.0.1
 
 Open `http://127.0.0.1:4173/`. The generated HTML files can be served directly by GitHub Pages. No package installation or browser-side framework is required.
 
+## LaTeX CV template
+
+The [`cv-template/`](cv-template/) folder contains a privacy-clean, single-file LaTeX CV template with prompts for each section and instructions for editing and compiling it.
+
 ## Update content
 
 - `user-data/data.js`: profile, publications, education, research interests, experience, and awards.

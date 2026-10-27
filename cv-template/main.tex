@@ -1,0 +1,122 @@
+\documentclass[10pt,a4paper]{article}
+
+% -----------------------------------------------------------------------------
+% EDIT THIS FILE: Replace every bracketed prompt with your own information.
+% Delete optional rows and bullets you do not need. Compile with pdfLaTeX.
+% -----------------------------------------------------------------------------
+
+% Personal details (also used in the PDF metadata and footer).
+\newcommand{\CVName}{Your Name} % e.g. Jane Doe
+\newcommand{\CVEmail}{your.email@example.com}
+\newcommand{\CVScholarURL}{https://example.com/your-scholar-profile}
+\newcommand{\CVWebsiteURL}{https://example.com/your-website}
+\newcommand{\CVGitHubURL}{https://github.com/your-username}
+
+\usepackage[margin=1.55cm,top=1.35cm,bottom=1.35cm,footskip=.7cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{fontawesome5}
+\usepackage{titlesec}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\definecolor{accent}{RGB}{112,75,139}
+\definecolor{linkblue}{RGB}{0,79,144}
+
+\hypersetup{
+  pdftitle={\CVName's CV},
+  pdfauthor={\CVName},
+  colorlinks=true,
+  urlcolor=linkblue,
+  linkcolor=accent
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyfoot[C]{\color{gray}\small\textit{\CVName{} - Page \thepage{} of \pageref*{LastPage}}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{0pt}
+\setlist[itemize]{leftmargin=1.1em,label=\textbullet,itemsep=1pt,topsep=2pt,parsep=0pt}
+\titleformat{\section}{\large\bfseries\color{accent}}{}{0pt}{}[\vspace{1pt}\titlerule]
+\titlespacing*{\section}{0pt}{7pt}{4pt}
+
+% Reusable row: left side is the entry; right side is the date/location.
+\newcommand{\CVRow}[2]{%
+  \begin{tabularx}{\linewidth}{@{}X>{\raggedleft\arraybackslash}p{.31\linewidth}@{}}#1&#2\end{tabularx}%
+}
+\newcommand{\CVLink}[2]{\href{#1}{#2\,\raisebox{.15ex}{\scriptsize\faExternalLink*}}}
+\newcommand{\CVBullet}[1]{%
+  \par\hangindent=1.25em\hangafter=1\noindent
+  \hspace*{.25em}\textbullet\hspace{.45em}#1\par%
+}
+
+\begin{document}
+
+% Header: edit the commands at the top of this file. Remove links you do not use.
+\begin{center}
+  {\LARGE\bfseries \CVName}\\[4pt]
+  \small
+  \href{mailto:\CVEmail}{\textcolor{accent}{\faEnvelope\hspace{.35em}\CVEmail}}
+  \quad
+  \CVLink{\CVScholarURL}{Google Scholar}
+  \quad
+  \CVLink{\CVWebsiteURL}{Website}
+  \quad
+  \CVLink{\CVGitHubURL}{GitHub}
+\end{center}
+\vspace{-5pt}
+
+\section{Education}
+% Add one CVRow for each degree. Replace dates, location, degree and optional GPA.
+\CVRow{\textbf{[University Name]}}{\textbf{[Start Year -- End Year]}}\\[-1pt]
+\CVRow{\textit{[Degree] in [Field of Study]}}{\textit{[City, Country]}}\\[-1pt]
+\CVRow{[GPA / grade, if applicable]}{[Expected graduation: Month Year]}
+
+\section{Publications}
+% Duplicate this block for each paper. Delete author names and status prompts you do not need.
+\textbf{[Paper Title]}\;\CVLink{https://doi.org/[DOI]}{paper}\\[-1pt]
+\textit{[Author One], \textbf{[Your Name]}, [Other Authors]}\hfill [Year]\\[-1pt]
+\textit{[Venue, status, or publication details]}
+\vspace{3pt}
+
+\textbf{[Another Paper Title]}\\[-1pt]
+\textit{[Authors; mark equal contributions if relevant]}\hfill [Year]\\[-1pt]
+\textit{[Venue, status, or publication details]}
+
+\section{Research Experience}
+% Repeat this block for each role. Keep bullets concise and outcome-focused.
+\CVRow{\textbf{[Organization / University]}}{\textbf{[Start Date -- End Date]}}\\[-1pt]
+\CVRow{\textit{[Role or Position]}}{\textit{[City, Country]}}\\[-1pt]
+\textit{Advisor: [Advisor Name]}
+\CVBullet{[Describe your research focus, methods, or contribution.]}
+\CVBullet{[State a measurable result, outcome, or publication when relevant.]}
+\vspace{-2pt}
+
+\CVRow{\textbf{[Another Organization]}}{\textbf{[Start Date -- End Date]}}\\[-1pt]
+\CVRow{\textit{[Role or Position]}}{\textit{[City, Country]}}\\[-1pt]
+\textit{Advisor: [Advisor Name]}
+\CVBullet{[Describe a project or research contribution.]}
+\CVBullet{[Add an outcome, metric, or result.]}
+
+\section{Honors \& Awards}
+% Add or remove rows as needed. Use a short award name and date.
+\CVRow{\textbf{[Award or Scholarship]} -- [Selection / distinction]}{[Year]}
+\CVRow{\textbf{[Competition or Prize]} -- [Award level]}{[Month Year]}
+
+\section{Research Interests}
+% Replace these topics with your own; remove any line you do not need.
+\textbf{[Research Area One]:} [A few specific topics or methods]\\
+\textbf{[Research Area Two]:} [A few specific topics or methods]\\
+\textbf{[Research Area Three]:} [A few specific topics or methods]
+
+\end{document}
