@@ -48,6 +48,11 @@ const icon = (name) => {
     close: '<path d="m6 6 12 12M6 18 18 6"/>',
     outline: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
     chevron: '<path d="m6 9 6 6 6-6"/>',
+    cv: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    scholar: '<path d="m2 9 10-5 10 5-10 5Z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6"/>',
+    paper: '<path d="M2 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H2Z"/><path d="M22 5h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7Z"/>',
+    github: '<path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
   };
   return `<svg class="gintmr_ui-icon gintmr_ui-icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 };
@@ -55,8 +60,27 @@ const pages = [{ id: 'home', label: 'Home', path: '/' }, { id: 'publication', la
 // This page is deliberately absent from the public navigation and page outlines.
 const historyPage = { id: 'visit-history', label: 'Visit history', path: '/visit-history/' };
 const linkedHeading = (tag, id, title, className = '') => `<${tag} class="${className}" id="${id}" tabindex="-1"><a class="gintmr_ui-heading-anchor" href="#${id}">${title}</a></${tag}>`;
-const heading = (id, title) => linkedHeading('h2', `${id}-heading`, title, 'gintmr_ui-section-title');
-const logo = (url, name) => `<div class="gintmr_ui-institution-logo"><img src="${url}" alt="${escape(name)} logo" width="80" height="64" loading="lazy" /></div>`;
+// Only the accent word is tinted, so the color change never lands mid-word. By default it is
+// the lead phrase before a colon, comma, or question mark (up to five words), else the first word.
+const accented = (text, accent) => {
+  if (!accent) {
+    const lead = text.match(/^(.+?)([:,?])\s/);
+    accent = lead && lead[1].split(' ').length <= 5 ? `${lead[1]}${lead[2] === '?' ? '?' : ''}` : text.split(' ')[0];
+  }
+  const start = text.indexOf(accent);
+  return `${escape(text.slice(0, start))}<span class="gintmr_ui-heading-accent">${escape(accent)}</span>${escape(text.slice(start + accent.length))}`;
+};
+const heading = (id, title) => linkedHeading('h2', `${id}-heading`, accented(title), 'gintmr_ui-section-title');
+const logo = (url, name) => `<div class="gintmr_ui-institution-logo"><img src="${url}" alt="${escape(name)} logo" width="48" height="48" loading="lazy" /></div>`;
+// The timeline reads top to bottom, so experience is ordered by start date (newest first).
+const startOf = item => Date.parse(`1 ${item.period.split(' – ')[0]}`);
+const timeline = [...experience].sort((a, b) => startOf(b) - startOf(a));
+// Award level and rank come from the title; each level gets its own badge color.
+const awardLevel = title => /Scholarship/.test(title) ? 'scholarship' : /Provincial/.test(title) ? 'provincial' : 'national';
+const awardLabel = { national: 'National', provincial: 'Provincial', scholarship: 'Scholarship' };
+const awardTitle = title => escape(title).replace(/(First|Second|Third) Prize/, (prize, rank) => `<span class="gintmr_ui-award-rank" data-rank="${rank.toLowerCase()}">${prize}</span>`);
+const awardYears = [...new Set(awards.map(item => item.year))].sort((a, b) => b - a);
+const updated = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 function pageOutline(page) {
   const entries = {
@@ -65,7 +89,7 @@ function pageOutline(page) {
       { id: 'education', label: 'Education' },
       { id: 'research', label: 'Research Interests' },
       { id: 'experience', label: 'Research Experience' },
-      ...experience.map(item => ({ id: item.id, label: item.shortName, depth: 1 })),
+      ...timeline.map(item => ({ id: item.id, label: item.shortName, depth: 1 })),
       { id: 'awards', label: 'Honors & Awards' },
       { id: 'visitors', label: 'Visitors' },
     ],
@@ -98,17 +122,17 @@ function home() {
     .replace(airAdvisor.name, external(airAdvisor.url, escape(airAdvisor.name)));
   return `<section class="gintmr_ui-profile" id="about" aria-labelledby="name-heading">
     <div class="gintmr_ui-profile-copy">
-      ${linkedHeading('h1', 'name-heading', `${escape(profile.name)} <span lang="zh-CN">${escape(profile.chineseName)}</span>`)}
+      ${linkedHeading('h1', 'name-heading', `${accented(profile.name)} <span lang="zh-CN">${escape(profile.chineseName)}</span>`)}
       <p>${introduction}</p>
       <p>${escape(profile.intro[1])}</p>
-      <p class="gintmr_ui-opportunity-line">${escape(profile.opportunities)} <a href="mailto:${escape(profile.email)}">${escape(profile.email)}</a>.</p>
+      <p class="gintmr_ui-opportunity-line"><span class="gintmr_ui-opportunity-pulse" aria-hidden="true"></span><span>${escape(profile.opportunities)} <a href="mailto:${escape(profile.email)}">${escape(profile.email)}</a></span></p>
     </div>
     <img class="gintmr_ui-portrait" src="${profile.portrait}" width="1286" height="1223" alt="Xinrui Wu" fetchpriority="high" />
-    <div class="gintmr_ui-profile-links"><a href="${profile.cvUrl}">Curriculum Vitae</a>${external(profile.scholarUrl, 'Google Scholar')}${external(profile.alphaXivUrl, 'alphaXiv')}${external(profile.githubUrl, 'GitHub')}<a href="mailto:${escape(profile.email)}">Email ${arrow}</a></div>
+    <div class="gintmr_ui-profile-links"><a href="${profile.cvUrl}">${icon('cv')}Curriculum Vitae</a>${[[profile.scholarUrl, 'Google Scholar', 'scholar'], [profile.alphaXivUrl, 'alphaXiv', 'paper'], [profile.githubUrl, 'GitHub', 'github']].map(([url, label, name]) => `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${icon(name)}${label}</a>`).join('')}<a href="mailto:${escape(profile.email)}">${icon('mail')}Email</a></div>
   </section>
   <section class="gintmr_ui-section" id="education" aria-labelledby="education-heading">
     ${heading('education', 'Education')}
-    ${education.map((item, index) => `<article class="gintmr_ui-entry gintmr_ui-education-entry">${logo(item.logo, 'UESTC')}<div>${linkedHeading('h3', `education-${index + 1}-heading`, `${escape(item.institution)}${item.designation ? ` <span class="gintmr_ui-institution-badge">${escape(item.designation)}</span>` : ''}`)}<p>${escape(item.degree)}</p><p class="gintmr_ui-meta">${escape(item.period)} <span class="gintmr_ui-separator">·</span> ${escape(item.detail)}</p></div></article>`).join('')}
+    ${education.map((item, index) => `<article class="gintmr_ui-entry gintmr_ui-education-entry">${logo(item.logo, 'UESTC')}<div>${linkedHeading('h3', `education-${index + 1}-heading`, `${accented(item.institution, item.accent)}${item.designation ? ` <span class="gintmr_ui-institution-badge">${escape(item.designation)}</span>` : ''}`)}<p>${escape(item.degree)}</p><p class="gintmr_ui-meta">${escape(item.period)} <span class="gintmr_ui-separator">·</span> ${escape(item.detail)}</p></div></article>`).join('')}
   </section>
   <section class="gintmr_ui-section" id="research" aria-labelledby="research-heading">
     ${heading('research', 'Research Interests')}
@@ -116,37 +140,50 @@ function home() {
   </section>
   <section class="gintmr_ui-section" id="experience" aria-labelledby="experience-heading">
     ${heading('experience', 'Research Experience')}
-    <div class="gintmr_ui-entry-list">${experience.map(item => `<article class="gintmr_ui-entry gintmr_ui-experience-entry" id="${item.id}">
+    <ol class="gintmr_ui-timeline">${timeline.map(item => {
+      const [start, end] = item.period.split(' – ');
+      return `<li class="gintmr_ui-timeline-item" data-gintmr_ui-current="${end === 'Present'}">
+      <p class="gintmr_ui-timeline-date"><time>${escape(start)}</time><span>${end === 'Present' ? 'Present' : escape(end)}</span></p>
+      <span class="gintmr_ui-timeline-dot" aria-hidden="true"></span>
+      <article class="gintmr_ui-entry gintmr_ui-experience-entry" id="${item.id}">
       ${logo(item.logo, item.shortName)}<div class="gintmr_ui-entry-content">
-        <div class="gintmr_ui-entry-heading">${linkedHeading('h3', `${item.id}-heading`, escape(item.organization))}<span class="gintmr_ui-date">${escape(item.period)}</span></div>
+        <div class="gintmr_ui-entry-heading">${linkedHeading('h3', `${item.id}-heading`, accented(item.organization, item.accent))}</div>
         <p class="gintmr_ui-role">${escape(item.role)} <span class="gintmr_ui-separator">·</span> <span class="gintmr_ui-meta">${escape(item.location)}</span></p>
         <p class="gintmr_ui-advisors">${item.advisors.length > 1 ? 'Advisors' : 'Advisor'}: ${item.advisors.map(person => person.url ? external(person.url, escape(person.name)) : escape(person.name)).join(', ')}</p>
         <p class="gintmr_ui-experience-description">${escape(item.description)}</p>
-      </div></article>`).join('')}</div>
+      </div></article></li>`;
+    }).join('')}</ol>
   </section>
   <section class="gintmr_ui-section" id="awards" aria-labelledby="awards-heading">
-    ${heading('awards', 'Honors &amp; Awards')}
-    <ul class="gintmr_ui-awards-list">${awards.map(item => `<li><span class="gintmr_ui-date">${item.year}</span><div><strong>${escape(item.title)}</strong><p class="gintmr_ui-meta">${escape(item.detail)}</p></div></li>`).join('')}</ul>
+    ${heading('awards', 'Honors & Awards')}
+    <div class="gintmr_ui-awards">${awardYears.map(year => `<section class="gintmr_ui-award-year" aria-label="${year}">
+      <p class="gintmr_ui-award-year-label">${year}</p>
+      <ul class="gintmr_ui-awards-list">${awards.filter(item => item.year === year).map(item => {
+        const level = awardLevel(item.title);
+        return `<li data-level="${level}"><div><strong>${awardTitle(item.title)}</strong><p class="gintmr_ui-meta">${escape(item.detail)}</p></div><span class="gintmr_ui-award-badge">${awardLabel[level]}</span></li>`;
+      }).join('')}</ul>
+    </section>`).join('')}</div>
   </section>
   ${visitorMarkup()}`;
 }
 
 function publicationPage() {
   const authors = (paper) => escape(paper.authors).replace('Xinrui Wu', '<strong>Xinrui Wu</strong>').replaceAll('*', '<sup>*</sup>').replaceAll('Ma+', 'Ma<sup>+</sup>');
-  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'publication-heading', 'Publications')}${external(profile.scholarUrl, 'Google Scholar', 'gintmr_ui-heading-link')}</div>
+  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'publication-heading', accented('Publications'))}${external(profile.scholarUrl, 'Google Scholar', 'gintmr_ui-heading-link')}</div>
     <p class="gintmr_ui-publication-note">* Equal contribution.</p>
-    <div class="gintmr_ui-publication-list">${publications.map(paper => `<article class="gintmr_ui-paper gintmr_ui-entry" id="${paper.id}">
-        ${linkedHeading('h3', `${paper.id}-heading`, escape(paper.title))}
+    <div class="gintmr_ui-publication-list">${publications.map(paper => `<article class="gintmr_ui-paper gintmr_ui-entry${paper.teaser ? ' gintmr_ui-paper--teaser' : ''}" id="${paper.id}">
+        ${paper.teaser ? `<div class="gintmr_ui-paper-teaser"><img src="${escape(paper.teaser)}" alt="" width="720" height="450" loading="lazy" /></div>` : ''}<div class="gintmr_ui-paper-body">
+        ${linkedHeading('h3', `${paper.id}-heading`, accented(paper.title, paper.accent))}
         <p class="gintmr_ui-authors">${authors(paper)}</p>
-        <div class="gintmr_ui-paper-meta"><span class="gintmr_ui-venue">${paper.status === 'submitted' ? 'Submitted to ' : ''}${escape(paper.venue)}${/\b20\d{2}\b/.test(paper.venue) ? '' : ` · ${paper.year}`}</span><span class="gintmr_ui-meta">${escape(paper.roleLabel)}</span></div>
+        <div class="gintmr_ui-paper-meta"><span class="gintmr_ui-venue" data-status="${escape(paper.status)}">${paper.status === 'submitted' ? 'Submitted to ' : ''}${escape(paper.venue)}${/\b20\d{2}\b/.test(paper.venue) ? '' : ` · ${paper.year}`}</span><span class="gintmr_ui-meta">${escape(paper.roleLabel)}</span></div>
         ${paper.links.length ? `<div class="gintmr_ui-paper-links">${paper.links.map(link => external(link.url, escape(link.label))).join('')}</div>` : ''}
-      </article>`).join('')}</div>`;
+      </div></article>`).join('')}</div>`;
 }
 
 function projectPage() {
-  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', 'Projects')}</div>
+  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', accented('Projects'))}</div>
     <div class="gintmr_ui-projects">${projects.map(project => `<article class="gintmr_ui-project-panel" id="${project.id}" aria-labelledby="${project.id}-heading">
-      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, escape(project.name))}<p>${escape(project.description)}</p>
+      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, accented(project.name, project.accent))}<p>${escape(project.description)}</p>
         <div class="gintmr_ui-project-links">${external(project.previewUrl, 'Open preview')}${external(project.repositoryUrl, 'GitHub repository')}</div>
       </div>
       <div class="gintmr_ui-project-preview"><div class="gintmr_ui-preview-bar"><span>${project.previewLabel}</span>${external(project.previewUrl, 'Open in new tab')}</div>
@@ -156,7 +193,7 @@ function projectPage() {
 }
 
 function cvPage() {
-  return `<div class="gintmr_ui-page-heading gintmr_ui-cv-heading">${linkedHeading('h1', 'cv-heading', 'Curriculum Vitae')}
+  return `<div class="gintmr_ui-page-heading gintmr_ui-cv-heading">${linkedHeading('h1', 'cv-heading', accented('Curriculum Vitae'))}
     <div class="gintmr_ui-cv-actions">${external(cvPdfUrl, 'Open PDF')}<a href="${escape(cvPdfUrl)}" download="Xinrui-Wu-CV.pdf">Download PDF <span aria-hidden="true">↓</span></a></div>
   </div>
   <object class="gintmr_ui-cv-document" data="${escape(cvPdfUrl)}#view=FitH&amp;navpanes=0" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
@@ -174,7 +211,7 @@ function layout(page, content) {
   }[page.id];
   return `<!doctype html>
 <!-- Generated by build.mjs. Edit user-data/ or the build templates, then run node build.mjs. -->
-<html lang="en" data-gintmr_ui-effects="on">
+<html lang="en" data-gintmr_ui-effects="on" data-gintmr_ui-outline="reserve">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -225,7 +262,13 @@ function layout(page, content) {
   </header>
   ${pageOutline(page)}
   <main class="gintmr_ui-shell" id="main-content">${content}</main>
-  <footer class="gintmr_ui-footer gintmr_ui-shell"><span>© 2026 Xinrui Wu</span><a href="mailto:${profile.email}">${profile.email}</a></footer>
+  <footer class="gintmr_ui-footer gintmr_ui-shell">
+    <p class="gintmr_ui-footer-sign" aria-hidden="true">Xinrui Wu</p>
+    <div class="gintmr_ui-footer-row">
+      <p>© 2026 Xinrui Wu <span class="gintmr_ui-separator">·</span> Last updated ${updated}</p>
+      <nav class="gintmr_ui-footer-links" aria-label="Elsewhere">${[[profile.scholarUrl, 'Google Scholar', 'scholar'], [profile.githubUrl, 'GitHub', 'github'], [`mailto:${profile.email}`, 'Email', 'mail']].map(([url, label, name]) => `<a href="${escape(url)}" aria-label="${label}" title="${label}"${url.startsWith('mailto:') ? '' : ' target="_blank" rel="noopener noreferrer"'}>${icon(name)}</a>`).join('')}</nav>
+    </div>
+  </footer>
 </body>
 </html>
 `;

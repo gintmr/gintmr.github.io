@@ -55,6 +55,7 @@ export const publications = [
   {
     id: "budgetthinker",
     shortName: "BudgetThinker",
+    teaser: "/assets/research/budgetthinker-teaser.webp",
     title: "BudgetThinker: Empowering Budget-aware LLM Reasoning with Control Tokens",
     authors: "Hao Wen*, Xinrui Wu*, Yi Sun, Feifei Zhang, Liye Chen, Jie Wang, Yifan Su, Yunxin Liu, Ya-Qin Zhang, Yuanchun Li",
     venue: "EMNLP 2026",
@@ -69,6 +70,7 @@ export const publications = [
   {
     id: "maskguide",
     shortName: "MaskGuide",
+    teaser: "/assets/research/maskguide-teaser.webp",
     title: "MaskGuide: Efficient Distillation for Deployable Lightweight Segmentation in Marine Environments",
     authors: "Xinrui Wu*, Ziqiang Zheng*, Yiwei Chen, Zeyu Ma+, Yang Yang, Sai-Kit Yeung",
     venue: "IEEE RA-L 2026",
@@ -90,6 +92,7 @@ export const publications = [
   {
     id: "imagetime",
     shortName: "ImageTime",
+    teaser: "/assets/research/imagetime-teaser.webp",
     title: "Can Image Models Imagine Time? ImageTime: A Novel Benchmark for Probing Visual World Modeling Through Spatiotemporal Consistency",
     authors: "Xinrui Wu*, Lichen Huang*",
     venue: "WACV 2027",
@@ -124,6 +127,7 @@ export const publications = [
   {
     id: "bidemem",
     shortName: "BiDeMem",
+    teaser: "/assets/research/bidemem-teaser.webp",
     title: "BiDeMem: Bidirectional Degradation Memory for Explainable Image Restoration",
     authors: "Xinrui Wu*, Lichen Huang*",
     venue: "Preprint, 2026",
@@ -140,8 +144,9 @@ export const experience = [
   {
     id: "mbzuai",
     organization: "Mohamed bin Zayed University of Artificial Intelligence",
+    accent: "Mohamed bin Zayed",
     shortName: "MBZUAI",
-    logo: "/assets/institutions/mbzuai.jpg",
+    logo: "/assets/institutions/tiles/mbzuai.png",
     role: "Visiting Student",
     period: "Jan 2026 – Present",
     location: "Abu Dhabi, UAE",
@@ -155,7 +160,7 @@ export const experience = [
     id: "tsinghua-air",
     organization: "Tsinghua University, Institute for AI Industry Research",
     shortName: "Tsinghua AIR",
-    logo: "/assets/institutions/tsinghua-air.png",
+    logo: "/assets/institutions/tiles/tsinghua-air.png",
     role: "Research Intern",
     period: "Jan 2025 – Present",
     location: "Beijing, China",
@@ -169,8 +174,9 @@ export const experience = [
   {
     id: "hkust",
     organization: "Hong Kong University of Science and Technology, VGD Group",
+    accent: "Hong Kong",
     shortName: "HKUST",
-    logo: "/assets/institutions/hkust.png",
+    logo: "/assets/institutions/tiles/hkust.png",
     role: "Research Intern",
     period: "Jul 2025 – Aug 2025",
     location: "Hong Kong",
@@ -184,7 +190,7 @@ export const experience = [
     id: "uestc-cfm",
     organization: "UESTC, Center for Future Media",
     shortName: "UESTC CFM",
-    logo: "/assets/institutions/uestc.png",
+    logo: "/assets/institutions/tiles/uestc.png",
     role: "Research Intern",
     period: "Jun 2024 – Present",
     location: "Sichuan, China",
@@ -197,7 +203,8 @@ export const experience = [
 export const education = [
   {
     institution: "University of Electronic Science and Technology of China (UESTC)",
-    logo: "/assets/institutions/uestc.png",
+    accent: "UESTC",
+    logo: "/assets/institutions/tiles/uestc.png",
     degree: "B.S. in Software Engineering (Embedded System)",
     period: "Sep 2023 – Present",
     detail: "Sichuan, China · GPA: 3.65/4.0 · Average score: 85.01/100",
