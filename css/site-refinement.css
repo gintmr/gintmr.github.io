@@ -19,6 +19,11 @@
   --gintmr_ui-max-width: 72rem;
   --gintmr_ui-inline-padding: clamp(1rem, 3.5vw, 2.25rem);
   --gintmr_ui-header-height: 4.6rem;
+  --gintmr_ui-aurora-1: #b992ff;
+  --gintmr_ui-aurora-2: #a9d9dc;
+  --gintmr_ui-aurora-3: #e5aed0;
+  --gintmr_ui-aurora-4: #aaa0ed;
+  --gintmr_ui-aurora-alpha: .11;
 }
 
 html[data-gintmr_ui-theme='dark'] {
@@ -30,6 +35,7 @@ html[data-gintmr_ui-theme='dark'] {
   --gintmr_ui-palette-link: #d7a2ff;
   --gintmr_ui-palette-line: #8b74ad;
   --gintmr_ui-palette-watermark: #f1d5ff;
+  --gintmr_ui-aurora-alpha: .2;
 }
 
 body {
@@ -45,6 +51,32 @@ html[data-gintmr_ui-effects='on'] body::before {
     radial-gradient(30% 42% at 88% 24%, color-mix(in srgb, #f2a9d4 9%, transparent), transparent 78%),
     radial-gradient(34% 45% at 76% 78%, color-mix(in srgb, #9ccee8 8%, transparent), transparent 78%);
   animation-duration: 18s;
+}
+
+/* The pointer glow follows the cursor behind the content, never over it. */
+.gintmr_ui-cursor-glow {
+  width: 280px;
+  height: 280px;
+  margin: -140px 0 0 -140px;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--gintmr_ui-palette-accent) 20%, transparent),
+    color-mix(in srgb, #a9d9dc 7%, transparent) 35%,
+    transparent 68%);
+  opacity: .65 !important;
+}
+
+/* Let the hand-written watermark drift a little across the page as you scroll. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    body::after {
+      animation: site-watermark-scroll-drift 1s linear both;
+      animation-timeline: scroll(root block);
+    }
+    @keyframes site-watermark-scroll-drift {
+      from { transform: translate(-50%, -50%) rotate(-9deg); }
+      to { transform: translate(-50%, calc(-50% - 1.25rem)) rotate(-10deg); }
+    }
+  }
 }
 
 html { scroll-padding-top: calc(var(--gintmr_ui-header-height) + 1rem); }
