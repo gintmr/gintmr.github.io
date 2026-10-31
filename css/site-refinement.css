@@ -38,6 +38,15 @@ body {
   background-image: none;
 }
 
+/* A little color drift at the page edges adds movement without tinting the content. */
+html[data-gintmr_ui-effects='on'] body::before {
+  background:
+    radial-gradient(38% 48% at 13% 26%, color-mix(in srgb, var(--gintmr_ui-palette-accent) 22%, transparent), transparent 76%),
+    radial-gradient(30% 42% at 88% 24%, color-mix(in srgb, #f2a9d4 9%, transparent), transparent 78%),
+    radial-gradient(34% 45% at 76% 78%, color-mix(in srgb, #9ccee8 8%, transparent), transparent 78%);
+  animation-duration: 18s;
+}
+
 html { scroll-padding-top: calc(var(--gintmr_ui-header-height) + 1rem); }
 h1 { line-height: 1.25; letter-spacing: -.025em; text-wrap: balance; }
 h2 { line-height: 1.35; letter-spacing: -.015em; text-wrap: balance; }
@@ -97,6 +106,8 @@ main.gintmr_ui-shell {
   transition: color 160ms ease;
 }
 .gintmr_ui-heading-anchor:is(:hover, :focus-visible) { color: var(--gintmr_ui-link); }
+.gintmr_ui-heading-anchor { transition: color 180ms ease, letter-spacing 180ms ease; }
+.gintmr_ui-heading-anchor:is(:hover, :focus-visible) { letter-spacing: -.005em; }
 
 .gintmr_ui-education-entry,
 .gintmr_ui-experience-entry,
@@ -114,12 +125,15 @@ main.gintmr_ui-shell {
 .gintmr_ui-paper { border-bottom: 1px solid var(--gintmr_ui-line); }
 .gintmr_ui-paper:first-child { border-top: 1px solid var(--gintmr_ui-line); }
 .gintmr_ui-project-panel { border-top: 1px solid var(--gintmr_ui-line); }
+.gintmr_ui-project-panel { transition: border-color 180ms ease; }
+.gintmr_ui-project-panel:hover { border-color: color-mix(in srgb, var(--gintmr_ui-link) 58%, var(--gintmr_ui-line)); }
 .gintmr_ui-awards-list li[data-level='national'] { --award: #795800; }
 .gintmr_ui-awards-list li[data-level='provincial'] { --award: #58636f; }
 html[data-gintmr_ui-theme='dark'] .gintmr_ui-awards-list li[data-level='national'] { --award: #e9c46a; }
 html[data-gintmr_ui-theme='dark'] .gintmr_ui-awards-list li[data-level='provincial'] { --award: #c3cbd6; }
 .gintmr_ui-project-copy { padding: 1.25rem 0; }
 .gintmr_ui-project-preview { margin-inline: 0; border-radius: .35rem; }
+.gintmr_ui-project-preview img { transition: transform 280ms cubic-bezier(.2,.7,.2,1); }
 .gintmr_ui-timeline::before { background: var(--gintmr_ui-line); }
 .gintmr_ui-profile-links a,
 .gintmr_ui-profile-links a:first-child {
@@ -161,13 +175,18 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-opportunity-line {
   --opportunity-strong: #e2c49f;
 }
 .gintmr_ui-opportunity-pulse { width: .42rem; height: .42rem; }
-.gintmr_ui-opportunity-pulse::after { display: none; }
 .gintmr_ui-opportunity-line a { white-space: normal; }
 
 /* Round 4 — keep the original lavender palette while reserving it for meaningful emphasis. */
 .gintmr_ui-footer { border-top: 1px solid var(--gintmr_ui-line); }
 .gintmr_ui-footer-sign { color: var(--gintmr_ui-secondary); text-shadow: none; }
 ::selection { background: color-mix(in srgb, var(--gintmr_ui-link) 24%, transparent); }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gintmr_ui-project-panel:hover .gintmr_ui-project-preview img { transform: scale(1.015); }
+  .gintmr_ui-profile-links a { transition: color 160ms ease, transform 160ms ease; }
+  .gintmr_ui-profile-links a:hover { transform: translateY(-1px); }
+}
 
 /* Keep secondary visitor labels readable while retaining their supporting role. */
 .gintmr_ui-visitor-totals dt,
