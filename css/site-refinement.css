@@ -1,0 +1,203 @@
+/* Site-specific visual refinement. Content and page order stay in the templates. */
+
+/* Round 1 — use the established serif voice with a quieter, clearer role scale. */
+:root {
+  --gintmr_ui-palette-canvas: #faf9f6;
+  --gintmr_ui-palette-canvas-veil: #fffefa;
+  --gintmr_ui-palette-ink: #302c31;
+  --gintmr_ui-palette-ink-soft: #6e6870;
+  --gintmr_ui-palette-accent: #b49bc7;
+  --gintmr_ui-palette-link: #705484;
+  --gintmr_ui-palette-line: #e4dfe5;
+  --gintmr_ui-palette-watermark: #765394;
+  --gintmr_ui-font-size: 16px;
+  --gintmr_ui-line-height: 1.72;
+  --gintmr_ui-h1-size: clamp(2rem, 2.4vw, 2.55rem);
+  --gintmr_ui-h2-size: 1.55rem;
+  --gintmr_ui-h3-size: 1.05rem;
+  --gintmr_ui-meta-size: .86rem;
+  --gintmr_ui-max-width: 72rem;
+  --gintmr_ui-inline-padding: clamp(1rem, 3.5vw, 2.25rem);
+  --gintmr_ui-header-height: 4.6rem;
+}
+
+html[data-gintmr_ui-theme='dark'] {
+  --gintmr_ui-palette-canvas: #1c1b1e;
+  --gintmr_ui-palette-canvas-veil: #242226;
+  --gintmr_ui-palette-ink: #f1edf2;
+  --gintmr_ui-palette-ink-soft: #c2bac5;
+  --gintmr_ui-palette-accent: #c9addb;
+  --gintmr_ui-palette-link: #d2b6e4;
+  --gintmr_ui-palette-line: #514a55;
+  --gintmr_ui-palette-watermark: #cbb2dc;
+}
+
+body {
+  font-size: var(--gintmr_ui-font-size);
+  line-height: var(--gintmr_ui-line-height);
+  background-image: none;
+}
+
+html { scroll-padding-top: calc(var(--gintmr_ui-header-height) + 1rem); }
+h1 { line-height: 1.25; letter-spacing: -.025em; text-wrap: balance; }
+h2 { line-height: 1.35; letter-spacing: -.015em; text-wrap: balance; }
+h3 { line-height: 1.5; text-wrap: pretty; }
+p, li { text-wrap: pretty; }
+
+/* Round 2 — build a calmer editorial rhythm around the existing information. */
+main.gintmr_ui-shell {
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  padding-bottom: 4rem;
+}
+
+.gintmr_ui-profile { column-gap: clamp(1.5rem, 4vw, 3rem); }
+.gintmr_ui-profile-copy { max-width: 64rem; }
+.gintmr_ui-profile p { max-width: 74ch; margin-top: 1rem; }
+.gintmr_ui-profile-links { gap: .45rem 1.2rem; margin-top: 1.6rem; }
+.gintmr_ui-section { margin-top: clamp(3rem, 5vw, 4.25rem); }
+.gintmr_ui-section-title {
+  margin-bottom: 1.4rem;
+  padding-bottom: .55rem;
+  border-bottom: 1px solid var(--gintmr_ui-line);
+}
+.gintmr_ui-entry-list { gap: 0; }
+.gintmr_ui-timeline { gap: 1.35rem; }
+.gintmr_ui-interest-list li { margin-block: .55rem; }
+.gintmr_ui-publication-list { gap: 0; }
+.gintmr_ui-projects { gap: 2.5rem; }
+
+/* Round 3 — remove ambient AI-style effects while keeping useful page structure. */
+body::before,
+body::after,
+.gintmr_ui-ambient,
+.gintmr_ui-click-effects { display: none !important; }
+
+.gintmr_ui-header {
+  background: var(--gintmr_ui-bg);
+  backdrop-filter: none;
+  box-shadow: none;
+}
+.gintmr_ui-header--flat { border-bottom: 1px solid var(--gintmr_ui-line); }
+.gintmr_ui-header--flat::after { display: none; }
+.gintmr_ui-nav-container { padding-top: 0; }
+.gintmr_ui-header-shell { min-height: 4.4rem; padding-inline: 0; }
+.gintmr_ui-nav a { border-radius: .25rem; }
+.gintmr_ui-header--flat .gintmr_ui-nav a[aria-current] {
+  background: transparent;
+  box-shadow: inset 0 -1px 0 var(--gintmr_ui-link);
+}
+.gintmr_ui-outline {
+  background: var(--gintmr_ui-bg);
+  backdrop-filter: none;
+}
+.gintmr_ui-outline-panel { border-radius: .5rem; box-shadow: 0 8px 20px rgb(35 28 39 / 8%); }
+
+.gintmr_ui-heading-anchor,
+.gintmr_ui-heading-anchor:has(> .gintmr_ui-heading-accent) {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: inherit;
+  transition: color 160ms ease;
+}
+.gintmr_ui-heading-anchor:is(:hover, :focus-visible) { color: var(--gintmr_ui-link); }
+
+.gintmr_ui-education-entry,
+.gintmr_ui-experience-entry,
+.gintmr_ui-paper,
+.gintmr_ui-project-panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.gintmr_ui-education-entry,
+.gintmr_ui-paper { padding-inline: 0; }
+.gintmr_ui-experience-entry { padding: .25rem 0; }
+.gintmr_ui-education-entry { border-bottom: 1px solid var(--gintmr_ui-line); }
+.gintmr_ui-paper { border-bottom: 1px solid var(--gintmr_ui-line); }
+.gintmr_ui-paper:first-child { border-top: 1px solid var(--gintmr_ui-line); }
+.gintmr_ui-project-panel { border-top: 1px solid var(--gintmr_ui-line); }
+.gintmr_ui-awards-list li[data-level='national'] { --award: #795800; }
+.gintmr_ui-awards-list li[data-level='provincial'] { --award: #58636f; }
+html[data-gintmr_ui-theme='dark'] .gintmr_ui-awards-list li[data-level='national'] { --award: #e9c46a; }
+html[data-gintmr_ui-theme='dark'] .gintmr_ui-awards-list li[data-level='provincial'] { --award: #c3cbd6; }
+.gintmr_ui-project-copy { padding: 1.25rem 0; }
+.gintmr_ui-project-preview { margin-inline: 0; border-radius: .35rem; }
+.gintmr_ui-timeline::before { background: var(--gintmr_ui-line); }
+.gintmr_ui-timeline-item[data-gintmr_ui-current='true'] .gintmr_ui-timeline-dot::after { display: none; }
+.gintmr_ui-profile-links a,
+.gintmr_ui-profile-links a:first-child {
+  border: 0;
+  border-radius: .2rem;
+  background: transparent;
+  color: var(--gintmr_ui-link);
+  padding: .35rem .1rem;
+}
+.gintmr_ui-profile-links a:first-child { font-weight: 700; }
+.gintmr_ui-profile-links a:hover,
+.gintmr_ui-profile-links a:first-child:hover {
+  background: transparent;
+  color: var(--gintmr_ui-fg);
+  transform: none;
+}
+.gintmr_ui-profile-links a:hover { text-decoration: underline; text-underline-offset: .22em; }
+.gintmr_ui-profile-links a:first-child .gintmr_ui-icon { color: var(--gintmr_ui-link); }
+
+/* Keep the opportunity sentence distinct without a callout box or pulsing effect. */
+.gintmr_ui-opportunity-line {
+  --opportunity: #8a5b2c;
+  --opportunity-strong: #74481e;
+  display: flex;
+  align-items: baseline;
+  width: fit-content;
+  max-width: 100%;
+  gap: .65rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.65;
+}
+html[data-gintmr_ui-theme='dark'] .gintmr_ui-opportunity-line {
+  --opportunity: #d4ae82;
+  --opportunity-strong: #e2c49f;
+}
+.gintmr_ui-opportunity-pulse { width: .42rem; height: .42rem; }
+.gintmr_ui-opportunity-pulse::after { display: none; }
+.gintmr_ui-opportunity-line a { white-space: normal; }
+
+/* Round 4 — lavender remains the identity accent; warm neutrals carry the canvas. */
+.gintmr_ui-footer { border-top: 1px solid var(--gintmr_ui-line); }
+.gintmr_ui-footer-sign { color: var(--gintmr_ui-secondary); text-shadow: none; }
+::selection { background: color-mix(in srgb, var(--gintmr_ui-link) 24%, transparent); }
+
+/* Keep secondary visitor labels readable while retaining their supporting role. */
+.gintmr_ui-visitor-totals dt,
+.gintmr_ui-visitor-today-totals dt,
+.gintmr_ui-visitor-detail-note,
+.gintmr_ui-visitor-tip,
+.gintmr_ui-visitor-status { font-size: .78rem; }
+.gintmr_ui-visitor-zone-label > span { font-size: .78rem; }
+.gintmr_ui-visitor-block { font-size: .75rem; }
+.gintmr_ui-visitor-block b { font-size: .8rem; }
+.gintmr_ui-visitor-block span { font-size: .78rem; }
+
+@media (max-width: 720px) {
+  :root {
+    --gintmr_ui-font-size: 16px;
+    --gintmr_ui-header-height: 4.25rem;
+  }
+  .gintmr_ui-header-shell { min-height: 4rem; padding-block: .35rem; }
+  main.gintmr_ui-shell { padding-top: 2rem; }
+  .gintmr_ui-profile-copy p { max-width: 65ch; }
+  .gintmr_ui-section { margin-top: 2.8rem; }
+  .gintmr_ui-profile-links { gap: .35rem 1rem; }
+  .gintmr_ui-project-copy { padding-block: 1rem; }
+}
+
+@media (forced-colors: active) {
+  .gintmr_ui-header--flat .gintmr_ui-nav a[aria-current] { box-shadow: inset 0 -2px 0 LinkText; }
+}
