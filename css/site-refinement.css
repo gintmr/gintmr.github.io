@@ -53,18 +53,6 @@ html[data-gintmr_ui-effects='on'] body::before {
   animation-duration: 18s;
 }
 
-/* The pointer glow follows the cursor behind the content, never over it. */
-.gintmr_ui-cursor-glow {
-  width: 280px;
-  height: 280px;
-  margin: -140px 0 0 -140px;
-  background: radial-gradient(circle,
-    color-mix(in srgb, var(--gintmr_ui-palette-accent) 20%, transparent),
-    color-mix(in srgb, #a9d9dc 7%, transparent) 35%,
-    transparent 68%);
-  opacity: .65 !important;
-}
-
 /* Let the hand-written watermark drift a little across the page as you scroll. */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
