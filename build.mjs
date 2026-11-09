@@ -94,7 +94,7 @@ function pageOutline(page) {
       { id: 'visitors', label: 'Visitors' },
     ],
     publication: publications.map(item => ({ id: item.id, label: item.shortName })),
-    project: projects.map(item => ({ id: item.id, label: item.name })),
+    project: projects.map(item => ({ id: item.id, label: item.name, icon: item.logo })),
     cv: [{ id: 'cv-heading', label: 'Curriculum Vitae' }],
     'visit-history': [{ id: 'visitor-activity-heading', label: 'Visit history' }],
   }[page.id];
@@ -107,7 +107,7 @@ function pageOutline(page) {
         <p class="gintmr_ui-outline-heading" id="outline-heading">${icon('outline')}On this page</p>
         <div class="gintmr_ui-outline-scroll"><div class="gintmr_ui-outline-items">
           <svg class="gintmr_ui-outline-track" width="24" aria-hidden="true"><path class="gintmr_ui-outline-rail"/><path class="gintmr_ui-outline-segment"/><circle class="gintmr_ui-outline-dot" r="2"/></svg>
-          <ol class="gintmr_ui-outline-list">${entries.map(item => `<li data-depth="${item.depth || 0}"><a href="#${item.id}">${escape(item.label)}</a></li>`).join('')}</ol>
+          <ol class="gintmr_ui-outline-list">${entries.map(item => `<li data-depth="${item.depth || 0}"><a href="#${item.id}">${item.icon ? `<img class="gintmr_ui-outline-icon" src="${escape(item.icon)}" alt="" width="18" height="18" />` : ''}${escape(item.label)}</a></li>`).join('')}</ol>
         </div></div>
       </nav>
     </div>
@@ -183,28 +183,29 @@ function publicationPage() {
 // X posts about a project, as static preview cards. The X mark is filled, so it sits outside icon().
 const xLogo = '<svg class="gintmr_ui-post-x" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
 const postDate = date => new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-function postAttachment({ kind, image, label, title }) {
-  if (kind === 'article') {
-    return `<span class="gintmr_ui-post-article">${icon('paper')}<span>${escape(label)}</span><span aria-hidden="true">→</span></span>`;
-  }
+// Compact row cards stacked in one narrow column: text on the left, an optional thumbnail on the right.
+// An X Article link has no image, so it shows as a chip in the footer instead.
+function postThumb({ kind, image, label }) {
+  if (!image) return '';
   const play = kind === 'video' ? `<span class="gintmr_ui-post-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l10.5-6.5z"/></svg></span><span class="gintmr_ui-post-duration">${escape(label)}</span>` : '';
-  const caption = kind === 'link' ? `<span class="gintmr_ui-post-caption"><span>${escape(label)}</span><strong>${escape(title)}</strong></span>` : '';
-  return `<span class="gintmr_ui-post-media" data-kind="${kind}"><span class="gintmr_ui-post-frame"><img src="${escape(image)}" alt="" loading="lazy" />${play}</span>${caption}</span>`;
+  return `<span class="gintmr_ui-post-thumb"><img src="${escape(image)}" alt="" loading="lazy" />${play}</span>`;
 }
 const projectPosts = posts => `<div class="gintmr_ui-project-posts">
         <p class="gintmr_ui-project-posts-label">${xLogo}Posts on X</p>
-        <div class="gintmr_ui-post-grid">${posts.map(post => `<a class="gintmr_ui-post" href="${escape(post.url)}" target="_blank" rel="noopener noreferrer" lang="${post.lang}">
-          <span class="gintmr_ui-post-head"><img class="gintmr_ui-post-avatar" src="${escape(xAccount.avatar)}" alt="" width="36" height="36" loading="lazy" /><span class="gintmr_ui-post-author"><strong>${escape(xAccount.name)}</strong><span>@${escape(xAccount.handle)}</span></span>${xLogo}</span>
-          <span class="gintmr_ui-post-text">${escape(post.text)}</span>
-          ${postAttachment(post.attachment)}
-          <span class="gintmr_ui-post-foot" lang="en"><time datetime="${post.date}">${postDate(post.date)}</time><span class="gintmr_ui-post-lang">${post.lang.startsWith('zh') ? '中文' : 'English'}</span><span class="gintmr_ui-post-view">View on X <span aria-hidden="true">↗</span></span></span>
+        <div class="gintmr_ui-post-list">${posts.map(post => `<a class="gintmr_ui-post" href="${escape(post.url)}" target="_blank" rel="noopener noreferrer" lang="${post.lang}">
+          <span class="gintmr_ui-post-body">
+            <span class="gintmr_ui-post-head" lang="en"><img class="gintmr_ui-post-avatar" src="${escape(xAccount.avatar)}" alt="" width="22" height="22" loading="lazy" /><strong>${escape(xAccount.name)}</strong><span class="gintmr_ui-post-handle">@${escape(xAccount.handle)}</span><span aria-hidden="true">·</span><time datetime="${post.date}">${postDate(post.date)}</time>${xLogo}</span>
+            <span class="gintmr_ui-post-text">${escape(post.text)}</span>
+            <span class="gintmr_ui-post-foot" lang="en"><span class="gintmr_ui-post-lang">${post.lang.startsWith('zh') ? '中文' : 'English'}</span>${post.attachment.kind === 'article' ? `<span class="gintmr_ui-post-article">${icon('paper')}${escape(post.attachment.label)}</span>` : ''}<span class="gintmr_ui-post-view">View on X <span aria-hidden="true">↗</span></span></span>
+          </span>
+          ${postThumb(post.attachment)}
         </a>`).join('')}</div>
       </div>`;
 
 function projectPage() {
   return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', accented('Projects'))}</div>
     <div class="gintmr_ui-projects">${projects.map(project => `<article class="gintmr_ui-project-panel" id="${project.id}" aria-labelledby="${project.id}-heading">
-      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, accented(project.name, project.accent))}<p>${escape(project.description)}</p>
+      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, `${project.logo ? `<img class="gintmr_ui-project-logo" src="${escape(project.logo)}" alt="" width="32" height="32" />` : ''}${accented(project.name, project.accent)}`)}<p>${escape(project.description)}</p>
         <div class="gintmr_ui-project-links">${external(project.previewUrl, 'Open preview')}${external(project.repositoryUrl, 'GitHub repository')}</div>
         ${project.posts ? projectPosts(project.posts) : ''}
       </div>

@@ -8,6 +8,7 @@ export const xAccount = {
 export const projects = [
   {
     id: "nodlink",
+    logo: "/assets/projects/logos/nodlink.png",
     name: "NodLink",
     description: "Turns AirPods into a hands-free mouse on macOS. Turn your head to move the cursor, tilt to click or drag, and speak commands in English or Chinese, using the AirPods' built-in motion sensors with no camera or extra hardware. The online demo simulates head movement with the mouse.",
     previewUrl: "https://gintmr.github.io/NodLink/",
@@ -34,6 +35,7 @@ export const projects = [
   },
   {
     id: "dji-luma",
+    logo: "/assets/projects/logos/luma.svg",
     name: "Luma for DJI Action",
     description: "An Android companion app that adds scheduled recording to DJI Action cameras. Set the capture interval and clip duration from your phone, then let the camera automatically record everyday moments. The current test build targets DJI Osmo Action 4 on Android 13+ and supports Chinese and English with light and dark themes.",
     previewUrl: "https://gintmr.github.io/DJI-Luma/",
@@ -42,6 +44,7 @@ export const projects = [
   },
   {
     id: "papertone",
+    logo: "/assets/projects/logos/papertone.svg",
     name: "Papertone",
     description: "A listening library that turns alphaXiv paper podcasts into study material. Every paper becomes a card with a waveform player, a sentence-level timeline, bilingual and dictation transcripts, and an offline copy of the library for focused listening practice.",
     previewUrl: "https://gintmr.github.io/Papertone/",
@@ -50,6 +53,7 @@ export const projects = [
   },
   {
     id: "researchos",
+    logo: "/assets/projects/logos/researchos.svg",
     name: "Research OS",
     description: "A local-first workspace that connects research questions, literature, experiments, and evidence. Insights link directly to supporting experiment tables, preserving project context for the next experiment, paper draft, or AI-assisted session.",
     previewUrl: "https://gintmr.github.io/ResearchOS-Public/",
@@ -58,6 +62,7 @@ export const projects = [
   },
   {
     id: "fingraph",
+    logo: "/assets/projects/logos/fingraph.svg",
     name: "FinGraph",
     description: "A macro-financial dashboard that connects source-linked market evidence through a nine-layer framework. Exportable AI Skill Packs carry the evidence, reasoning structure, and citations into any language model for guided analysis.",
     previewUrl: "https://fin-graph-two.vercel.app/",
@@ -66,6 +71,7 @@ export const projects = [
   },
   {
     id: "embedded-studio",
+    logo: "/assets/projects/logos/embedded-studio.png",
     name: "UESTC SISE Embedded Studio",
     description: "The official website and knowledge hub for Embedded Studio at UESTC’s School of Information and Software Engineering. It brings together learning resources, past recruitment challenges, and practical guides across robotics, IoT, edge AI, and computer systems.",
     previewUrl: "https://uestc404.github.io/Embedded-Studio/",
