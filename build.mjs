@@ -94,7 +94,7 @@ function pageOutline(page) {
       { id: 'visitors', label: 'Visitors' },
     ],
     publication: publications.map(item => ({ id: item.id, label: item.shortName })),
-    project: projects.map(item => ({ id: item.id, label: item.name, icon: item.logo, wordmark: item.wordmark })),
+    project: projects.map(item => ({ id: item.id, label: item.name, lockup: item.lockup, wordmark: item.wordmark })),
     cv: [{ id: 'cv-heading', label: 'Curriculum Vitae' }],
     'visit-history': [{ id: 'visitor-activity-heading', label: 'Visit history' }],
   }[page.id];
@@ -107,7 +107,7 @@ function pageOutline(page) {
         <p class="gintmr_ui-outline-heading" id="outline-heading">${icon('outline')}On this page</p>
         <div class="gintmr_ui-outline-scroll"><div class="gintmr_ui-outline-items">
           <svg class="gintmr_ui-outline-track" width="24" aria-hidden="true"><path class="gintmr_ui-outline-rail"/><path class="gintmr_ui-outline-segment"/><circle class="gintmr_ui-outline-dot" r="2"/></svg>
-          <ol class="gintmr_ui-outline-list">${entries.map(item => `<li data-depth="${item.depth || 0}"><a href="#${item.id}">${item.icon ? `<img class="gintmr_ui-outline-icon" src="${escape(item.icon)}" alt="" width="18" height="18" />` : ''}${item.wordmark ? wordmark(item.label, item.wordmark) : escape(item.label)}</a></li>`).join('')}</ol>
+          <ol class="gintmr_ui-outline-list">${entries.map(item => `<li data-depth="${item.depth || 0}"><a href="#${item.id}">${item.lockup ? lockup(item.label, item.lockup, 'gintmr_ui-outline-lockup') : item.wordmark ? wordmark(item.label, item.wordmark) : escape(item.label)}</a></li>`).join('')}</ol>
         </div></div>
       </nav>
     </div>
@@ -192,6 +192,8 @@ function postThumb({ kind, image, label }) {
 }
 // A project whose logo is a text wordmark shows its name in the brand font instead of a logo image.
 const wordmark = (name, family) => `<span class="gintmr_ui-wordmark" style="font-family: '${escape(family)}', var(--gintmr_ui-font-sans)">${escape(name)}</span>`;
+// A brand lockup image, with light and dark variants that follow the site theme; the name stays as hidden text.
+const lockup = (name, { light, dark, width, height }, className) => `<span class="gintmr_ui-lockup ${className}" style="--lockup-ratio: ${width / height}; --lockup-height: ${height}px"><img class="gintmr_ui-lockup-light" src="${escape(light)}" alt="" width="${width}" height="${height}" /><img class="gintmr_ui-lockup-dark" src="${escape(dark)}" alt="" width="${width}" height="${height}" /><span class="gintmr_ui-visually-hidden">${escape(name)}</span></span>`;
 const projectPosts = posts => `<div class="gintmr_ui-project-posts">
         <p class="gintmr_ui-project-posts-label">${xLogo}Posts on X</p>
         <div class="gintmr_ui-post-list">${posts.map(post => `<a class="gintmr_ui-post" href="${escape(post.url)}" target="_blank" rel="noopener noreferrer" lang="${post.lang}">
@@ -207,7 +209,7 @@ const projectPosts = posts => `<div class="gintmr_ui-project-posts">
 function projectPage() {
   return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', accented('Projects'))}</div>
     <div class="gintmr_ui-projects">${projects.map(project => `<article class="gintmr_ui-project-panel" id="${project.id}" aria-labelledby="${project.id}-heading">
-      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, project.wordmark ? `<span class="gintmr_ui-heading-accent">${wordmark(project.name, project.wordmark)}</span>` : `${project.logo ? `<img class="gintmr_ui-project-logo" src="${escape(project.logo)}" alt="" width="32" height="32" />` : ''}${accented(project.name, project.accent)}`)}<p>${escape(project.description)}</p>
+      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, project.lockup ? `<span class="gintmr_ui-heading-accent">${lockup(project.name, project.lockup, 'gintmr_ui-project-lockup')}</span>` : project.wordmark ? `<span class="gintmr_ui-heading-accent">${wordmark(project.name, project.wordmark)}</span>` : accented(project.name, project.accent))}<p>${escape(project.description)}</p>
         <div class="gintmr_ui-project-links">${external(project.previewUrl, 'Open preview')}${external(project.repositoryUrl, 'GitHub repository')}</div>
         ${project.posts ? projectPosts(project.posts) : ''}
       </div>
