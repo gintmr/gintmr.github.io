@@ -1,3 +1,10 @@
+// Author shown on the X post cards.
+export const xAccount = {
+  name: "Xinr",
+  handle: "xinrui_wu34550",
+  avatar: "/assets/projects/nodlink/x-avatar.webp",
+};
+
 export const projects = [
   {
     id: "nodlink",
@@ -6,6 +13,43 @@ export const projects = [
     previewUrl: "https://gintmr.github.io/NodLink/",
     repositoryUrl: "https://github.com/gintmr/NodLink",
     previewLabel: "Interactive demo",
+    // Rendered as static preview cards; text and images are copied from the posts,
+    // so the page loads no X scripts.
+    posts: [
+      {
+        url: "https://x.com/xinrui_wu34550/status/2119524878701436979",
+        date: "2026-11-08",
+        lang: "zh-CN",
+        text: "我把 AirPods 变成了一只鼠标🎧🖱️\n转头指向，歪头点击，说一声「点击」就点击。\n不用摄像头，不用额外设备，Mac 上免费开源。",
+        attachment: { kind: "article", label: "X 长文" },
+      },
+      {
+        url: "https://x.com/xinrui_wu34550/status/2119521783187640655",
+        date: "2026-11-08",
+        lang: "zh-CN",
+        text: "你的 AirPods 其实是一只鼠标🤯\n只是没人告诉你 🎧🖱️\n转头指向，歪头点击，开口发指令。\n刷抖音、回消息、点外卖，什么都不用碰。\n不用摄像头、不用额外硬件、不用手。\n专为手不方便的朋友打造。",
+        attachment: {
+          kind: "link",
+          image: "/assets/projects/nodlink/bilibili-thumb.webp",
+          label: "bilibili.com",
+          title: "你见过入耳式鼠标吗？我把 AirPods 改成了鼠标，现在不动手也能爽玩电脑！",
+        },
+      },
+      {
+        url: "https://x.com/xinrui_wu34550/status/2119189896091103448",
+        date: "2026-11-07",
+        lang: "en",
+        text: "I turned my AirPods into a mouse. Turn your head to point, tilt to click, say \"click\" to click. Free and open source for Mac 🎧🖱️",
+        attachment: { kind: "article", label: "X Article" },
+      },
+      {
+        url: "https://x.com/xinrui_wu34550/status/2119121702731108562",
+        date: "2026-11-07",
+        lang: "en",
+        text: "Your AirPods are secretly a mouse.🤯\nNobody told you. 🎧🖱️\nTurn your head to point.\nTilt to click.\nSpeak to command.\nScrolling TikTok, replying to messages and ordering food without touching anything.\nNo camera/extra hardware/hands.\nBuilt for anyone who can't use their hands.",
+        attachment: { kind: "video", image: "/assets/projects/nodlink/x-video-poster.webp", label: "5:15" },
+      },
+    ],
   },
   {
     id: "dji-luma",

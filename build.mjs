@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { profile, researchAreas, publications, experience, education, awards } from './user-data/data.js';
-import { projects } from './user-data/projects.js';
+import { projects, xAccount } from './user-data/projects.js';
 import { visitorConfig } from './user-data/visitors.js';
 import { visitorMarkup, visitorHistoryMarkup } from './visitor-markup.mjs';
 
@@ -180,11 +180,33 @@ function publicationPage() {
       </div></article>`).join('')}</div>`;
 }
 
+// X posts about a project, as static preview cards. The X mark is filled, so it sits outside icon().
+const xLogo = '<svg class="gintmr_ui-post-x" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+const postDate = date => new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+function postAttachment({ kind, image, label, title }) {
+  if (kind === 'article') {
+    return `<span class="gintmr_ui-post-article">${icon('paper')}<span>${escape(label)}</span><span aria-hidden="true">→</span></span>`;
+  }
+  const play = kind === 'video' ? `<span class="gintmr_ui-post-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l10.5-6.5z"/></svg></span><span class="gintmr_ui-post-duration">${escape(label)}</span>` : '';
+  const caption = kind === 'link' ? `<span class="gintmr_ui-post-caption"><span>${escape(label)}</span><strong>${escape(title)}</strong></span>` : '';
+  return `<span class="gintmr_ui-post-media" data-kind="${kind}"><span class="gintmr_ui-post-frame"><img src="${escape(image)}" alt="" loading="lazy" />${play}</span>${caption}</span>`;
+}
+const projectPosts = posts => `<div class="gintmr_ui-project-posts">
+        <p class="gintmr_ui-project-posts-label">${xLogo}Posts on X</p>
+        <div class="gintmr_ui-post-grid">${posts.map(post => `<a class="gintmr_ui-post" href="${escape(post.url)}" target="_blank" rel="noopener noreferrer" lang="${post.lang}">
+          <span class="gintmr_ui-post-head"><img class="gintmr_ui-post-avatar" src="${escape(xAccount.avatar)}" alt="" width="36" height="36" loading="lazy" /><span class="gintmr_ui-post-author"><strong>${escape(xAccount.name)}</strong><span>@${escape(xAccount.handle)}</span></span>${xLogo}</span>
+          <span class="gintmr_ui-post-text">${escape(post.text)}</span>
+          ${postAttachment(post.attachment)}
+          <span class="gintmr_ui-post-foot" lang="en"><time datetime="${post.date}">${postDate(post.date)}</time><span class="gintmr_ui-post-lang">${post.lang.startsWith('zh') ? '中文' : 'English'}</span><span class="gintmr_ui-post-view">View on X <span aria-hidden="true">↗</span></span></span>
+        </a>`).join('')}</div>
+      </div>`;
+
 function projectPage() {
   return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', accented('Projects'))}</div>
     <div class="gintmr_ui-projects">${projects.map(project => `<article class="gintmr_ui-project-panel" id="${project.id}" aria-labelledby="${project.id}-heading">
       <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, accented(project.name, project.accent))}<p>${escape(project.description)}</p>
         <div class="gintmr_ui-project-links">${external(project.previewUrl, 'Open preview')}${external(project.repositoryUrl, 'GitHub repository')}</div>
+        ${project.posts ? projectPosts(project.posts) : ''}
       </div>
       <div class="gintmr_ui-project-preview"><div class="gintmr_ui-preview-bar"><span>${project.previewLabel}</span>${external(project.previewUrl, 'Open in new tab')}</div>
         <div class="gintmr_ui-preview-viewport"><iframe src="${project.previewUrl}" title="${project.name} — interactive project preview" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-downloads" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
