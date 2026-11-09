@@ -205,7 +205,7 @@ function layout(page, content) {
   const description = {
     home: 'Xinrui Wu (吴欣锐), undergraduate at UESTC, visiting student at MBZUAI, and research intern at Tsinghua AIR. Research interests, education, academic experience, and awards.',
     publication: 'Publications by Xinrui Wu in efficient reasoning, computer vision, clinical AI, and world models.',
-    project: 'Papertone, Research OS, FinGraph, and UESTC SISE Embedded Studio: project websites, interactive previews, and source repositories.',
+    project: 'NodLink, Luma for DJI Action, Papertone, Research OS, FinGraph, and UESTC SISE Embedded Studio: project websites, interactive previews, and source repositories.',
     cv: 'Curriculum vitae of Xinrui Wu. View or download the PDF, including education, research experience, publications, and awards.',
     'visit-history': 'Visit history for the academic homepage.',
   }[page.id];

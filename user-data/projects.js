@@ -1,5 +1,13 @@
 export const projects = [
   {
+    id: "nodlink",
+    name: "NodLink",
+    description: "Turns AirPods into a hands-free mouse on macOS. Turn your head to move the cursor, tilt to click or drag, and speak commands in English or Chinese, using the AirPods' built-in motion sensors with no camera or extra hardware. The online demo simulates head movement with the mouse.",
+    previewUrl: "https://gintmr.github.io/NodLink/",
+    repositoryUrl: "https://github.com/gintmr/NodLink",
+    previewLabel: "Interactive demo",
+  },
+  {
     id: "dji-luma",
     name: "Luma for DJI Action",
     description: "An Android companion app that adds scheduled recording to DJI Action cameras. Set the capture interval and clip duration from your phone, then let the camera automatically record everyday moments. The current test build targets DJI Osmo Action 4 on Android 13+ and supports Chinese and English with light and dark themes.",
