@@ -17,25 +17,6 @@ export const projects = [
     // so the page loads no X scripts.
     posts: [
       {
-        url: "https://x.com/xinrui_wu34550/status/2119524878701436979",
-        date: "2026-11-08",
-        lang: "zh-CN",
-        text: "我把 AirPods 变成了一只鼠标🎧🖱️\n转头指向，歪头点击，说一声「点击」就点击。\n不用摄像头，不用额外设备，Mac 上免费开源。",
-        attachment: { kind: "article", label: "X 长文" },
-      },
-      {
-        url: "https://x.com/xinrui_wu34550/status/2119521783187640655",
-        date: "2026-11-08",
-        lang: "zh-CN",
-        text: "你的 AirPods 其实是一只鼠标🤯\n只是没人告诉你 🎧🖱️\n转头指向，歪头点击，开口发指令。\n刷抖音、回消息、点外卖，什么都不用碰。\n不用摄像头、不用额外硬件、不用手。\n专为手不方便的朋友打造。",
-        attachment: {
-          kind: "link",
-          image: "/assets/projects/nodlink/bilibili-thumb.webp",
-          label: "bilibili.com",
-          title: "你见过入耳式鼠标吗？我把 AirPods 改成了鼠标，现在不动手也能爽玩电脑！",
-        },
-      },
-      {
         url: "https://x.com/xinrui_wu34550/status/2119189896091103448",
         date: "2026-11-07",
         lang: "en",
