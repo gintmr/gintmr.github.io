@@ -1342,6 +1342,9 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-paper-teaser img { filter: brightne
   vertical-align: -.28em;
   border-radius: .3em;
 }
+/* 以文字字标为 logo 的项目：名称用品牌字体、正文色，不套强调色 */
+.gintmr_ui-wordmark { font-weight: 650; letter-spacing: -.03em; }
+.gintmr_ui-heading-accent > .gintmr_ui-wordmark { color: var(--gintmr_ui-fg); }
 html[data-gintmr_ui-theme='dark'] .gintmr_ui-project-logo { box-shadow: 0 0 0 1px color-mix(in srgb, var(--gintmr_ui-palette-line) 45%, transparent); }
 .gintmr_ui-project-copy p { margin-top: .7rem; font-size: .94rem; }
 .gintmr_ui-project-links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: .85rem; font-size: .88rem; font-weight: 550; }

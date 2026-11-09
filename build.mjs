@@ -94,7 +94,7 @@ function pageOutline(page) {
       { id: 'visitors', label: 'Visitors' },
     ],
     publication: publications.map(item => ({ id: item.id, label: item.shortName })),
-    project: projects.map(item => ({ id: item.id, label: item.name, icon: item.logo })),
+    project: projects.map(item => ({ id: item.id, label: item.name, icon: item.logo, wordmark: item.wordmark })),
     cv: [{ id: 'cv-heading', label: 'Curriculum Vitae' }],
     'visit-history': [{ id: 'visitor-activity-heading', label: 'Visit history' }],
   }[page.id];
@@ -107,7 +107,7 @@ function pageOutline(page) {
         <p class="gintmr_ui-outline-heading" id="outline-heading">${icon('outline')}On this page</p>
         <div class="gintmr_ui-outline-scroll"><div class="gintmr_ui-outline-items">
           <svg class="gintmr_ui-outline-track" width="24" aria-hidden="true"><path class="gintmr_ui-outline-rail"/><path class="gintmr_ui-outline-segment"/><circle class="gintmr_ui-outline-dot" r="2"/></svg>
-          <ol class="gintmr_ui-outline-list">${entries.map(item => `<li data-depth="${item.depth || 0}"><a href="#${item.id}">${item.icon ? `<img class="gintmr_ui-outline-icon" src="${escape(item.icon)}" alt="" width="18" height="18" />` : ''}${escape(item.label)}</a></li>`).join('')}</ol>
+          <ol class="gintmr_ui-outline-list">${entries.map(item => `<li data-depth="${item.depth || 0}"><a href="#${item.id}">${item.icon ? `<img class="gintmr_ui-outline-icon" src="${escape(item.icon)}" alt="" width="18" height="18" />` : ''}${item.wordmark ? wordmark(item.label, item.wordmark) : escape(item.label)}</a></li>`).join('')}</ol>
         </div></div>
       </nav>
     </div>
@@ -190,6 +190,8 @@ function postThumb({ kind, image, label }) {
   const play = kind === 'video' ? `<span class="gintmr_ui-post-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l10.5-6.5z"/></svg></span><span class="gintmr_ui-post-duration">${escape(label)}</span>` : '';
   return `<span class="gintmr_ui-post-thumb"><img src="${escape(image)}" alt="" loading="lazy" />${play}</span>`;
 }
+// A project whose logo is a text wordmark shows its name in the brand font instead of a logo image.
+const wordmark = (name, family) => `<span class="gintmr_ui-wordmark" style="font-family: '${escape(family)}', var(--gintmr_ui-font-sans)">${escape(name)}</span>`;
 const projectPosts = posts => `<div class="gintmr_ui-project-posts">
         <p class="gintmr_ui-project-posts-label">${xLogo}Posts on X</p>
         <div class="gintmr_ui-post-list">${posts.map(post => `<a class="gintmr_ui-post" href="${escape(post.url)}" target="_blank" rel="noopener noreferrer" lang="${post.lang}">
@@ -205,7 +207,7 @@ const projectPosts = posts => `<div class="gintmr_ui-project-posts">
 function projectPage() {
   return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', accented('Projects'))}</div>
     <div class="gintmr_ui-projects">${projects.map(project => `<article class="gintmr_ui-project-panel" id="${project.id}" aria-labelledby="${project.id}-heading">
-      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, `${project.logo ? `<img class="gintmr_ui-project-logo" src="${escape(project.logo)}" alt="" width="32" height="32" />` : ''}${accented(project.name, project.accent)}`)}<p>${escape(project.description)}</p>
+      <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, project.wordmark ? `<span class="gintmr_ui-heading-accent">${wordmark(project.name, project.wordmark)}</span>` : `${project.logo ? `<img class="gintmr_ui-project-logo" src="${escape(project.logo)}" alt="" width="32" height="32" />` : ''}${accented(project.name, project.accent)}`)}<p>${escape(project.description)}</p>
         <div class="gintmr_ui-project-links">${external(project.previewUrl, 'Open preview')}${external(project.repositoryUrl, 'GitHub repository')}</div>
         ${project.posts ? projectPosts(project.posts) : ''}
       </div>
@@ -258,7 +260,8 @@ function layout(page, content) {
     ${themePreload.replace(/\n\s*/g, '\n    ').replace(/^\n\s*/, '')}
   </script>
   <link rel="stylesheet" href="/assets/fonts/noto-serif-sc/index.css" />
-  <link rel="stylesheet" href="/assets/fonts/noto-sans-sc/index.css" />
+  <link rel="stylesheet" href="/assets/fonts/noto-sans-sc/index.css" />${page.id === 'project' ? `
+  <link rel="stylesheet" href="/assets/fonts/unbounded/index.css" />` : ''}
   <link rel="stylesheet" href="${libraryStyleUrl}" />${page.id === 'home' ? `
   <link rel="stylesheet" href="${opportunityStyleUrl}" />` : ''}
   <!-- visitors.js 必须排在库脚本之前：库的 boot() 会在 DOMContentLoaded 之前就初始化访客卡，

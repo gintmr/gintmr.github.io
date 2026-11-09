@@ -8,7 +8,8 @@ export const xAccount = {
 export const projects = [
   {
     id: "nodlink",
-    logo: "/assets/projects/logos/nodlink.png",
+    // NodLink's logo is its text wordmark, set in Unbounded.
+    wordmark: "Unbounded Variable",
     name: "NodLink",
     description: "Turns AirPods into a hands-free mouse on macOS. Turn your head to move the cursor, tilt to click or drag, and speak commands in English or Chinese, using the AirPods' built-in motion sensors with no camera or extra hardware. The online demo simulates head movement with the mouse.",
     previewUrl: "https://gintmr.github.io/NodLink/",

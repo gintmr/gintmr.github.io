@@ -1,0 +1,8 @@
+/* unbounded-latin-wght-normal: NodLink's wordmark font, used for its project logo */
+@font-face {
+  font-family: 'Unbounded Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url(./files/unbounded-latin-wght-normal.woff2) format('woff2-variations');
+}
