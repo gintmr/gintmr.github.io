@@ -193,7 +193,7 @@ function postThumb({ kind, image, label }) {
 // A project whose logo is a text wordmark shows its name in the brand font instead of a logo image.
 const wordmark = (name, family) => `<span class="gintmr_ui-wordmark" style="font-family: '${escape(family)}', var(--gintmr_ui-font-sans)">${escape(name)}</span>`;
 // A brand lockup image, with light and dark variants that follow the site theme; the name stays as hidden text.
-const lockup = (name, { light, dark, width, height }, className) => `<span class="gintmr_ui-lockup ${className}" style="--lockup-ratio: ${width / height}; --lockup-height: ${height}px"><img class="gintmr_ui-lockup-light" src="${escape(light)}" alt="" width="${width}" height="${height}" /><img class="gintmr_ui-lockup-dark" src="${escape(dark)}" alt="" width="${width}" height="${height}" /><span class="gintmr_ui-visually-hidden">${escape(name)}</span></span>`;
+const lockup = (name, { light, dark, width, height, scale = 1 }, className) => `<span class="gintmr_ui-lockup ${className}" style="--lockup-height: ${height}px; --lockup-scale: ${scale}"><img class="gintmr_ui-lockup-light" src="${escape(light)}" alt="" width="${width}" height="${height}" /><img class="gintmr_ui-lockup-dark" src="${escape(dark)}" alt="" width="${width}" height="${height}" /><span class="gintmr_ui-visually-hidden">${escape(name)}</span></span>`;
 const projectPosts = posts => `<div class="gintmr_ui-project-posts">
         <p class="gintmr_ui-project-posts-label">${xLogo}Posts on X</p>
         <div class="gintmr_ui-post-list">${posts.map(post => `<a class="gintmr_ui-post" href="${escape(post.url)}" target="_blank" rel="noopener noreferrer" lang="${post.lang}">

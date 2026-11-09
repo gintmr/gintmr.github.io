@@ -1,5 +1,7 @@
 // `lockup` is the brand mark (icon + styled name) captured from each project's own site header,
-// in its light and dark themes, at its native CSS size. `wordmark` is for a logo that is just the name in a font.
+// in its light and dark themes, at its native CSS size. `scale` evens out their optical size: it is the geometric
+// mean of the factors that bring the icon to 20px and the main text line to 12px tall.
+// `wordmark` is for a logo that is just the name in a font.
 
 // Author shown on the X post cards.
 export const xAccount = {
@@ -39,7 +41,7 @@ export const projects = [
   },
   {
     id: "dji-luma",
-    lockup: { light: "/assets/projects/logos/luma-light.webp", dark: "/assets/projects/logos/luma-dark.webp", width: 133, height: 38 },
+    lockup: { light: "/assets/projects/logos/luma-light.webp", dark: "/assets/projects/logos/luma-dark.webp", width: 133, height: 38, scale: 0.536 },
     name: "Luma for DJI Action",
     description: "An Android companion app that adds scheduled recording to DJI Action cameras. Set the capture interval and clip duration from your phone, then let the camera automatically record everyday moments. The current test build targets DJI Osmo Action 4 on Android 13+ and supports Chinese and English with light and dark themes.",
     previewUrl: "https://gintmr.github.io/DJI-Luma/",
@@ -48,7 +50,7 @@ export const projects = [
   },
   {
     id: "papertone",
-    lockup: { light: "/assets/projects/logos/papertone-light.webp", dark: "/assets/projects/logos/papertone-dark.webp", width: 124, height: 27 },
+    lockup: { light: "/assets/projects/logos/papertone-light.webp", dark: "/assets/projects/logos/papertone-dark.webp", width: 124, height: 27, scale: 0.778 },
     name: "Papertone",
     description: "A listening library that turns alphaXiv paper podcasts into study material. Every paper becomes a card with a waveform player, a sentence-level timeline, bilingual and dictation transcripts, and an offline copy of the library for focused listening practice.",
     previewUrl: "https://gintmr.github.io/Papertone/",
@@ -57,7 +59,7 @@ export const projects = [
   },
   {
     id: "researchos",
-    lockup: { light: "/assets/projects/logos/researchos-light.webp", dark: "/assets/projects/logos/researchos-dark.webp", width: 77, height: 24 },
+    lockup: { light: "/assets/projects/logos/researchos-light.webp", dark: "/assets/projects/logos/researchos-dark.webp", width: 77, height: 24, scale: 1.061 },
     name: "Research OS",
     description: "A local-first workspace that connects research questions, literature, experiments, and evidence. Insights link directly to supporting experiment tables, preserving project context for the next experiment, paper draft, or AI-assisted session.",
     previewUrl: "https://gintmr.github.io/ResearchOS-Public/",
@@ -66,7 +68,7 @@ export const projects = [
   },
   {
     id: "fingraph",
-    lockup: { light: "/assets/projects/logos/fingraph-light.webp", dark: "/assets/projects/logos/fingraph-dark.webp", width: 131, height: 34 },
+    lockup: { light: "/assets/projects/logos/fingraph-light.webp", dark: "/assets/projects/logos/fingraph-dark.webp", width: 131, height: 34, scale: 0.638 },
     name: "FinGraph",
     description: "A macro-financial dashboard that connects source-linked market evidence through a nine-layer framework. Exportable AI Skill Packs carry the evidence, reasoning structure, and citations into any language model for guided analysis.",
     previewUrl: "https://fin-graph-two.vercel.app/",
@@ -75,7 +77,7 @@ export const projects = [
   },
   {
     id: "embedded-studio",
-    lockup: { light: "/assets/projects/logos/embedded-studio-light.webp", dark: "/assets/projects/logos/embedded-studio-dark.webp", width: 131, height: 26 },
+    lockup: { light: "/assets/projects/logos/embedded-studio-light.webp", dark: "/assets/projects/logos/embedded-studio-dark.webp", width: 131, height: 26, scale: 0.926 },
     name: "UESTC SISE Embedded Studio",
     description: "The official website and knowledge hub for Embedded Studio at UESTC’s School of Information and Software Engineering. It brings together learning resources, past recruitment challenges, and practical guides across robotics, IoT, edge AI, and computer systems.",
     previewUrl: "https://uestc404.github.io/Embedded-Studio/",

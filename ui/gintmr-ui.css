@@ -785,8 +785,10 @@ html[data-gintmr_ui-js] .gintmr_ui-outline-list { border: 0; }
   transition: color var(--gintmr_ui-duration-fast) ease;
 }
 .gintmr_ui-outline-list [data-depth='1'] a { padding-left: 32px; font-size: .8rem; }
-/* 条目可以是一个品牌标识图（如项目 logo + 字标），统一缩到 24px 高 */
-.gintmr_ui-outline-list .gintmr_ui-outline-lockup img { height: 24px; }
+/* 条目可以是品牌标识图（logo + 字标）或文字字标：按 --lockup-scale 统一光学尺寸，每行等高 */
+.gintmr_ui-outline-list a:has(.gintmr_ui-outline-lockup, .gintmr_ui-wordmark) { display: flex; align-items: center; min-height: 38px; }
+.gintmr_ui-outline-list .gintmr_ui-outline-lockup img { height: calc(var(--lockup-height) * var(--lockup-scale, 1)); }
+.gintmr_ui-outline-list .gintmr_ui-wordmark { font-size: .95rem; line-height: 1; }
 .gintmr_ui-outline-list a:hover { color: var(--gintmr_ui-fg); text-decoration: none; }
 .gintmr_ui-outline-list a[aria-current='location'] { color: var(--gintmr_ui-link); font-weight: 650; }
 .gintmr_ui-outline-list a:focus-visible { outline-offset: -2px; }
@@ -1333,8 +1335,8 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-paper-teaser img { filter: brightne
    标题里按原站页头的原生尺寸显示；名称作为隐藏文字保留给读屏与目录。 */
 .gintmr_ui-lockup { display: inline-flex; align-items: center; vertical-align: middle; }
 .gintmr_ui-lockup img { width: auto; height: var(--lockup-height); }
-/* 作为项目标题时比原站页头放大两成，与其他标题的分量相当 */
-.gintmr_ui-project-lockup img { height: calc(var(--lockup-height) * 1.2); }
+/* --lockup-scale 由站点按光学尺寸给出，使各家图标与主字行大小一致；作为项目标题再放大 1.6 倍 */
+.gintmr_ui-project-lockup img { height: calc(var(--lockup-height) * var(--lockup-scale, 1) * 1.6); }
 .gintmr_ui-lockup-dark,
 html[data-gintmr_ui-theme='dark'] .gintmr_ui-lockup-light { display: none; }
 html[data-gintmr_ui-theme='dark'] .gintmr_ui-lockup-dark { display: block; }
