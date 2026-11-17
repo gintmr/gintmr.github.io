@@ -71,18 +71,16 @@ function initTheme(root = document.documentElement) {
         applyTheme(next, { persist: true, root });
         refreshLabels();
       };
-      // 可选：新配色从按钮位置以圆形扩散揭开（html[data-gintmr_ui-theme-reveal="on"]，样式见 motion.css）
-      if (root.dataset.gintmr_uiThemeReveal !== 'on' || !document.startViewTransition
-        || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // 可选：整页交叉淡入新配色，按钮图标旋转换位（html[data-gintmr_ui-theme-reveal="on"]，样式见 motion.css）
+      if (root.dataset.gintmr_uiThemeReveal !== 'on' || matchMedia('(prefers-reduced-motion: reduce)').matches) {
         swap();
         return;
       }
-      const box = button.getBoundingClientRect();
-      const x = box.left + box.width / 2;
-      const y = box.top + box.height / 2;
-      root.style.setProperty('--gintmr_ui-reveal-x', `${x}px`);
-      root.style.setProperty('--gintmr_ui-reveal-y', `${y}px`);
-      root.style.setProperty('--gintmr_ui-reveal-r', `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`);
+      root.setAttribute('data-gintmr_ui-theme-toggled', '');
+      if (!document.startViewTransition) {
+        swap();
+        return;
+      }
       root.setAttribute('data-gintmr_ui-theme-switching', '');
       const transition = document.startViewTransition(swap);
       transition.finished.finally(() => root.removeAttribute('data-gintmr_ui-theme-switching'));

@@ -1006,10 +1006,10 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 /* ============================================================================
    gintmr-ui · 装饰动效
    只作用于固定的装饰位置，正文与数据从不隐藏、模糊或延迟出现。
-     · 板块标题前的点阵图标：<svg class="gintmr_ui-dot-icon">，每个 circle 带 --i（出场次序）
-     · 板块标题下的细线：进入视口时从左向右画出
-     · 页脚署名：像笔迹一样从左向右写出
-     · 主题切换：从按钮位置扩散一个圆，换成另一套配色（theme.js 驱动）
+     · 板块标题前的点阵图标：<svg class="gintmr_ui-dot-icon">，每个 circle 带 --i（距中心的次序），
+       进入视口时逐点弹出，之后每隔几秒由中心向外荡开一圈涟漪
+     · 页脚署名：循环地从左向右写出、停留、淡出
+     · 主题切换：整页交叉淡入新配色，切换按钮图标旋转换位（theme.js 驱动）
    入场动效需要 html[data-gintmr_ui-motion='on']，并由 motion.js 打上 data-gintmr_ui-seen。
    ========================================================================= */
 
@@ -1026,22 +1026,6 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 }
 .gintmr_ui-dot-icon circle { transform-box: fill-box; transform-origin: center; }
 
-/* ── 标题细线：强调色起笔，向右淡出 ─────────────────────────────────────── */
-html[data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading) { position: relative; }
-html[data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -.35rem;
-  height: 1px;
-  background: linear-gradient(90deg, var(--gintmr_ui-link), color-mix(in srgb, var(--gintmr_ui-link) 35%, transparent) 22%, transparent 48%);
-  transform-origin: left center;
-  pointer-events: none;
-}
-/* 板块标题若自带下边框，强调线正好压在边框上，像沿着边框描了一笔 */
-html[data-gintmr_ui-motion='on'] .gintmr_ui-section-title::after { bottom: -1px; }
-
 /* ── 署名只占文字宽度，书写进度才和字形对得上 ─────────────────────────── */
 html[data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign { width: fit-content; }
 
@@ -1049,28 +1033,15 @@ html[data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign { width: fit-content; }
   /* 只有脚本在场时才先藏起来等待入场，否则一律直接显示 */
   html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading):not([data-gintmr_ui-seen]) .gintmr_ui-dot-icon circle { opacity: 0; transform: scale(0); }
   html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)[data-gintmr_ui-seen] .gintmr_ui-dot-icon circle {
-    animation: gintmr_ui-dot-in 420ms var(--gintmr_ui-ease) both;
-    animation-delay: calc(var(--i, 0) * 32ms);
+    animation:
+      gintmr_ui-dot-in 420ms var(--gintmr_ui-ease) calc(var(--i, 0) * 32ms) both,
+      gintmr_ui-dot-wave 4.8s ease-in-out calc(1.6s + var(--i, 0) * 70ms) infinite;
   }
 
-  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading):not([data-gintmr_ui-seen])::after { transform: scaleX(0); }
-  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)[data-gintmr_ui-seen]::after {
-    animation: gintmr_ui-rule-in 900ms cubic-bezier(.22, .8, .24, 1) 120ms both;
-  }
-
-  /* 遮罩宽度是署名的 3 倍：前半段不透明、过渡带 10%。位置 100% 时整段在左侧外面，0 时完全露出 */
-  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign {
-    -webkit-mask-image: linear-gradient(90deg, #000 50%, transparent 60%);
-    mask-image: linear-gradient(90deg, #000 50%, transparent 60%);
-    -webkit-mask-size: 300% 100%;
-    mask-size: 300% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: 100% 0;
-    mask-position: 100% 0;
-  }
+  /* 署名循环书写：写出 → 停留 → 淡出 → 重写。用 clip-path 而非遮罩，各浏览器都能动画 */
+  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign:not([data-gintmr_ui-seen]) { clip-path: inset(-30% 100% -30% -10%); }
   html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign[data-gintmr_ui-seen] {
-    animation: gintmr_ui-sign-in 1.8s cubic-bezier(.45, .05, .35, 1) 150ms both;
+    animation: gintmr_ui-sign-loop 9s cubic-bezier(.45, .05, .35, 1) 200ms infinite both;
   }
 }
 
@@ -1079,32 +1050,41 @@ html[data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign { width: fit-content; }
   60% { opacity: 1; transform: scale(1.25); }
   to { opacity: 1; transform: scale(1); }
 }
-@keyframes gintmr_ui-rule-in {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+/* 循环里的一圈涟漪：大部分时间静止，只在开头一小段由中心向外依次放大 */
+@keyframes gintmr_ui-dot-wave {
+  0%, 22%, 100% { transform: scale(1); }
+  9% { transform: scale(1.5); }
 }
-@keyframes gintmr_ui-sign-in {
-  from { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
-  to { -webkit-mask-position: 0 0; mask-position: 0 0; }
+@keyframes gintmr_ui-sign-loop {
+  0% { clip-path: inset(-30% 100% -30% -10%); opacity: 1; }
+  30% { clip-path: inset(-30% -10% -30% -10%); opacity: 1; }
+  82% { clip-path: inset(-30% -10% -30% -10%); opacity: 1; }
+  94% { clip-path: inset(-30% -10% -30% -10%); opacity: 0; }
+  100% { clip-path: inset(-30% 100% -30% -10%); opacity: 0; }
 }
 
-/* ── 主题切换：新配色从按钮位置以圆形扩散覆盖旧配色 ───────────────────── */
-/* 切换期间取消顶栏与导航滑块的独立转场名，让它们跟着整页一起被圆形揭开 */
+/* ── 主题切换：整页新旧配色柔和交叉淡入，图标同时旋转换位 ─────────────── */
+/* 图标动画挂在 data-gintmr_ui-theme-toggled 上（首次点击后才有），避免页面加载时也转一下 */
+/* 只动画快照的 opacity，由合成器完成，不会逐帧重绘整页（圆形 clip-path 会，所以卡）。
+   切换期间取消顶栏与导航滑块的独立转场名，让它们跟着整页一起淡入。 */
 html[data-gintmr_ui-theme-switching] .gintmr_ui-header,
 html[data-gintmr_ui-theme-switching] .gintmr_ui-active-nav::after { view-transition-name: none; }
-html[data-gintmr_ui-theme-switching]::view-transition-old(root) { animation: none; }
+html[data-gintmr_ui-theme-switching]::view-transition-old(root),
 html[data-gintmr_ui-theme-switching]::view-transition-new(root) {
-  animation: gintmr_ui-theme-reveal 520ms cubic-bezier(.4, 0, .2, 1);
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(.4, 0, .2, 1);
 }
-@keyframes gintmr_ui-theme-reveal {
-  from { clip-path: circle(0 at var(--gintmr_ui-reveal-x, 50%) var(--gintmr_ui-reveal-y, 0)); }
-  to { clip-path: circle(var(--gintmr_ui-reveal-r, 150vmax) at var(--gintmr_ui-reveal-x, 50%) var(--gintmr_ui-reveal-y, 0)); }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-gintmr_ui-theme-reveal='on'][data-gintmr_ui-theme-toggled] .gintmr_ui-theme-toggle .gintmr_ui-icon { animation: gintmr_ui-toggle-spin 520ms cubic-bezier(.34, 1.4, .64, 1); }
+}
+@keyframes gintmr_ui-toggle-spin {
+  from { opacity: 0; transform: rotate(-90deg) scale(.6); }
+  to { opacity: 1; transform: none; }
 }
 
 @media print {
   .gintmr_ui-dot-icon circle { opacity: 1 !important; transform: none !important; animation: none !important; }
-  :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)::after { display: none; }
-  .gintmr_ui-footer-sign { -webkit-mask: none !important; mask: none !important; animation: none !important; }
+  .gintmr_ui-footer-sign { clip-path: none !important; opacity: 1 !important; animation: none !important; }
 }
 
 
