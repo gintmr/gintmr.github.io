@@ -1030,17 +1030,17 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 html[data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign { width: fit-content; }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* 只有脚本在场时才先藏起来等待入场，否则一律直接显示 */
-  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading):not([data-gintmr_ui-seen]) .gintmr_ui-dot-icon circle { opacity: 0; transform: scale(0); }
-  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)[data-gintmr_ui-seen] .gintmr_ui-dot-icon circle {
+  /* 只有 motion.js 真正运行起来（打上 motion-ready）才先藏起来等待入场，否则一律直接显示 */
+  html[data-gintmr_ui-motion-ready] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading):not([data-gintmr_ui-seen]) .gintmr_ui-dot-icon circle { opacity: 0; transform: scale(0); }
+  html[data-gintmr_ui-motion-ready] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)[data-gintmr_ui-seen] .gintmr_ui-dot-icon circle {
     animation:
       gintmr_ui-dot-in 420ms var(--gintmr_ui-ease) calc(var(--i, 0) * 32ms) both,
       gintmr_ui-dot-wave 4.8s ease-in-out calc(1.6s + var(--i, 0) * 70ms) infinite;
   }
 
   /* 署名循环书写：写出 → 停留 → 淡出 → 重写。用 clip-path 而非遮罩，各浏览器都能动画 */
-  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign:not([data-gintmr_ui-seen]) { clip-path: inset(-30% 100% -30% -10%); }
-  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign[data-gintmr_ui-seen] {
+  html[data-gintmr_ui-motion-ready] .gintmr_ui-footer-sign:not([data-gintmr_ui-seen]) { clip-path: inset(-30% 100% -30% -10%); }
+  html[data-gintmr_ui-motion-ready] .gintmr_ui-footer-sign[data-gintmr_ui-seen] {
     animation: gintmr_ui-sign-loop 9s cubic-bezier(.45, .05, .35, 1) 200ms infinite both;
   }
 }

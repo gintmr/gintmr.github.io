@@ -681,13 +681,16 @@ function initMotion(root = document.documentElement) {
     targets.forEach(reveal);
     return () => {};
   }
+  // 藏起待入场状态的 CSS 只认这个标记：脚本没跑起来时元素保持可见
+  root.setAttribute('data-gintmr_ui-motion-ready', '');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       reveal(entry.target);
       observer.unobserve(entry.target);
     });
-  }, { rootMargin: '0px 0px -8% 0px' });
+  });
+  // 不收缩视口判定区：页脚署名贴着页面底部，收缩后在高屏上滚到底也进不了判定区，就永远不显示
   targets.forEach(el => observer.observe(el));
   return () => observer.disconnect();
 }
