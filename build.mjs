@@ -70,7 +70,21 @@ const accented = (text, accent) => {
   const start = text.indexOf(accent);
   return `${escape(text.slice(0, start))}<span class="gintmr_ui-heading-accent">${escape(accent)}</span>${escape(text.slice(start + accent.length))}`;
 };
-const heading = (id, title) => linkedHeading('h2', `${id}-heading`, accented(title), 'gintmr_ui-section-title');
+// Dot-matrix glyphs (7x7) shown before the fixed section and page titles. Purely decorative:
+// the dots pop in once, centre first, when the title scrolls into view (gintmr-ui motion.css).
+const dotGlyphs = {
+  education: ['.......', '...#...', '.#####.', '#######', '.#####.', '#.###..', '#......'],
+  research: ['..###..', '.#...#.', '#.....#', '#.....#', '.#...#.', '..###..', '..###..'],
+  experience: ['..###..', '...#...', '..#.#..', '.#...#.', '#.....#', '#.###.#', '.#####.'],
+  awards: ['...#...', '..###..', '#######', '.#####.', '..###..', '.##.##.', '.#...#.'],
+  publication: ['#####..', '#...##.', '#.###.#', '#.....#', '#.###.#', '#.....#', '#######'],
+  project: ['##...##', '##...##', '.......', '...#...', '.......', '##...##', '##...##'],
+  cv: ['..###..', '..###..', '..###..', '.......', '.#####.', '#######', '#######'],
+};
+const dotIcon = name => `<svg class="gintmr_ui-dot-icon" viewBox="0 0 7 7" aria-hidden="true" focusable="false">${dotGlyphs[name].flatMap((row, y) => [...row].map((cell, x) => cell === '#' ? `<circle cx="${x + .5}" cy="${y + .5}" r=".4" style="--i: ${Math.round(Math.hypot(x - 3, y - 3) * 2)}"/>` : '')).join('')}</svg>`;
+// Like linkedHeading, with the dot icon placed before the anchor so it is not part of the link text.
+const iconHeading = (tag, id, icon, title, className = '') => linkedHeading(tag, id, title, className).replace(`<a class=`, `${dotIcon(icon)}<a class=`);
+const heading = (id, title) => iconHeading('h2', `${id}-heading`, id, accented(title), 'gintmr_ui-section-title');
 const logo = (url, name) => `<div class="gintmr_ui-institution-logo"><img src="${url}" alt="${escape(name)} logo" width="48" height="48" loading="lazy" /></div>`;
 // The timeline reads top to bottom, so experience is ordered by start date (newest first).
 const startOf = item => Date.parse(`1 ${item.period.split(' – ')[0]}`);
@@ -169,7 +183,7 @@ function home() {
 
 function publicationPage() {
   const authors = (paper) => escape(paper.authors).replace('Xinrui Wu', '<strong>Xinrui Wu</strong>').replaceAll('*', '<sup>*</sup>').replaceAll('Ma+', 'Ma<sup>+</sup>');
-  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'publication-heading', accented('Publications'))}${external(profile.scholarUrl, 'Google Scholar', 'gintmr_ui-heading-link')}</div>
+  return `<div class="gintmr_ui-page-heading">${iconHeading('h1', 'publication-heading', 'publication', accented('Publications'))}${external(profile.scholarUrl, 'Google Scholar', 'gintmr_ui-heading-link')}</div>
     <p class="gintmr_ui-publication-note">* Equal contribution.</p>
     <div class="gintmr_ui-publication-list">${publications.map(paper => `<article class="gintmr_ui-paper gintmr_ui-entry${paper.teaser ? ' gintmr_ui-paper--teaser' : ''}" id="${paper.id}">
         ${paper.teaser ? `<div class="gintmr_ui-paper-teaser"><img src="${escape(paper.teaser)}" alt="" width="720" height="450" loading="lazy" /></div>` : ''}<div class="gintmr_ui-paper-body">
@@ -207,7 +221,7 @@ const projectPosts = posts => `<div class="gintmr_ui-project-posts">
       </div>`;
 
 function projectPage() {
-  return `<div class="gintmr_ui-page-heading">${linkedHeading('h1', 'project-heading', accented('Projects'))}</div>
+  return `<div class="gintmr_ui-page-heading">${iconHeading('h1', 'project-heading', 'project', accented('Projects'))}</div>
     <div class="gintmr_ui-projects">${projects.map(project => `<article class="gintmr_ui-project-panel" id="${project.id}" aria-labelledby="${project.id}-heading">
       <div class="gintmr_ui-project-copy">${linkedHeading('h2', `${project.id}-heading`, project.lockup ? `<span class="gintmr_ui-heading-accent">${lockup(project.name, project.lockup, 'gintmr_ui-project-lockup')}</span>` : project.wordmark ? `<span class="gintmr_ui-heading-accent">${wordmark(project.name, project.wordmark)}</span>` : accented(project.name, project.accent))}<p>${escape(project.description)}</p>
         <div class="gintmr_ui-project-links">${external(project.previewUrl, 'Open preview')}${external(project.repositoryUrl, 'GitHub repository')}</div>
@@ -220,7 +234,7 @@ function projectPage() {
 }
 
 function cvPage() {
-  return `<div class="gintmr_ui-page-heading gintmr_ui-cv-heading">${linkedHeading('h1', 'cv-heading', accented('Curriculum Vitae'))}
+  return `<div class="gintmr_ui-page-heading gintmr_ui-cv-heading">${iconHeading('h1', 'cv-heading', 'cv', accented('Curriculum Vitae'))}
     <div class="gintmr_ui-cv-actions">${external(cvPdfUrl, 'Open PDF')}<a href="${escape(cvPdfUrl)}" download="Xinrui-Wu-CV.pdf">Download PDF <span aria-hidden="true">↓</span></a></div>
   </div>
   <object class="gintmr_ui-cv-document" data="${escape(cvPdfUrl)}#view=FitH&amp;navpanes=0" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
@@ -238,7 +252,7 @@ function layout(page, content) {
   }[page.id];
   return `<!doctype html>
 <!-- Generated by build.mjs. Edit user-data/ or the build templates, then run node build.mjs. -->
-<html lang="en" data-gintmr_ui-effects="on" data-gintmr_ui-outline="reserve" data-gintmr_ui-aurora="on">
+<html lang="en" data-gintmr_ui-effects="on" data-gintmr_ui-outline="reserve" data-gintmr_ui-aurora="on" data-gintmr_ui-motion="on" data-gintmr_ui-theme-reveal="on">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />

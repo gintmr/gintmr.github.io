@@ -1002,6 +1002,112 @@ html[data-gintmr_ui-aurora='on'] .gintmr_ui-aurora { display: block; }
 }
 
 
+/* ── primitives/motion.css ───────────────────────────────── */
+/* ============================================================================
+   gintmr-ui · 装饰动效
+   只作用于固定的装饰位置，正文与数据从不隐藏、模糊或延迟出现。
+     · 板块标题前的点阵图标：<svg class="gintmr_ui-dot-icon">，每个 circle 带 --i（出场次序）
+     · 板块标题下的细线：进入视口时从左向右画出
+     · 页脚署名：像笔迹一样从左向右写出
+     · 主题切换：从按钮位置扩散一个圆，换成另一套配色（theme.js 驱动）
+   入场动效需要 html[data-gintmr_ui-motion='on']，并由 motion.js 打上 data-gintmr_ui-seen。
+   ========================================================================= */
+
+/* ── 点阵图标：静态即完整，动效只是锦上添花 ─────────────────────────────── */
+.gintmr_ui-dot-icon {
+  display: inline-block;
+  width: .95em;
+  height: .95em;
+  margin-right: .4em;
+  vertical-align: -.1em;
+  overflow: visible;
+  fill: var(--gintmr_ui-link);
+  opacity: .82;
+}
+.gintmr_ui-dot-icon circle { transform-box: fill-box; transform-origin: center; }
+
+/* ── 标题细线：强调色起笔，向右淡出 ─────────────────────────────────────── */
+html[data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading) { position: relative; }
+html[data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -.35rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gintmr_ui-link), color-mix(in srgb, var(--gintmr_ui-link) 35%, transparent) 22%, transparent 48%);
+  transform-origin: left center;
+  pointer-events: none;
+}
+/* 板块标题若自带下边框，强调线正好压在边框上，像沿着边框描了一笔 */
+html[data-gintmr_ui-motion='on'] .gintmr_ui-section-title::after { bottom: -1px; }
+
+/* ── 署名只占文字宽度，书写进度才和字形对得上 ─────────────────────────── */
+html[data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign { width: fit-content; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* 只有脚本在场时才先藏起来等待入场，否则一律直接显示 */
+  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading):not([data-gintmr_ui-seen]) .gintmr_ui-dot-icon circle { opacity: 0; transform: scale(0); }
+  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)[data-gintmr_ui-seen] .gintmr_ui-dot-icon circle {
+    animation: gintmr_ui-dot-in 420ms var(--gintmr_ui-ease) both;
+    animation-delay: calc(var(--i, 0) * 32ms);
+  }
+
+  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading):not([data-gintmr_ui-seen])::after { transform: scaleX(0); }
+  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)[data-gintmr_ui-seen]::after {
+    animation: gintmr_ui-rule-in 900ms cubic-bezier(.22, .8, .24, 1) 120ms both;
+  }
+
+  /* 遮罩宽度是署名的 3 倍：前半段不透明、过渡带 10%。位置 100% 时整段在左侧外面，0 时完全露出 */
+  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign {
+    -webkit-mask-image: linear-gradient(90deg, #000 50%, transparent 60%);
+    mask-image: linear-gradient(90deg, #000 50%, transparent 60%);
+    -webkit-mask-size: 300% 100%;
+    mask-size: 300% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  html[data-gintmr_ui-js][data-gintmr_ui-motion='on'] .gintmr_ui-footer-sign[data-gintmr_ui-seen] {
+    animation: gintmr_ui-sign-in 1.8s cubic-bezier(.45, .05, .35, 1) 150ms both;
+  }
+}
+
+@keyframes gintmr_ui-dot-in {
+  from { opacity: 0; transform: scale(0); }
+  60% { opacity: 1; transform: scale(1.25); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes gintmr_ui-rule-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes gintmr_ui-sign-in {
+  from { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  to { -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
+
+/* ── 主题切换：新配色从按钮位置以圆形扩散覆盖旧配色 ───────────────────── */
+/* 切换期间取消顶栏与导航滑块的独立转场名，让它们跟着整页一起被圆形揭开 */
+html[data-gintmr_ui-theme-switching] .gintmr_ui-header,
+html[data-gintmr_ui-theme-switching] .gintmr_ui-active-nav::after { view-transition-name: none; }
+html[data-gintmr_ui-theme-switching]::view-transition-old(root) { animation: none; }
+html[data-gintmr_ui-theme-switching]::view-transition-new(root) {
+  animation: gintmr_ui-theme-reveal 520ms cubic-bezier(.4, 0, .2, 1);
+}
+@keyframes gintmr_ui-theme-reveal {
+  from { clip-path: circle(0 at var(--gintmr_ui-reveal-x, 50%) var(--gintmr_ui-reveal-y, 0)); }
+  to { clip-path: circle(var(--gintmr_ui-reveal-r, 150vmax) at var(--gintmr_ui-reveal-x, 50%) var(--gintmr_ui-reveal-y, 0)); }
+}
+
+@media print {
+  .gintmr_ui-dot-icon circle { opacity: 1 !important; transform: none !important; animation: none !important; }
+  :is(.gintmr_ui-section-title, .gintmr_ui-page-heading)::after { display: none; }
+  .gintmr_ui-footer-sign { -webkit-mask: none !important; mask: none !important; animation: none !important; }
+}
+
+
 /* ── components/content.css ──────────────────────────────── */
 /* ============================================================================
    gintmr-ui · 内容区块

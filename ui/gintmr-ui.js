@@ -67,8 +67,25 @@ function initTheme(root = document.documentElement) {
     button.dataset.gintmr_uiReady = 'true';
     button.addEventListener('click', () => {
       const next = root.dataset.gintmr_uiTheme === 'dark' ? 'light' : 'dark';
-      applyTheme(next, { persist: true, root });
-      refreshLabels();
+      const swap = () => {
+        applyTheme(next, { persist: true, root });
+        refreshLabels();
+      };
+      // 可选：新配色从按钮位置以圆形扩散揭开（html[data-gintmr_ui-theme-reveal="on"]，样式见 motion.css）
+      if (root.dataset.gintmr_uiThemeReveal !== 'on' || !document.startViewTransition
+        || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        swap();
+        return;
+      }
+      const box = button.getBoundingClientRect();
+      const x = box.left + box.width / 2;
+      const y = box.top + box.height / 2;
+      root.style.setProperty('--gintmr_ui-reveal-x', `${x}px`);
+      root.style.setProperty('--gintmr_ui-reveal-y', `${y}px`);
+      root.style.setProperty('--gintmr_ui-reveal-r', `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`);
+      root.setAttribute('data-gintmr_ui-theme-switching', '');
+      const transition = document.startViewTransition(swap);
+      transition.finished.finally(() => root.removeAttribute('data-gintmr_ui-theme-switching'));
     });
   });
 
@@ -644,6 +661,37 @@ function initCursorGlow(root = document.documentElement) {
     removeEventListener('pointermove', onMove);
     glow.remove();
   };
+}
+
+/* ── primitives/motion.js ── */
+/* ============================================================================
+   gintmr-ui · 装饰动效原语
+   只给「内容固定、不承载信息」的地方加一次性动效：板块标题的点阵图标与细线、
+   页脚署名。正文、论文、作者等内容一律不参与。
+   开关：<html data-gintmr_ui-motion="on">。关闭、减少动态效果或没有
+   IntersectionObserver 时，元素直接处于最终状态。
+   ========================================================================= */
+
+const MOTION_TARGETS = '.gintmr_ui-section-title, .gintmr_ui-page-heading, .gintmr_ui-footer-sign';
+
+/** 元素进入视口时打上 data-gintmr_ui-seen，CSS 据此播放一次入场动效 */
+function initMotion(root = document.documentElement) {
+  if (root.dataset.gintmr_uiMotion !== 'on') return () => {};
+  const targets = [...document.querySelectorAll(MOTION_TARGETS)].filter(el => !el.hasAttribute('data-gintmr_ui-seen'));
+  const reveal = el => el.setAttribute('data-gintmr_ui-seen', '');
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    targets.forEach(reveal);
+    return () => {};
+  }
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      reveal(entry.target);
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+  targets.forEach(el => observer.observe(el));
+  return () => observer.disconnect();
 }
 
 /* ── components/preview.js ── */
@@ -1857,6 +1905,7 @@ const elementInits = [
   initOutline,
   initSparkles,
   initAurora,
+  initMotion,
   initProjectPreviews,
   initAudioTracks,
   initVideos,
@@ -1904,6 +1953,7 @@ if (typeof window !== 'undefined') {
     initAurora,
     initClickParticles,
     initCursorGlow,
+    initMotion,
     initProjectPreviews,
     initAudioTracks,
     initVideos,
