@@ -1401,7 +1401,7 @@ function initImageViewer(options = {}) {
 /* ============================================================================
    gintmr-ui · 访客卡
 
-   一块卡：总计（浏览 / 访客日 / 国家地区）+ 世界地图 + 今日 + 国家明细 + 状态行。
+   一块卡：总计（浏览 / 访客日 / 国家地区）+ 世界地图 + 今日与累计两块并排的地区方块图 + 状态行。
    观感全在 components/visitor-card.css；这里负责标记、取数、渲染与生命周期。
 
    ── 数据契约（version 1）────────────────────────────────────────────────
@@ -1413,7 +1413,8 @@ function initImageViewer(options = {}) {
          generatedAt: '2026-10-10T12:00:00Z',   // 统计生成时间
          since: '2026-09-11T00:00:00Z' | null,  // 统计起点
          totals: { pageviews: 349, visitorDays: 279 },
-         today: { date: '2026-10-10', pageviews: 4, visitors: 3 },
+         today: { date: '2026-10-10', pageviews: 4, visitors: 3,
+                  countries?: [{ code: 'SG', pageviews: 2, visitors: 1 }, …] },  // 可选：今日按地区
          countries: [{ code: 'SG', pageviews: 125, visitorDays: 125 }, …],
        }),
        demo?: () => summary,   // 可选：?gintmr_ui-visitor-demo=1 时用的样例数据
@@ -1443,20 +1444,22 @@ const DEFAULT_LABELS = {
   visitorDaysHint: 'Daily unique visitors, summed across UTC days. Returning visitors on another day count again.',
   countries: 'Countries & regions',
   today: 'Today',
+  allTime: 'All time',
   regions: 'By region',
   visitors: 'Visitors',
   demo: 'Design preview · sample data',
-  demoNote: 'Sample data for design review. No visits are recorded in this preview.',
   notConnected: 'Visitor statistics are not connected yet.',
   loading: 'Loading visitor statistics…',
   unavailable: 'Visitor statistics are temporarily unavailable.',
   empty: 'No visits recorded yet.',
   countriesEmpty: 'No country or region totals recorded yet.',
+  todayEmpty: 'No visits yet today.',
+  todayUnavailable: 'Today\'s regional breakdown is not available.',
   unknownCountry: 'Unknown location',
   mapLabel: 'Visitor locations by country or region',
-  mapNote: 'Simplified world map shaded by page views. The adjacent country and region list provides the visitor counts.',
   noscript: 'Enable JavaScript to view visitor statistics.',
   regionTotalsLabel: 'Visitor totals by country or region',
+  todayRegionLabel: 'Today\'s visits by country or region',
   since: 'Since',
   updated: 'Updated',
 };
@@ -1492,7 +1495,7 @@ function visitorCardMarkup({ mapSvg = '', heading, labels = {}, id = 'visitors' 
     <div class="gintmr_ui-visitor-summary">
       <dl class="gintmr_ui-visitor-totals">
         <div><dt>${escapeHtml(t.pageviews)}</dt><dd data-gintmr_ui-visitor-value="pageviews">—</dd></div>
-        <div><dt><abbr title="${escapeHtml(t.visitorDaysHint)}">${escapeHtml(t.visitorDays)}</abbr></dt><dd data-gintmr_ui-visitor-value="visitorDays">—</dd></div>
+        <div><dt title="${escapeHtml(t.visitorDaysHint)}">${escapeHtml(t.visitorDays)}</dt><dd data-gintmr_ui-visitor-value="visitorDays">—</dd></div>
         <div><dt>${escapeHtml(t.countries)}</dt><dd data-gintmr_ui-visitor-value="countries">—</dd></div>
       </dl>
       <span class="gintmr_ui-visitor-demo-label" data-gintmr_ui-visitor-demo hidden>${escapeHtml(t.demo)}</span>
@@ -1500,23 +1503,32 @@ function visitorCardMarkup({ mapSvg = '', heading, labels = {}, id = 'visitors' 
     <div class="gintmr_ui-visitor-geography">
       <figure class="gintmr_ui-visitor-map-figure">
         ${mapSvg.replace('<svg ', `<svg role="img" aria-label="${escapeHtml(t.mapLabel)}" `)}
-        <figcaption class="gintmr_ui-visitor-detail-note">${escapeHtml(t.mapNote)}</figcaption>
       </figure>
     </div>
     <div class="gintmr_ui-visitor-analysis">
-      <div class="gintmr_ui-visitor-today">
-        <p class="gintmr_ui-visitor-zone-label">${escapeHtml(t.today)} <span data-gintmr_ui-visitor-today-date>UTC</span></p>
-        <dl class="gintmr_ui-visitor-totals gintmr_ui-visitor-today-totals">
-          <div><dt>${escapeHtml(t.pageviews)}</dt><dd data-gintmr_ui-visitor-today-value="pageviews">—</dd></div>
-          <div><dt>${escapeHtml(t.visitors)}</dt><dd data-gintmr_ui-visitor-today-value="visitors">—</dd></div>
-        </dl>
+      <div class="gintmr_ui-visitor-panel gintmr_ui-visitor-today">
+        <div class="gintmr_ui-visitor-panel-head">
+          <p class="gintmr_ui-visitor-zone-label">${escapeHtml(t.today)} <span data-gintmr_ui-visitor-today-date>UTC</span></p>
+          <dl class="gintmr_ui-visitor-panel-stats">
+            <div><dd data-gintmr_ui-visitor-today-value="pageviews">—</dd><dt>${escapeHtml(t.pageviews)}</dt></div>
+            <div><dd data-gintmr_ui-visitor-today-value="visitors">—</dd><dt>${escapeHtml(t.visitors)}</dt></div>
+          </dl>
+        </div>
+        <div class="gintmr_ui-visitor-treemap" data-gintmr_ui-visitor-today-treemap hidden role="list" aria-label="${escapeHtml(t.todayRegionLabel)}"></div>
+        <p class="gintmr_ui-visitor-treemap-empty" data-gintmr_ui-visitor-today-status></p>
       </div>
-      <div class="gintmr_ui-visitor-country-panel">
-        <p class="gintmr_ui-visitor-zone-label">${escapeHtml(t.regions)}</p>
-        <div class="gintmr_ui-visitor-treemap" data-gintmr_ui-visitor-treemap role="list" aria-label="${escapeHtml(t.regionTotalsLabel)}"></div>
-        <p class="gintmr_ui-visitor-detail-note" data-gintmr_ui-visitor-countries-status>${escapeHtml(t.countriesEmpty)}</p>
-        <div class="gintmr_ui-visitor-tip" data-gintmr_ui-visitor-tip role="tooltip" hidden></div>
+      <div class="gintmr_ui-visitor-panel gintmr_ui-visitor-country-panel">
+        <div class="gintmr_ui-visitor-panel-head">
+          <p class="gintmr_ui-visitor-zone-label">${escapeHtml(t.allTime)} <span>${escapeHtml(t.regions)}</span></p>
+          <dl class="gintmr_ui-visitor-panel-stats">
+            <div><dd data-gintmr_ui-visitor-value="pageviews">—</dd><dt>${escapeHtml(t.pageviews)}</dt></div>
+            <div><dd data-gintmr_ui-visitor-value="countries">—</dd><dt>${escapeHtml(t.countries)}</dt></div>
+          </dl>
+        </div>
+        <div class="gintmr_ui-visitor-treemap" data-gintmr_ui-visitor-treemap hidden role="list" aria-label="${escapeHtml(t.regionTotalsLabel)}"></div>
+        <p class="gintmr_ui-visitor-treemap-empty" data-gintmr_ui-visitor-countries-status>${escapeHtml(t.countriesEmpty)}</p>
       </div>
+      <div class="gintmr_ui-visitor-tip" data-gintmr_ui-visitor-tip role="tooltip" hidden></div>
     </div>
     <div class="gintmr_ui-visitor-footer">
       <p class="gintmr_ui-visitor-status" data-gintmr_ui-visitor-status role="status">${escapeHtml(t.notConnected)}</p>
@@ -1561,6 +1573,25 @@ function validateVisitorSummary(value) {
     !Number.isSafeInteger(mappedViews) || mappedViews > value.totals.pageviews ||
     !Number.isSafeInteger(mappedDays) || mappedDays > value.totals.visitorDays
   ) return null;
+  // 今日按地区是可选字段；给了就必须自洽：代码不重复、每项访客不超过浏览、合计不超过今日总数
+  if (value.today.countries !== undefined) {
+    const today = value.today.countries;
+    if (!Array.isArray(today) || today.length > 300) return null;
+    const todaySeen = new Set();
+    let todayViews = 0;
+    for (const country of today) {
+      if (
+        !country ||
+        (country.code !== null && !/^[A-Z]{2}$/.test(country.code)) ||
+        todaySeen.has(country.code) ||
+        !isCount(country.pageviews) || !isCount(country.visitors) ||
+        country.visitors > country.pageviews
+      ) return null;
+      todaySeen.add(country.code);
+      todayViews += country.pageviews;
+    }
+    if (!Number.isSafeInteger(todayViews) || todayViews > value.today.pageviews) return null;
+  }
   return value;
 }
 
@@ -1582,7 +1613,16 @@ function designPreviewSummary() {
     generatedAt: '2026-09-11T12:00:00Z',
     since: '2026-09-01T00:00:00Z',
     totals: { pageviews: 359, visitorDays: 189 },
-    today: { date: '2026-09-11', pageviews: 15, visitors: 8 },
+    today: {
+      date: '2026-09-11', pageviews: 15, visitors: 8,
+      countries: [
+        { code: 'CN', pageviews: 7, visitors: 3 },
+        { code: 'US', pageviews: 4, visitors: 2 },
+        { code: 'AE', pageviews: 2, visitors: 1 },
+        { code: 'JP', pageviews: 1, visitors: 1 },
+        { code: null, pageviews: 1, visitors: 1 },
+      ],
+    },
     countries,
   };
 }
@@ -1642,8 +1682,15 @@ function layoutTreemap(items) {
   return blocks;
 }
 
-function renderTreemap(container, countries, formatter, labels) {
-  if (!countries.length) {
+/**
+ * 画一块地区方块图。
+ *   hues：地区代码 → 色相。两块图共用同一张表，同一地区在今日与累计里颜色一致，便于对照。
+ *   rows：每项给悬停提示与读屏用的 [标签, 数值] 两行。
+ */
+function renderTreemap(container, items, { formatter, labels, hues, rows }) {
+  // 没有数据时整块藏起来，由同尺寸的占位框顶上；有数据时先显示出来再量尺寸
+  container.hidden = !items.length;
+  if (!items.length) {
     container.replaceChildren();
     return;
   }
@@ -1652,38 +1699,34 @@ function renderTreemap(container, countries, formatter, labels) {
   const boxWidth = box.width || 320;
   const boxHeight = box.height || 176;
   // √ 缩放：保留排名与量级关系，同时不让头两名吃掉整块画布
-  const weighted = countries.map(country => ({ ...country, weight: Math.sqrt(country.pageviews) }));
-  const maximumWeight = weighted[0].weight || 1;
+  const weighted = items.map(item => ({ ...item, weight: Math.sqrt(item.pageviews) }));
   container.replaceChildren(
-    ...layoutTreemap(weighted).map(({ item, x, y, w, h }, rank) => {
+    ...layoutTreemap(weighted).map(({ item, x, y, w, h }) => {
       const name = item.code === null ? labels.unknownCountry : regionName(item.code);
+      const details = rows(item);
       const block = document.createElement('div');
       block.className = 'gintmr_ui-visitor-block';
       block.setAttribute('role', 'listitem');
       block.tabIndex = 0;
       block.dataset.gintmr_uiVisitorName = name;
-      block.dataset.gintmr_uiVisitorViews = String(item.pageviews);
-      block.dataset.gintmr_uiVisitorDays = String(item.visitorDays);
-      // 内缩半个缝宽：色块之间、以及与画布边缘之间都留出均匀的缝
-      const gapX = 0.45;
-      const gapY = 0.8;
+      block.dataset.gintmr_uiVisitorRows = JSON.stringify(details);
+      // 内缩半个缝宽：色块之间、以及与画布边缘之间都留出均匀的缝（缝宽按像素换算，两块图一致）
+      const gapX = (3 / boxWidth) * 100;
+      const gapY = (3 / boxHeight) * 100;
       const bx = x + gapX / 2;
       const by = y + gapY / 2;
       const bw = Math.max(w - gapX, 0.5);
       const bh = Math.max(h - gapY, 0.5);
       block.style.cssText = `left:${bx}%;top:${by}%;width:${bw}%;height:${bh}%`;
-      const hue = hueOf(rank);
+      const hue = hues.get(item.code) ?? 0;
       block.style.setProperty('--gintmr_ui-visitor-block-fill', `hsl(${hue.toFixed(1)} 72% 66%)`);
       block.style.setProperty('--gintmr_ui-visitor-block-line', `hsl(${hue.toFixed(1)} 60% 40%)`);
       block.style.setProperty('--gintmr_ui-visitor-block-ink', `hsl(${hue.toFixed(1)} 65% 17%)`);
-      block.setAttribute(
-        'aria-label',
-        `${name}: ${formatter.format(item.pageviews)} ${labels.pageviews}, ${formatter.format(item.visitorDays)} ${labels.visitorDays}`
-      );
+      block.setAttribute('aria-label', `${name}: ${details.map(([label, value]) => `${formatter.format(value)} ${label}`).join(', ')}`);
       // 放得下就写名称与浏览量，放不下就只写数字，再小就交给悬停提示
       const widthPx = (bw / 100) * boxWidth;
       const heightPx = (bh / 100) * boxHeight;
-      const lineHeight = 15;
+      const lineHeight = 16;
       if (widthPx >= 72 && heightPx >= lineHeight * 2 + 8) {
         const title = document.createElement('b');
         title.textContent = name;
@@ -1730,22 +1773,43 @@ function renderSummary(card, summary, { demo = false, labels = DEFAULT_LABELS } 
 
   const unknown = summary.countries.find(country => country.code === null);
   const allCountries = unknown?.pageviews ? [...countries, unknown] : countries;
-  renderTreemap(
-    card.querySelector('[data-gintmr_ui-visitor-treemap]'),
-    allCountries,
-    formatter,
-    labels
-  );
+  // 色相按累计排名分配，今日图沿用同一张表；今日新出现、累计里还没有的地区接在后面
+  const hues = new Map(allCountries.map((country, rank) => [country.code, hueOf(rank)]));
+  const todayCountries = Array.isArray(summary.today.countries)
+    ? summary.today.countries
+      .filter(country => country.pageviews > 0)
+      .sort((a, b) => b.pageviews - a.pageviews || (a.code === null) - (b.code === null) || String(a.code).localeCompare(String(b.code)))
+    : null;
+  (todayCountries || []).forEach(country => {
+    if (!hues.has(country.code)) hues.set(country.code, hueOf(hues.size));
+  });
+
+  renderTreemap(card.querySelector('[data-gintmr_ui-visitor-treemap]'), allCountries, {
+    formatter, labels, hues,
+    rows: item => [[labels.pageviews, item.pageviews], [labels.visitorDays, item.visitorDays]],
+  });
   const countryStatus = card.querySelector('[data-gintmr_ui-visitor-countries-status]');
   countryStatus.hidden = allCountries.length > 0;
+
+  const todayMap = card.querySelector('[data-gintmr_ui-visitor-today-treemap]');
+  const todayStatus = card.querySelector('[data-gintmr_ui-visitor-today-status]');
+  if (todayMap) {
+    renderTreemap(todayMap, todayCountries || [], {
+      formatter, labels, hues,
+      rows: item => [[labels.pageviews, item.pageviews], [labels.visitors, item.visitors]],
+    });
+    if (todayStatus) {
+      todayStatus.hidden = Boolean(todayCountries?.length);
+      todayStatus.textContent = todayCountries ? labels.todayEmpty : labels.todayUnavailable;
+    }
+  }
 
   const dateFormat = new Intl.DateTimeFormat(locale(), {
     day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
   });
   const since = summary.since ? `${dateFormat.format(new Date(summary.since))}` : '';
-  card.querySelector('[data-gintmr_ui-visitor-status]').textContent = demo
-    ? labels.demoNote
-    : summary.totals.pageviews === 0
+  // 样张模式也显示和线上一样的状态行；样张身份由右上角的徽标标明
+  card.querySelector('[data-gintmr_ui-visitor-status]').textContent = summary.totals.pageviews === 0
       ? labels.empty
       : `${since ? `${labels.since || 'Since'} ${since} · ` : ''}${labels.updated || 'Updated'} ${dateFormat.format(new Date(summary.generatedAt))} UTC`;
 }
@@ -1758,7 +1822,8 @@ const isDemoRequest = () =>
 
 /** 悬停或聚焦时弹出的小提示：名称 + 浏览量 + 访客日。很小的方块也能靠它读数 */
 function bindTooltip(card) {
-  const area = card.querySelector('[data-gintmr_ui-visitor-treemap]');
+  // 两块方块图共用一个提示框，挂在它们共同的父容器上
+  const area = card.querySelector('.gintmr_ui-visitor-analysis');
   const tip = card.querySelector('[data-gintmr_ui-visitor-tip]');
   if (!area || !tip || area.dataset.gintmr_uiTipBound === 'true') return;
   area.dataset.gintmr_uiTipBound = 'true';
@@ -1775,12 +1840,14 @@ function bindTooltip(card) {
     swatch.style.borderColor = getComputedStyle(block).borderTopColor;
     name.append(swatch, document.createTextNode(block.dataset.gintmr_uiVisitorName || ''));
     const list = document.createElement('dl');
-    for (const [label, key] of [[labels.pageviews, 'gintmr_uiVisitorViews'], [labels.visitorDays, 'gintmr_uiVisitorDays']]) {
+    let rows = [];
+    try { rows = JSON.parse(block.dataset.gintmr_uiVisitorRows || '[]'); } catch (_) { rows = []; }
+    for (const [label, value] of rows) {
       const row = document.createElement('div');
       const dt = document.createElement('dt');
       const dd = document.createElement('dd');
       dt.textContent = label;
-      dd.textContent = formatter.format(Number(block.dataset[key] || 0));
+      dd.textContent = formatter.format(Number(value) || 0);
       row.append(dt, dd);
       list.append(row);
     }

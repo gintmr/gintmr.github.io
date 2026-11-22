@@ -46,14 +46,14 @@
   </script>
   <link rel="stylesheet" href="/assets/fonts/noto-serif-sc/index.css" />
   <link rel="stylesheet" href="/assets/fonts/noto-sans-sc/index.css" />
-  <link rel="stylesheet" href="/ui/gintmr-ui.css?v=923d3460bfed" />
+  <link rel="stylesheet" href="/ui/gintmr-ui.css?v=ab6d628f776a" />
   <link rel="stylesheet" href="/css/home-opportunity.css?v=9913a342defc" />
   <!-- visitors.js 必须排在库脚本之前：库的 boot() 会在 DOMContentLoaded 之前就初始化访客卡，
        那时取数函数还没定义，卡片会停在「尚未接入」。两者都是 defer，按文档顺序执行。
        只读的那个历史页不挂它，那里走自己的只读脚本。 -->
   <script src="/visitors.js?v=2dc94ab02244" type="module"></script>
   <script id="visitor-config" type="application/json">{"enabled":true,"endpoint":"https://gjofwuihpzjfqeaysuuy.supabase.co/functions/v1/visitor-analytics","allowedOrigins":["https://gintmr.github.io"]}</script>
-  <script src="/ui/gintmr-ui.js?v=51ebf8853444" defer></script>
+  <script src="/ui/gintmr-ui.js?v=45daa2d8962e" defer></script>
   <link rel="stylesheet" href="/css/visitors.css?v=94fc71392c01" />
   <link rel="stylesheet" href="/css/site-refinement.css?v=42ba7ca13349" />
 
@@ -160,7 +160,7 @@
     <div class="gintmr_ui-visitor-summary">
       <dl class="gintmr_ui-visitor-totals">
         <div><dt>Page views</dt><dd data-gintmr_ui-visitor-value="pageviews">—</dd></div>
-        <div><dt><abbr title="Daily unique visitors, summed across UTC days. Returning visitors on another day count again.">Visitor-days</abbr></dt><dd data-gintmr_ui-visitor-value="visitorDays">—</dd></div>
+        <div><dt title="Daily unique visitors, summed across UTC days. Returning visitors on another day count again.">Visitor-days</dt><dd data-gintmr_ui-visitor-value="visitorDays">—</dd></div>
         <div><dt>Countries &amp; regions</dt><dd data-gintmr_ui-visitor-value="countries">—</dd></div>
       </dl>
       <span class="gintmr_ui-visitor-demo-label" data-gintmr_ui-visitor-demo hidden>Design preview · sample data</span>
@@ -348,23 +348,32 @@
 <path data-country="SS" d="M525.4,208.8L523.2,207.1L522.6,206.1L521.3,206.6L520.1,206.4L519.5,206.9L518.4,206.6L516.9,204.5L516.5,203.8L514.7,202.8L514.1,201.3L513.1,200.3L511.4,199.0L511.4,198.2L510.1,197.2L508.4,196.3L509.1,196.0L510.0,195.5L510.6,193.4L511.3,192.2L513.0,191.9L513.5,192.6L514.7,194.0L515.4,194.2L516.3,193.8L518.0,193.9L518.4,194.4L520.8,194.4L520.9,193.9L522.2,193.4L522.4,192.7L523.3,192.2L525.4,193.6L526.6,193.4L527.9,191.6L529.2,190.2L529.0,188.8L528.4,188.1L529.9,187.9L530.0,187.4L531.2,187.6L530.9,189.4L531.2,191.1L532.4,192.1L532.7,192.9L532.7,194.2L533.0,194.2L533.0,196.1L532.7,196.9L531.4,196.9L530.6,198.3L532.1,198.5L533.3,199.7L533.7,200.6L534.8,201.2L536.3,203.9L534.6,205.5L533.1,206.9L531.6,208.1L529.9,208.1L527.9,208.6L526.4,208.1L525.4,208.8Z"></path>
 </g>
 </svg>
-        <figcaption class="gintmr_ui-visitor-detail-note">Simplified world map shaded by page views. The adjacent country and region list provides the visitor counts.</figcaption>
       </figure>
     </div>
     <div class="gintmr_ui-visitor-analysis">
-      <div class="gintmr_ui-visitor-today">
-        <p class="gintmr_ui-visitor-zone-label">Today <span data-gintmr_ui-visitor-today-date>UTC</span></p>
-        <dl class="gintmr_ui-visitor-totals gintmr_ui-visitor-today-totals">
-          <div><dt>Page views</dt><dd data-gintmr_ui-visitor-today-value="pageviews">—</dd></div>
-          <div><dt>Visitors</dt><dd data-gintmr_ui-visitor-today-value="visitors">—</dd></div>
-        </dl>
+      <div class="gintmr_ui-visitor-panel gintmr_ui-visitor-today">
+        <div class="gintmr_ui-visitor-panel-head">
+          <p class="gintmr_ui-visitor-zone-label">Today <span data-gintmr_ui-visitor-today-date>UTC</span></p>
+          <dl class="gintmr_ui-visitor-panel-stats">
+            <div><dd data-gintmr_ui-visitor-today-value="pageviews">—</dd><dt>Page views</dt></div>
+            <div><dd data-gintmr_ui-visitor-today-value="visitors">—</dd><dt>Visitors</dt></div>
+          </dl>
+        </div>
+        <div class="gintmr_ui-visitor-treemap" data-gintmr_ui-visitor-today-treemap hidden role="list" aria-label="Today&#39;s visits by country or region"></div>
+        <p class="gintmr_ui-visitor-treemap-empty" data-gintmr_ui-visitor-today-status></p>
       </div>
-      <div class="gintmr_ui-visitor-country-panel">
-        <p class="gintmr_ui-visitor-zone-label">By region</p>
-        <div class="gintmr_ui-visitor-treemap" data-gintmr_ui-visitor-treemap role="list" aria-label="Visitor totals by country or region"></div>
-        <p class="gintmr_ui-visitor-detail-note" data-gintmr_ui-visitor-countries-status>No country or region totals recorded yet.</p>
-        <div class="gintmr_ui-visitor-tip" data-gintmr_ui-visitor-tip role="tooltip" hidden></div>
+      <div class="gintmr_ui-visitor-panel gintmr_ui-visitor-country-panel">
+        <div class="gintmr_ui-visitor-panel-head">
+          <p class="gintmr_ui-visitor-zone-label">All time <span>By region</span></p>
+          <dl class="gintmr_ui-visitor-panel-stats">
+            <div><dd data-gintmr_ui-visitor-value="pageviews">—</dd><dt>Page views</dt></div>
+            <div><dd data-gintmr_ui-visitor-value="countries">—</dd><dt>Countries &amp; regions</dt></div>
+          </dl>
+        </div>
+        <div class="gintmr_ui-visitor-treemap" data-gintmr_ui-visitor-treemap hidden role="list" aria-label="Visitor totals by country or region"></div>
+        <p class="gintmr_ui-visitor-treemap-empty" data-gintmr_ui-visitor-countries-status>No country or region totals recorded yet.</p>
       </div>
+      <div class="gintmr_ui-visitor-tip" data-gintmr_ui-visitor-tip role="tooltip" hidden></div>
     </div>
     <div class="gintmr_ui-visitor-footer">
       <p class="gintmr_ui-visitor-status" data-gintmr_ui-visitor-status role="status">Visitor statistics are not connected yet.</p>

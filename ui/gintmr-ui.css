@@ -2242,7 +2242,7 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-lockup-dark { display: block; }
 /* ── components/visitor-card.css ─────────────────────────── */
 /* ============================================================================
    gintmr-ui · 访客卡
-   一块卡：总计（浏览 / 访客日 / 国家地区）+ 世界地图 + 今日 + 地区方块图 + 状态行。
+   一块卡：总计（浏览 / 访客日 / 国家地区）+ 世界地图 + 今日 / 累计两块并排的地区方块图 + 状态行。
    数据由站点提供（见 components/visitor-card.js 的数据契约），这里只管观感。
    地图 SVG 不在这里，由站点在构建期内联：visitorCardMarkup({ mapSvg })。
    ========================================================================= */
@@ -2301,11 +2301,6 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-lockup-dark { display: block; }
   line-height: 1.15;
   letter-spacing: -.01em;
 }
-.gintmr_ui-visitor-totals abbr {
-  text-decoration: underline dotted color-mix(in srgb, var(--gintmr_ui-secondary) 45%, transparent);
-  text-underline-offset: .22em;
-  cursor: help;
-}
 .gintmr_ui-visitor-demo-label {
   color: var(--gintmr_ui-link);
   border: 1px solid var(--gintmr_ui-line);
@@ -2330,26 +2325,34 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-lockup-dark { display: block; }
   fill: color-mix(in srgb, var(--gintmr_ui-link) var(--gintmr_ui-visitor-country-strength, 8%), var(--gintmr_ui-bg));
   transition: fill var(--gintmr_ui-duration-fast) ease;
 }
-.gintmr_ui-visitor-map-figure .gintmr_ui-visitor-detail-note {
-  margin: .5rem 0 0;
-  text-align: right;
-}
 
-/* ── 分析区：左边今日、右边按地区 ──────────────────────────────────────── */
+/* ── 分析区：今日与累计两块同构的面板并排 ──────────────────────────────
+   两块都是「标题行（标签 + 两个小计）+ 等高方块图」，顶边、标题行、画布高度全部对齐；
+   同一地区在两块图里颜色相同（色相表由 JS 共用），一眼就能对照。 */
 .gintmr_ui-visitor-analysis {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   align-items: start;
   gap: 1.1rem 1.6rem;
   margin-top: 1.1rem;
   padding-top: 1rem;
   border-top: 1px solid color-mix(in srgb, var(--gintmr_ui-line) 65%, transparent);
 }
+.gintmr_ui-visitor-panel { min-width: 0; }
+/* 标题行固定两行：上面标签、下面小计。两块面板结构一致，画布顶边永远对齐，不受宽度影响 */
+.gintmr_ui-visitor-panel-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .3rem;
+  margin-bottom: .7rem;
+}
 .gintmr_ui-visitor-zone-label {
   display: flex;
   align-items: baseline;
   gap: .1rem .5rem;
-  margin: 0 0 .6rem;
+  margin: 0;
   color: var(--gintmr_ui-secondary);
   font-family: var(--gintmr_ui-visitor-sans);
   font-size: .7rem;
@@ -2363,18 +2366,37 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-lockup-dark { display: block; }
   text-transform: none;
   opacity: .78;
 }
-.gintmr_ui-visitor-today { display: block; }
-.gintmr_ui-visitor-today-totals { gap: 0; }
-.gintmr_ui-visitor-today-totals > div { min-width: 4.2rem; padding-left: 1rem; }
-.gintmr_ui-visitor-today-totals dd { font-size: 1.25rem; }
-.gintmr_ui-visitor-today-totals dt { font-size: .7rem; }
+/* 小计：数字在前、标签在后，同一条基线 */
+.gintmr_ui-visitor-panel-stats { display: flex; flex-wrap: wrap; gap: .2rem 1.1rem; margin: 0; }
+.gintmr_ui-visitor-panel-stats > div { display: flex; align-items: baseline; gap: .3rem; }
+.gintmr_ui-visitor-panel-stats dd {
+  margin: 0;
+  color: var(--gintmr_ui-fg);
+  font-size: .95rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.gintmr_ui-visitor-panel-stats dt { color: var(--gintmr_ui-secondary); font-size: .7rem; line-height: 1.2; }
+/* 没有数据时，方块图位置换成同尺寸的虚线占位框，两块面板依旧等高 */
+.gintmr_ui-visitor-treemap-empty {
+  display: grid;
+  place-items: center;
+  height: 176px;
+  margin: 0;
+  padding: 0 1rem;
+  border: 1px dashed color-mix(in srgb, var(--gintmr_ui-line) 80%, transparent);
+  border-radius: 6px;
+  color: var(--gintmr_ui-secondary);
+  font-family: var(--gintmr_ui-visitor-sans);
+  font-size: .72rem;
+  text-align: center;
+}
 
 /* ── 地区方块图 ──────────────────────────────────────────────────────────
    高度写死、内部不滚动、长尾不合并：所有地区都在这块画布里。
    面积按 √浏览量缩放（保留排名，又不会让头两名吃掉整块画布）。
    每个地区一个色相（按排名取黄金角，相邻块差异最大）；方块小到放不下
    文字时，靠悬停或键盘聚焦弹出的提示来读数。 */
-.gintmr_ui-visitor-country-panel { min-width: 0; position: relative; }
 .gintmr_ui-visitor-treemap { position: relative; height: 176px; }
 /* 每个色块三个颜色都由 JS 按自己的色相写进来：浅底、更深的同色系边框、
    以及同色系深色文字（浅底上白字会糊，深色字才读得清） */
@@ -2477,16 +2499,14 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-lockup-dark { display: block; }
   .gintmr_ui-visitor-card { padding: 1rem; }
   .gintmr_ui-visitor-totals > div { min-width: 4.4rem; padding-left: .9rem; }
   .gintmr_ui-visitor-totals dd { font-size: 1.45rem; }
-  .gintmr_ui-visitor-analysis { grid-template-columns: minmax(0, 1fr); gap: .9rem; }
-  .gintmr_ui-visitor-today-totals > div { min-width: 4rem; }
-  .gintmr_ui-visitor-treemap { height: 150px; }
+  .gintmr_ui-visitor-analysis { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
+  .gintmr_ui-visitor-treemap, .gintmr_ui-visitor-treemap-empty { height: 150px; }
   .gintmr_ui-visitor-table { font-size: .76rem; }
   .gintmr_ui-visitor-table th, .gintmr_ui-visitor-table td { padding: .5rem .6rem; }
 }
 @media (max-width: 420px) {
   .gintmr_ui-visitor-totals { justify-content: space-between; width: 100%; }
   .gintmr_ui-visitor-totals dt { font-size: .67rem; }
-  .gintmr_ui-visitor-today-totals { gap: 0; }
   .gintmr_ui-visitor-table th, .gintmr_ui-visitor-table td { padding-inline: .35rem; }
   .gintmr_ui-visitor-table thead th { white-space: normal; }
 }

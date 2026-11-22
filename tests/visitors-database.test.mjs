@@ -8,8 +8,9 @@ const migration = await readFile(new URL('../supabase/migrations/202609110001_vi
 const activityMigration = await readFile(new URL('../supabase/migrations/202609110002_visitor_activity.sql', import.meta.url), 'utf8');
 const pagesMigration = await readFile(new URL('../supabase/migrations/202609120001_visitor_activity_pages.sql', import.meta.url), 'utf8');
 const writeOrderMigration = await readFile(new URL('../supabase/migrations/202609120002_visitor_history_write_order.sql', import.meta.url), 'utf8');
+const todayCountriesMigration = await readFile(new URL('../supabase/migrations/202611220001_visitor_today_countries.sql', import.meta.url), 'utf8');
 
-async function database({ activity = true, pages = true, writeOrder = true } = {}) {
+async function database({ activity = true, pages = true, writeOrder = true, todayCountries = true } = {}) {
   const db = new PGlite();
   await db.exec(`
     create role anon;
@@ -23,6 +24,7 @@ async function database({ activity = true, pages = true, writeOrder = true } = {
   if (activity) await db.exec(activityMigration);
   if (activity && pages) await db.exec(pagesMigration);
   if (activity && writeOrder) await db.exec(writeOrderMigration);
+  if (todayCountries) await db.exec(todayCountriesMigration);
   return db;
 }
 
@@ -349,5 +351,33 @@ test('name collisions fail without modifying existing analytics or application d
     await db.exec('rollback');
     assert.equal((await summary(db)).totals.pageviews, 1);
     assert.equal((await db.query('select content from public.existing_application')).rows[0].content, 'preserve me');
+  } finally { await db.close(); }
+});
+
+test('summary lists today\'s countries without changing totals or permissions', async () => {
+  const db = await database({ todayCountries: false });
+  try {
+    await track(db);
+    await track(db, { country: 'CN' });
+    await track(db, { visitor: 'b'.repeat(64), country: 'CN' });
+    await track(db, { visitor: 'c'.repeat(64), country: null });
+    // Yesterday's row must not appear in today's list.
+    await db.exec(`insert into visitor_analytics.country_daily_totals (day, country_code, pageviews, visitors)
+      values ((now() at time zone 'UTC')::date - 1, 'JP', 5, 2)`);
+    const before = await summary(db);
+    assert.equal(before.today.countries, undefined);
+    await db.exec(todayCountriesMigration);
+    const after = await summary(db);
+    assert.deepEqual(after.totals, before.totals);
+    assert.deepEqual(after.countries, before.countries);
+    assert.deepEqual(after.today.countries, [
+      { code: 'CN', pageviews: 2, visitors: 1 },
+      { code: 'US', pageviews: 1, visitors: 1 },
+      { code: null, pageviews: 1, visitors: 1 },
+    ]);
+    for (const role of ['anon', 'authenticated']) {
+      const allowed = (await db.query(`select has_function_privilege($1, 'public.visitor_analytics_summary()', 'EXECUTE') as ok`, [role])).rows[0].ok;
+      assert.equal(allowed, false);
+    }
   } finally { await db.close(); }
 });
