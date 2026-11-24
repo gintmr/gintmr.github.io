@@ -142,6 +142,23 @@ main.gintmr_ui-shell {
 .gintmr_ui-paper { padding-inline: 0; }
 .gintmr_ui-experience-entry { padding: .25rem 0; }
 .gintmr_ui-education-entry { border-bottom: 1px solid var(--gintmr_ui-line); }
+/* 教育条目：时间、地点放右侧一列，左侧只留学校、学位和成绩 */
+.gintmr_ui-education-entry { grid-template-columns: 48px minmax(0, 1fr) auto; }
+.gintmr_ui-education-entry .gintmr_ui-education-scores { display: flex; flex-wrap: wrap; margin-top: .45rem; }
+.gintmr_ui-education-scores span { white-space: nowrap; }
+.gintmr_ui-education-scores .gintmr_ui-separator { margin-inline: .55rem; }
+.gintmr_ui-education-aside {
+  display: grid;
+  justify-items: end;
+  gap: .3rem;
+  margin: 0;
+  padding-top: .15rem;
+  color: var(--gintmr_ui-secondary);
+  font-size: .9rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.gintmr_ui-education-aside span:first-child { color: var(--gintmr_ui-fg); }
 .gintmr_ui-paper { border-bottom: 1px solid var(--gintmr_ui-line); }
 .gintmr_ui-paper:first-child { border-top: 1px solid var(--gintmr_ui-line); }
 .gintmr_ui-project-panel { border-top: 1px solid var(--gintmr_ui-line); }
@@ -230,6 +247,9 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-opportunity-line {
   .gintmr_ui-section { margin-top: 2.8rem; }
   .gintmr_ui-profile-links { gap: .35rem 1rem; }
   .gintmr_ui-project-copy { padding-block: 1rem; }
+  .gintmr_ui-education-entry { grid-template-columns: 40px minmax(0, 1fr); }
+  .gintmr_ui-education-aside { grid-column: 2; display: flex; flex-wrap: wrap; gap: 0 .55rem; justify-items: start; margin-top: .35rem; padding: 0; font-size: .84rem; white-space: normal; }
+  .gintmr_ui-education-aside span + span::before { content: '·'; margin-inline-end: .55rem; }
 }
 
 @media (forced-colors: active) {

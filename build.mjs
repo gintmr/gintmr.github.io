@@ -146,7 +146,7 @@ function home() {
   </section>
   <section class="gintmr_ui-section" id="education" aria-labelledby="education-heading">
     ${heading('education', 'Education')}
-    ${education.map((item, index) => `<article class="gintmr_ui-entry gintmr_ui-education-entry">${logo(item.logo, 'UESTC')}<div>${linkedHeading('h3', `education-${index + 1}-heading`, `${accented(item.institution, item.accent)}${item.designation ? ` <span class="gintmr_ui-institution-badge">${escape(item.designation)}</span>` : ''}`)}<p>${escape(item.degree)}</p><p class="gintmr_ui-meta">${escape(item.period)} <span class="gintmr_ui-separator">·</span> ${escape(item.detail)}</p></div></article>`).join('')}
+    ${education.map((item, index) => `<article class="gintmr_ui-entry gintmr_ui-education-entry">${logo(item.logo, 'UESTC')}<div>${linkedHeading('h3', `education-${index + 1}-heading`, `${accented(item.institution, item.accent)}${item.designation ? ` <span class="gintmr_ui-institution-badge">${escape(item.designation)}</span>` : ''}`)}<p>${escape(item.degree)}</p><p class="gintmr_ui-meta gintmr_ui-education-scores">${item.scores.map(score => `<span>${escape(score)}</span>`).join('<span class="gintmr_ui-separator" aria-hidden="true">·</span>')}</p></div><p class="gintmr_ui-education-aside"><span>${escape(item.period)}</span><span>${escape(item.location)}</span></p></article>`).join('')}
   </section>
   <section class="gintmr_ui-section" id="research" aria-labelledby="research-heading">
     ${heading('research', 'Research Interests')}
