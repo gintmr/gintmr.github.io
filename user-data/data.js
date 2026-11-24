@@ -207,7 +207,7 @@ export const education = [
     logo: "/assets/institutions/tiles/uestc.png",
     degree: "B.S. in Software Engineering (Embedded System)",
     period: "Sep 2023 – Present",
-    detail: "Sichuan, China · GPA: 3.65/4.0 · Average score: 85.01/100",
+    detail: "Sichuan, China · GPA: 3.65/4.0 · Average score: 85.01/100 · IELTS: 7.0",
   },
 ];
 
