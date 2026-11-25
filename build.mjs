@@ -9,6 +9,12 @@ import { visitorMarkup, visitorHistoryMarkup } from './visitor-markup.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
+// 页面上显示防爬写法（name [at] gmail [dot] com），mailto 链接仍指向真实地址。
+const obfuscateEmail = (address) => {
+  const [local, domain] = address.split('@');
+  return `${local} [at] ${domain.split('.').join(' [dot] ')}`;
+};
+
 // 组件库以本地工作副本挂在 vendor/gintmr-ui，构建时把 dist/ 拷进仓库根的 ui/。
 //
 // 这一份副本【故意不跟踪】、不进仓库：GitHub Pages 的构建会递归拉 submodule，
@@ -139,7 +145,7 @@ function home() {
       ${linkedHeading('h1', 'name-heading', `${accented(profile.name)} <span lang="zh-CN">${escape(profile.chineseName)}</span>`)}
       <p>${introduction}</p>
       <p>${escape(profile.intro[1])}</p>
-      <p class="gintmr_ui-opportunity-line"><span class="gintmr_ui-opportunity-pulse" aria-hidden="true"></span><span>${escape(profile.opportunities)} <a href="mailto:${escape(profile.email)}">${escape(profile.email)}</a></span></p>
+      <p class="gintmr_ui-opportunity-line"><span class="gintmr_ui-opportunity-pulse" aria-hidden="true"></span><span>${escape(profile.opportunities)} <a href="mailto:${escape(profile.email)}">${escape(obfuscateEmail(profile.email))}</a> (preferred)${profile.altEmail ? ` or <a href="mailto:${escape(profile.altEmail)}">${escape(obfuscateEmail(profile.altEmail))}</a>` : ''}</span></p>
     </div>
     <img class="gintmr_ui-portrait" src="${profile.portrait}" width="1286" height="1223" alt="Xinrui Wu" fetchpriority="high" />
     <div class="gintmr_ui-profile-links"><a href="${profile.cvUrl}">${icon('cv')}Curriculum Vitae</a>${[[profile.scholarUrl, 'Google Scholar', 'scholar'], [profile.alphaXivUrl, 'alphaXiv', 'paper'], [profile.githubUrl, 'GitHub', 'github']].map(([url, label, name]) => `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${icon(name)}${label}</a>`).join('')}<a href="mailto:${escape(profile.email)}">${icon('mail')}Email</a></div>
