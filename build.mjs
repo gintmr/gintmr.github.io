@@ -243,7 +243,7 @@ function cvPage() {
   return `<div class="gintmr_ui-page-heading gintmr_ui-cv-heading">${iconHeading('h1', 'cv-heading', 'cv', accented('Curriculum Vitae'))}
     <div class="gintmr_ui-cv-actions">${external(cvPdfUrl, 'Open PDF')}<a href="${escape(cvPdfUrl)}" download="Xinrui-Wu-CV.pdf">Download PDF <span aria-hidden="true">↓</span></a></div>
   </div>
-  <object class="gintmr_ui-cv-document" data="${escape(cvPdfUrl)}#view=FitH&amp;navpanes=0" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
+  <object class="gintmr_ui-cv-document" data="${escape(cvPdfUrl)}#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
     <p>Your browser cannot display this PDF inline. ${external(cvPdfUrl, 'Open the CV PDF')} or <a href="${escape(cvPdfUrl)}" download>download a copy</a>.</p>
   </object>`;
 }
