@@ -54,7 +54,7 @@
   <script id="visitor-config" type="application/json">{"enabled":true,"endpoint":"https://gjofwuihpzjfqeaysuuy.supabase.co/functions/v1/visitor-analytics","allowedOrigins":["https://gintmr.github.io"]}</script>
   <script src="/ui/gintmr-ui.js?v=45daa2d8962e" defer></script>
 
-  <link rel="stylesheet" href="/css/site-refinement.css?v=21a41166f75b" />
+  <link rel="stylesheet" href="/css/site-refinement.css?v=4e98349cd239" />
 
   <script>if (location.pathname === '/' && location.hash === '#publications') location.replace('/publication/');</script>
 
@@ -88,9 +88,11 @@
   <main class="gintmr_ui-shell" id="main-content"><div class="gintmr_ui-page-heading gintmr_ui-cv-heading"><h1 class="" id="cv-heading" tabindex="-1"><svg class="gintmr_ui-dot-icon" viewBox="0 0 7 7" aria-hidden="true" focusable="false"><circle cx="2.5" cy="0.5" r=".4" style="--i: 6"/><circle cx="3.5" cy="0.5" r=".4" style="--i: 6"/><circle cx="4.5" cy="0.5" r=".4" style="--i: 6"/><circle cx="2.5" cy="1.5" r=".4" style="--i: 4"/><circle cx="3.5" cy="1.5" r=".4" style="--i: 4"/><circle cx="4.5" cy="1.5" r=".4" style="--i: 4"/><circle cx="2.5" cy="2.5" r=".4" style="--i: 3"/><circle cx="3.5" cy="2.5" r=".4" style="--i: 2"/><circle cx="4.5" cy="2.5" r=".4" style="--i: 3"/><circle cx="1.5" cy="4.5" r=".4" style="--i: 4"/><circle cx="2.5" cy="4.5" r=".4" style="--i: 3"/><circle cx="3.5" cy="4.5" r=".4" style="--i: 2"/><circle cx="4.5" cy="4.5" r=".4" style="--i: 3"/><circle cx="5.5" cy="4.5" r=".4" style="--i: 4"/><circle cx="0.5" cy="5.5" r=".4" style="--i: 7"/><circle cx="1.5" cy="5.5" r=".4" style="--i: 6"/><circle cx="2.5" cy="5.5" r=".4" style="--i: 4"/><circle cx="3.5" cy="5.5" r=".4" style="--i: 4"/><circle cx="4.5" cy="5.5" r=".4" style="--i: 4"/><circle cx="5.5" cy="5.5" r=".4" style="--i: 6"/><circle cx="6.5" cy="5.5" r=".4" style="--i: 7"/><circle cx="0.5" cy="6.5" r=".4" style="--i: 8"/><circle cx="1.5" cy="6.5" r=".4" style="--i: 7"/><circle cx="2.5" cy="6.5" r=".4" style="--i: 6"/><circle cx="3.5" cy="6.5" r=".4" style="--i: 6"/><circle cx="4.5" cy="6.5" r=".4" style="--i: 6"/><circle cx="5.5" cy="6.5" r=".4" style="--i: 7"/><circle cx="6.5" cy="6.5" r=".4" style="--i: 8"/></svg><a class="gintmr_ui-heading-anchor" href="#cv-heading"><span class="gintmr_ui-heading-accent">Curriculum</span> Vitae</a></h1>
     <div class="gintmr_ui-cv-actions"><a href="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0" class="" target="_blank" rel="noopener noreferrer">Open PDF <span aria-hidden="true">↗</span></a><a href="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0" download="Xinrui-Wu-CV.pdf">Download PDF <span aria-hidden="true">↓</span></a></div>
   </div>
-  <object class="gintmr_ui-cv-document" data="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
-    <p>Your browser cannot display this PDF inline. <a href="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0" class="" target="_blank" rel="noopener noreferrer">Open the CV PDF <span aria-hidden="true">↗</span></a> or <a href="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0" download>download a copy</a>.</p>
-  </object></main>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/web/pdf_viewer.css" />
+  <div class="gintmr_ui-cv-viewer" data-src="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0" role="document" aria-label="Xinrui Wu's curriculum vitae">
+    <p class="gintmr_ui-cv-fallback">Loading the CV… If it does not appear, <a href="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0" class="" target="_blank" rel="noopener noreferrer">open the CV PDF <span aria-hidden="true">↗</span></a> or <a href="/assets/cv/Xinrui-Wu-CV.pdf?v=fe43f706b1a0" download>download a copy</a>.</p>
+  </div>
+  <script src="/cv-viewer.js?v=06ea9e1c1273" type="module"></script></main>
   <footer class="gintmr_ui-footer gintmr_ui-shell">
     <p class="gintmr_ui-footer-sign" aria-hidden="true">Xinrui Wu</p>
     <div class="gintmr_ui-footer-row">

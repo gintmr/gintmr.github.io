@@ -37,7 +37,7 @@ for (const file of ['gintmr-ui.css', 'gintmr-ui.js', 'theme-preload.js']) {
 
 // All generated pages reference the same asset versions, so layout edits cannot
 // leave individual subpages using a previously cached stylesheet, script, logo, or CV.
-const [libraryStyleUrl, opportunityStyleUrl, refinementStyleUrl, libraryScriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl, historyScriptUrl, cvPdfUrl] = await Promise.all(['/ui/gintmr-ui.css', '/css/home-opportunity.css', '/css/site-refinement.css', '/ui/gintmr-ui.js', profile.logo, '/css/visitors.css', '/visitors.js', '/visit-history.js', profile.cvPdfUrl].map(async path => {
+const [libraryStyleUrl, opportunityStyleUrl, refinementStyleUrl, libraryScriptUrl, logoUrl, visitorStyleUrl, visitorScriptUrl, historyScriptUrl, cvPdfUrl, cvViewerScriptUrl] = await Promise.all(['/ui/gintmr-ui.css', '/css/home-opportunity.css', '/css/site-refinement.css', '/ui/gintmr-ui.js', profile.logo, '/css/visitors.css', '/visitors.js', '/visit-history.js', profile.cvPdfUrl, '/cv-viewer.js'].map(async path => {
   const version = createHash('sha256').update(await readFile(`${root}${path.slice(1)}`)).digest('hex').slice(0, 12);
   return `${path}?v=${version}`;
 }));
@@ -243,9 +243,11 @@ function cvPage() {
   return `<div class="gintmr_ui-page-heading gintmr_ui-cv-heading">${iconHeading('h1', 'cv-heading', 'cv', accented('Curriculum Vitae'))}
     <div class="gintmr_ui-cv-actions">${external(cvPdfUrl, 'Open PDF')}<a href="${escape(cvPdfUrl)}" download="Xinrui-Wu-CV.pdf">Download PDF <span aria-hidden="true">↓</span></a></div>
   </div>
-  <object class="gintmr_ui-cv-document" data="${escape(cvPdfUrl)}#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" type="application/pdf" aria-label="Xinrui Wu's curriculum vitae" title="Xinrui Wu's curriculum vitae">
-    <p>Your browser cannot display this PDF inline. ${external(cvPdfUrl, 'Open the CV PDF')} or <a href="${escape(cvPdfUrl)}" download>download a copy</a>.</p>
-  </object>`;
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/web/pdf_viewer.css" />
+  <div class="gintmr_ui-cv-viewer" data-src="${escape(cvPdfUrl)}" role="document" aria-label="Xinrui Wu's curriculum vitae">
+    <p class="gintmr_ui-cv-fallback">Loading the CV… If it does not appear, ${external(cvPdfUrl, 'open the CV PDF')} or <a href="${escape(cvPdfUrl)}" download>download a copy</a>.</p>
+  </div>
+  <script src="${cvViewerScriptUrl}" type="module"></script>`;
 }
 
 function layout(page, content) {

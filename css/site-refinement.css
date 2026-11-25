@@ -256,17 +256,62 @@ html[data-gintmr_ui-theme='dark'] .gintmr_ui-opportunity-line {
   .gintmr_ui-header--flat .gintmr_ui-nav a[aria-current] { box-shadow: inset 0 -2px 0 LinkText; }
 }
 
-/* CV page: the embedded PDF viewer is sized to the A4 page (210 × 297) and opened with
-   its toolbar hidden (#toolbar=0), so the frame matches the CV instead of cropping it. */
-.gintmr_ui-cv-document {
-  width: min(100%, 860px);
-  height: auto;
-  min-height: 0;
-  aspect-ratio: 210 / 297;
+/* CV page: pdf.js reader (cv-viewer.js). At 100% each page is drawn at exactly the
+   frame's width, so the CV fills the frame on every screen size. */
+.gintmr_ui-cv-viewer {
+  width: min(100%, 880px);
   margin: 1.8rem auto 0;
-  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--gintmr_ui-line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--gintmr_ui-line) 35%, transparent);
   box-shadow: 0 10px 30px rgb(0 0 0 / .18);
 }
+.gintmr_ui-cv-fallback { margin: 0; padding: 1.5rem; }
+.gintmr_ui-cv-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem 1rem;
+  flex-wrap: wrap;
+  padding: .45rem .6rem;
+  border-bottom: 1px solid var(--gintmr_ui-line);
+  font-size: .85rem;
+}
+.gintmr_ui-cv-toolbar-group { display: flex; align-items: center; gap: .25rem; }
+.gintmr_ui-cv-toolbar button,
+.gintmr_ui-cv-toolbar a {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-height: 2rem;
+  padding: .25rem .55rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.gintmr_ui-cv-toolbar button:hover:not(:disabled),
+.gintmr_ui-cv-toolbar a:hover { background: color-mix(in srgb, currentColor 12%, transparent); text-decoration: none; }
+.gintmr_ui-cv-toolbar button:disabled { opacity: .35; cursor: default; }
+.gintmr_ui-cv-toolbar :focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.gintmr_ui-cv-zoom { min-width: 3.6rem; justify-content: center; font-variant-numeric: tabular-nums; }
+.gintmr_ui-cv-pagecount { opacity: .7; }
+.gintmr_ui-cv-scroll { overflow: auto; }
+.gintmr_ui-cv-viewer.is-zoomed .gintmr_ui-cv-scroll { max-height: 85vh; }
+.gintmr_ui-cv-pages { position: relative; }
+.gintmr_ui-cv-viewer .pdfViewer .page {
+  position: relative;
+  margin: 0;
+  border: 0;
+  background: #fff;
+}
+.gintmr_ui-cv-viewer .pdfViewer .page + .page { margin-top: 1px; }
 @media (max-width: 720px) {
-  .gintmr_ui-cv-document { height: auto; min-height: 0; margin-top: 1.3rem; border-radius: 4px; }
+  .gintmr_ui-cv-viewer { margin-top: 1.3rem; border-radius: 6px; }
+  .gintmr_ui-cv-toolbar a span { display: none; }
+  .gintmr_ui-cv-pagecount { display: none; }
 }
