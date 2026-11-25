@@ -145,7 +145,7 @@ function home() {
       ${linkedHeading('h1', 'name-heading', `${accented(profile.name)} <span lang="zh-CN">${escape(profile.chineseName)}</span>`)}
       <p>${introduction}</p>
       <p>${escape(profile.intro[1])}</p>
-      <p class="gintmr_ui-opportunity-line"><span class="gintmr_ui-opportunity-pulse" aria-hidden="true"></span><span>${escape(profile.opportunities)} <a href="mailto:${escape(profile.email)}">${escape(obfuscateEmail(profile.email))}</a> (preferred)${profile.altEmail ? ` or <a href="mailto:${escape(profile.altEmail)}">${escape(obfuscateEmail(profile.altEmail))}</a>` : ''}</span></p>
+      <p class="gintmr_ui-opportunity-line"><span class="gintmr_ui-opportunity-pulse" aria-hidden="true"></span><span>${escape(profile.opportunities)}<br><a href="mailto:${escape(profile.email)}">${escape(obfuscateEmail(profile.email))}</a> (preferred)${profile.altEmail ? `<br><a href="mailto:${escape(profile.altEmail)}">${escape(obfuscateEmail(profile.altEmail))}</a>` : ''}</span></p>
     </div>
     <img class="gintmr_ui-portrait" src="${profile.portrait}" width="1286" height="1223" alt="Xinrui Wu" fetchpriority="high" />
     <div class="gintmr_ui-profile-links"><a href="${profile.cvUrl}">${icon('cv')}Curriculum Vitae</a>${[[profile.scholarUrl, 'Google Scholar', 'scholar'], [profile.alphaXivUrl, 'alphaXiv', 'paper'], [profile.githubUrl, 'GitHub', 'github']].map(([url, label, name]) => `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${icon(name)}${label}</a>`).join('')}<a href="mailto:${escape(profile.email)}">${icon('mail')}Email</a></div>
