@@ -59,7 +59,7 @@ export const publications = [
     teaser: "/assets/research/budgetthinker-teaser.webp",
     title: "BudgetThinker: Empowering Budget-aware LLM Reasoning with Control Tokens",
     authors: "Hao Wen*, Xinrui Wu*, Yi Sun, Feifei Zhang, Liye Chen, Jie Wang, Yifan Su, Yunxin Liu, Ya-Qin Zhang, Yuanchun Li",
-    venue: "EMNLP 2026",
+    venue: "Findings of EMNLP 2026",
     year: 2026,
     status: "accepted",
     role: "first",
@@ -67,8 +67,7 @@ export const publications = [
     topic: "reasoning",
     summary: "Uses proportional control tokens and a two-stage training pipeline to align reasoning length with a specified token budget.",
     links: [{ label: "arXiv", url: "https://arxiv.org/abs/2508.17196" }],
-  },
-  {
+  },  {
     id: "maskguide",
     shortName: "MaskGuide",
     teaser: "/assets/research/maskguide-teaser.webp",
@@ -89,8 +88,7 @@ export const publications = [
       { label: "PDF", url: "https://saikit.org/static/projects/RAL26/MaskGuide_RAL2026.pdf" },
       { label: "Project page", url: "https://gintmr.github.io/MaskGuide/" },
     ],
-  },
-  {
+  },  {
     id: "imagetime",
     shortName: "ImageTime",
     teaser: "/assets/research/imagetime-teaser.webp",
@@ -110,22 +108,7 @@ export const publications = [
       { label: "GitHub", url: "https://github.com/gintmr/ImagineTime" },
       { label: "Dataset", url: "https://huggingface.co/datasets/Xin-Rui/ImageTime_Benchmark" },
     ],
-  },
-  {
-    id: "hiret",
-    shortName: "HiReT",
-    title: "Hierarchical Relational Trajectory Modeling for Longitudinal Clinical Prognosis",
-    authors: "Xinrui Wu, Wanqi Yang, Min Xu, Yutong Xie",
-    venue: "ICLR 2027",
-    year: 2026,
-    status: "submitted",
-    role: "first",
-    roleLabel: "First author",
-    topic: "clinical",
-    summary: "Models hierarchical relationships within longitudinal clinical trajectories to support patient prognosis.",
-    links: [],
-  },
-  {
+  },  {
     id: "bidemem",
     shortName: "BiDeMem",
     teaser: "/assets/research/bidemem-teaser.webp",
@@ -138,6 +121,22 @@ export const publications = [
     roleLabel: "Co-first author",
     topic: "vision",
     links: [{ label: "arXiv", url: "https://arxiv.org/abs/2606.28112" }],
+  },  {
+    id: "parathinker",
+    shortName: "ParaThinker",
+    title: "ParaThinker: Native Parallel Reasoning for Scaling LLM Test-Time Compute",
+    authors: "Hao Wen, Yifan Su, Feifei Zhang, Xinrui Wu, Yi Sun, Yunxin Liu, Yunhao Liu, Ya-Qin Zhang, Yuanchun Li",
+    venue: "Findings of EMNLP 2026",
+    year: 2026,
+    status: "accepted",
+    role: "coauthor",
+    roleLabel: "Co-author",
+    topic: "reasoning",
+    summary: "Trains LLMs to generate multiple reasoning paths in parallel and aggregate them into one answer, instead of extending a single chain of thought.",
+    links: [
+      { label: "ACL Anthology", url: "https://aclanthology.org/2026.findings-emnlp.1469/" },
+      { label: "GitHub", url: "https://github.com/MobileLLM/ParaThinker" },
+    ],
   },
 ];
 
